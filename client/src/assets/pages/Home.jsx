@@ -17,21 +17,21 @@ function Home() {
                 id: 1,
                 roomNumber: "A-101",
                 price: "₹6,000/month",
-                image:
+                image1:
                     "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85",
             },
             {
                 id: 2,
                 roomNumber: "A-102",
                 price: "₹7,500/month",
-                image:
+                imag1e:
                     "https://images.unsplash.com/photo-1484154218962-a197022b5858",
             },
             {
                 id: 3,
                 roomNumber: "B-201",
                 price: "₹8,000/month",
-                image:
+                ima1ge:
                     "https://images.unsplash.com/photo-1494526585095-c41746248156",
             },
         ],
@@ -57,7 +57,7 @@ function Home() {
                 <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/70 to-zinc-950"></div>
 
 
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-20 md:py-28 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+                <div className="relative max-w-7xl mx-auto px-4 py-5 px-6 lg:px-10 lg:py-5 md:py-5 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
                     {/* LEFT CONTENT */}
                     <div>

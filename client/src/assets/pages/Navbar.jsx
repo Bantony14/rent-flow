@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Button from "../components/Button";
+import { NavLink } from "react-router-dom";
 
 function Navbar() {
 
@@ -33,15 +34,42 @@ function Navbar() {
                 <ul className="hidden md:flex items-center gap-10 text-sm font-medium">
 
                     <li className="relative cursor-pointer text-zinc-300 hover:text-cyan-400 transition duration-300 after:absolute after:left-0 after:-bottom-2 after:h-[2px] after:w-0 after:bg-cyan-400 hover:after:w-full after:transition-all after:duration-300">
-                        Home
+                        <NavLink
+                            to="/"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold"
+                                    : "text-white"
+                            }
+                        >
+                            Home
+                        </NavLink>
                     </li>
 
                     <li className="relative cursor-pointer text-zinc-300 hover:text-cyan-400 transition duration-300 after:absolute after:left-0 after:-bottom-2 after:h-[2px] after:w-0 after:bg-cyan-400 hover:after:w-full after:transition-all after:duration-300">
-                        About
+                        <NavLink
+                            to="/about"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold"
+                                    : "text-white"
+                            }
+                        >
+                            About
+                        </NavLink>
                     </li>
 
                     <li className="relative cursor-pointer text-zinc-300 hover:text-cyan-400 transition duration-300 after:absolute after:left-0 after:-bottom-2 after:h-[2px] after:w-0 after:bg-cyan-400 hover:after:w-full after:transition-all after:duration-300">
-                        Rooms
+                        <NavLink
+                            to="/rooms"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold"
+                                    : "text-white"
+                            }
+                        >
+                            Rooms
+                        </NavLink>
                     </li>
                 </ul>
 
@@ -50,15 +78,42 @@ function Navbar() {
                 <div className="hidden md:flex items-center gap-3">
 
                     <Button className="px-5 py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 hover:border-cyan-500 transition duration-300 text-sm font-medium">
-                        Login
+                        <NavLink
+                            to="/login"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold"
+                                    : "text-white"
+                            }
+                        >
+                            Login
+                        </NavLink>
                     </Button>
 
                     <Button className="px-5 py-2.5 rounded-2xl bg-white text-black hover:bg-zinc-200 transition duration-300 text-sm font-semibold shadow-lg">
-                        Register
+                        <NavLink
+                            to="/registration"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold "
+                                    : ""
+                            }
+                        >
+                            Registration
+                        </NavLink>
                     </Button>
 
                     <Button className="hidden xl:block px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/30">
-                        Dashboard
+                        <NavLink
+                            to="/dashbord"
+                            className={({ isActive }) =>
+                                isActive
+                                    ? "text-cyan-400 font-bold"
+                                    : "text-white"
+                            }
+                        >
+                            Dashbord
+                        </NavLink>
                     </Button>
 
                 </div>
@@ -90,15 +145,42 @@ function Navbar() {
                             <ul className="flex flex-col gap-5 text-sm font-medium">
 
                                 <li className="text-zinc-300 hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                    Home
+                                    <NavLink
+                                        to="/"
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "text-cyan-400 font-bold"
+                                                : "text-white"
+                                        }
+                                    >
+                                        Home
+                                    </NavLink>
                                 </li>
 
                                 <li className="text-zinc-300 hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                    About
+                                    <NavLink
+                                        to="/about"
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "text-cyan-400 font-bold"
+                                                : "text-white"
+                                        }
+                                    >
+                                        About
+                                    </NavLink>
                                 </li>
 
                                 <li className="text-zinc-300 hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                    Rooms
+                                    <NavLink
+                                        to="/rooms"
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "text-cyan-400 font-bold"
+                                                : "text-white"
+                                        }
+                                    >
+                                        Rooms
+                                    </NavLink>
                                 </li>
 
                             </ul>
@@ -112,7 +194,16 @@ function Navbar() {
                                 </Button>
 
                                 <Button className="w-full px-5 py-3 rounded-2xl bg-white text-black hover:bg-zinc-200 transition duration-300 text-sm font-semibold shadow-lg">
-                                    Register
+                                    <NavLink
+                                        to="/registration"
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "text-cyan-400 font-bold"
+                                                : "text-white"
+                                        }
+                                    >
+                                        Registration
+                                    </NavLink>
                                 </Button>
 
                                 <Button className="w-full px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold transition duration-300 shadow-xl shadow-cyan-500/30">
