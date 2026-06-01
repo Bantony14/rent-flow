@@ -136,12 +136,12 @@ export const getAllUserByBuilding = async (req, res, next) => {
 
 
 export const userLogin = async (req, res, next) => {
-    const { mobileNumber, password } = req.body;
-    if (!mobileNumber || !password) {
+    const { email, password } = req.body;
+    if (!email || !password) {
         return next(new ErrorHandler("all filed is required", 400))
     }
     try {
-        const user = await User.findOne({ mobileNumber }).select("+password");
+        const user = await User.findOne({ email }).select("+password");
         if (!user) {
             return next(new ErrorHandler("user not found", 400))
         }
@@ -166,7 +166,7 @@ export const userLogin = async (req, res, next) => {
 
 export const userLogout = async (req, res, next) => {
     try {
-        res.cookie("token", "", {
+        res.clearCookie("token", "", {
             httpOnly: true,
             expires: new Date(0)
         })

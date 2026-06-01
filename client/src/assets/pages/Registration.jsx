@@ -107,7 +107,7 @@ function Registration() {
                     </h1>
 
                     <p className="text-sm text-gray-500 mt-2">
-                        Fill in your details to create account
+                        Fill in Tenant details to create account
                     </p>
                 </div>
 
@@ -228,13 +228,13 @@ function Registration() {
                                 {
                                     value.type === "password" && (
 
-                                        <Button
+                                        <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="
                   absolute
                   right-4
-                  top-3
+                  top-3.5
                   text-gray-500
                   hover:text-cyan-600
                   transition
@@ -247,7 +247,7 @@ function Registration() {
                                                     : <Eye size={20} />
                                             }
 
-                                        </Button>
+                                        </button>
                                     )
                                 }
 

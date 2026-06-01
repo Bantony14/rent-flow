@@ -1,10 +1,33 @@
 import { useState } from "react";
 import Button from "../components/Button";
 import { NavLink } from "react-router-dom";
+import { userLogout } from "../api/authApi";
+import { toast } from "react-hot-toast"
+import { useContext } from "react";
+import { AuthContext } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
+
 
 function Navbar() {
 
     const [menuOpen, setMenuOpen] = useState(false);
+    const { user, setUser } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+
+
+    const logOut = async () => {
+        try {
+            const res = await userLogout();
+            toast.success(res.data.message)
+            setUser("");
+            navigate("/")
+
+        } catch (error) {
+            toast.error(error.data.message)
+        }
+
+    }
 
     return (
         <nav className="w-full sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/90 border-b border-cyan-500/10 text-white">
@@ -78,19 +101,33 @@ function Navbar() {
                 <div className="hidden md:flex items-center gap-3">
 
                     <Button className="px-5 py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 hover:border-cyan-500 transition duration-300 text-sm font-medium">
-                        <NavLink
-                            to="/login"
+                        {user ? <NavLink
+                            to="/tenantdashboard"
                             className={({ isActive }) =>
                                 isActive
                                     ? "text-cyan-400 font-bold"
                                     : "text-white"
                             }
                         >
-                            Login
+                            My Portal
                         </NavLink>
+                            :
+                            <NavLink
+                                to="/Login"
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? "text-cyan-400 font-bold"
+                                        : "text-white"
+                                }
+                            >
+                                Login
+                            </NavLink>}
+
                     </Button>
 
-                    <Button className="px-5 py-2.5 rounded-2xl bg-white text-black hover:bg-zinc-200 transition duration-300 text-sm font-semibold shadow-lg">
+                    {user ? <button className="text-2xl text-amber-700" onClick={() => logOut()}>LogOut</button> : ""}
+
+                    {user.role === "ADMIN" ? <Button className="px-5 py-2.5 rounded-2xl bg-white text-black hover:bg-zinc-200 transition duration-300 text-sm font-semibold shadow-lg">
                         <NavLink
                             to="/registration"
                             className={({ isActive }) =>
@@ -101,21 +138,23 @@ function Navbar() {
                         >
                             Registration
                         </NavLink>
-                    </Button>
 
-                    <Button className="hidden xl:block px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/30">
-                        <NavLink
-                            to="/dashbord"
-                            className={({ isActive }) =>
-                                isActive
-                                    ? "text-cyan-400 font-bold"
-                                    : "text-white"
-                            }
-                        >
-                            Dashbord
-                        </NavLink>
-                    </Button>
 
+                    </Button> : ""}
+
+                    {user.role === "ADMIN" ?
+                        <Button className="hidden xl:block px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/30">
+                            <NavLink
+                                to="/dashbord"
+                                className={({ isActive }) =>
+                                    isActive
+                                        ? "text-cyan-400 font-bold"
+                                        : "text-white"
+                                }
+                            >
+                                Dashbord
+                            </NavLink>
+                        </Button> : ""}
                 </div>
 
 
@@ -190,7 +229,16 @@ function Navbar() {
                             <div className="flex flex-col gap-4">
 
                                 <Button className="w-full px-5 py-3 rounded-2xl border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 hover:border-cyan-500 transition duration-300 text-sm font-medium">
-                                    Login
+                                    <NavLink
+                                        to="/login"
+                                        className={({ isActive }) =>
+                                            isActive
+                                                ? "text-cyan-400 font-bold"
+                                                : ""
+                                        }
+                                    >
+                                        Login
+                                    </NavLink>
                                 </Button>
 
                                 <Button className="w-full px-5 py-3 rounded-2xl bg-white text-black hover:bg-zinc-200 transition duration-300 text-sm font-semibold shadow-lg">
@@ -199,7 +247,7 @@ function Navbar() {
                                         className={({ isActive }) =>
                                             isActive
                                                 ? "text-cyan-400 font-bold"
-                                                : "text-white"
+                                                : ""
                                         }
                                     >
                                         Registration

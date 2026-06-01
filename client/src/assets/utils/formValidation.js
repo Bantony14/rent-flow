@@ -35,7 +35,7 @@ export const input = (roomOptions) => {
         {
             type: "text",
             name: "fullName",
-            placeholder: "Enter your full name",
+            placeholder: "Enter your Tenant full name",
             minLength: 3,
             maxLength: 30
         },
