@@ -33,9 +33,10 @@ export const userRegistration = async (req, res, next) => {
                 new ErrorHandler(`${field} already exists`, 400)
             );
         }
-
+        console.log(error.message)
         return next(
             new ErrorHandler(error.message, 500)
+
         );
     }
 };

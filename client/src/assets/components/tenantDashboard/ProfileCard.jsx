@@ -8,12 +8,12 @@ const profileData = {
     room: "Room A-204",
 };
 
-function ProfileCard() {
+function ProfileCard({ name, email, phone, room }) {
     const fields = [
-        { icon: <User size={14} />, label: profileData.name },
-        { icon: <Mail size={14} />, label: profileData.email },
-        { icon: <Phone size={14} />, label: profileData.phone },
-        { icon: <Home size={14} />, label: profileData.room },
+        { icon: <User size={14} />, label: name },
+        { icon: <Mail size={14} />, label: email },
+        { icon: <Phone size={14} />, label: phone },
+        { icon: <Home size={14} />, label: room },
     ];
 
     return (

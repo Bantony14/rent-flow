@@ -6,7 +6,7 @@ const rentInfo = {
     status: "Upcoming",
 };
 
-function RentDueCard() {
+function RentDueCard({ rentDue, }) {
     const handlePayNow = () => {
         console.log("Pay Now clicked");
     };
@@ -21,7 +21,7 @@ function RentDueCard() {
                 </span>
             </div>
             <p className="text-4xl font-bold text-slate-800 font-mono tracking-tight">
-                {rentInfo.amount}
+                ₹{rentDue}/-
             </p>
             <p className="text-slate-500 text-sm mt-1 mb-4 flex items-center gap-1">
                 <Calendar size={13} /> Due on {rentInfo.dueDate}

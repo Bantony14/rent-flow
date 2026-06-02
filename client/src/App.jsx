@@ -7,6 +7,7 @@ import ScrollToTop from "./assets/components/ScrollToTop"
 import Login from "./assets/pages/login"
 import TenantDashboard from "./assets/pages/TenantDashboard"
 import ProtectedRoute from "./assets/routes/ProtectedRoute"
+import AdminDashboard from "./assets/pages/AdminDashboard"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/tenantdashboard" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
+          <Route path="/admindashboard" element={<AdminDashboard />} />
         </Route>
 
       </Routes>

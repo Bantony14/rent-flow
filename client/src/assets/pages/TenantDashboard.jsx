@@ -9,7 +9,7 @@ import { AuthContext } from "../context/authContext";
 
 export default function TenantDashboard() {
     const { user } = useContext(AuthContext)
-    console.log("user>", user)
+    console.log(user)
     return (
 
         <div className="min-h-screen bg-slate-100 font-sans">
@@ -20,7 +20,7 @@ export default function TenantDashboard() {
                     Tenant Portal
                 </p>
                 <h1 className="text-2xl sm:text-4xl font-bold text-white">
-                    Welcome back, Rahul 👋
+                    Welcome back, {user.fullName.split(" ")[0]}👋
                 </h1>
                 <p className="text-sky-100 mt-1 text-sm sm:text-base">
                     Manage your rent, receipts and profile in one place.
@@ -34,7 +34,7 @@ export default function TenantDashboard() {
 
                     {/* Rent Due */}
 
-                    <RentDueCard />
+                    <RentDueCard rentDue={user.rentPrice} />
                     {/* Notifications */}
                     <NotificationsCard />
                 </div>
@@ -43,7 +43,7 @@ export default function TenantDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                     {/* Profile */}
-                    <ProfileCard />
+                    <ProfileCard name={user.fullName} email={user.email} phone={user.mobileNumber} room={user.roomNumber} />
 
                     {/* Payment History */}
                     <PaymentHistoryCard />
