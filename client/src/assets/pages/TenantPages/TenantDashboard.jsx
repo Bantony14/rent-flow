@@ -1,11 +1,10 @@
-
-import RentDueCard from "../components/tenantDashboard/RentDueCard";
-import NotificationsCard from "../components/tenantDashboard/NotificationCard";
-import ProfileCard from "../components/tenantDashboard/ProfileCard";
-import PaymentHistoryCard from "../components/tenantDashboard/PaymentHistoryCard";
-import QuickActionsCard from "../components/tenantDashboard/QuickActionCard";
+import RentDueCard from "../../components/tenantDashboard/RentDueCard";
+import NotificationsCard from "../../components/tenantDashboard/NotificationCard";
+import ProfileCard from "../../components/tenantDashboard/ProfileCard";
+import PaymentHistoryCard from "../../components/tenantDashboard/PaymentHistoryCard";
+import QuickActionsCard from "../../components/tenantDashboard/QuickActionCard";
 import { useContext } from "react";
-import { AuthContext } from "../context/authContext";
+import { AuthContext } from "../../context/authContext";
 
 export default function TenantDashboard() {
     const { user } = useContext(AuthContext)

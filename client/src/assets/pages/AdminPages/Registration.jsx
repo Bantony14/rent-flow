@@ -1,10 +1,9 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { userRegistrationApi } from "../api/authApi";
+import { userRegistrationApi } from "../../api/authApi.js";
 import toast from "react-hot-toast";
-import { rooms, errorMsg, validation, input } from "../utils/formValidation.js"
-import Button from "../components/Button.jsx";
+import { rooms, errorMsg, validation, input } from "../../utils/formValidation.js"
 
 function Registration() {
 

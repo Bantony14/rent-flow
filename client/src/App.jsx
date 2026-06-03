@@ -1,13 +1,13 @@
 import About from "./assets/pages/About"
-import Registration from "./assets/pages/Registration"
+import Registration from "./assets/pages/AdminPages/Registration"
 import Home from "./assets/pages/Home"
 import { Routes, Route } from "react-router-dom"
 import Layout from "./assets/layout/Layout"
 import ScrollToTop from "./assets/components/ScrollToTop"
 import Login from "./assets/pages/login"
-import TenantDashboard from "./assets/pages/TenantDashboard"
+import TenantDashboard from "./assets/pages/TenantPages/TenantDashboard"
 import ProtectedRoute from "./assets/routes/ProtectedRoute"
-import AdminDashboard from "./assets/pages/AdminDashboard"
+import AdminDashboard from "./assets/pages/AdminPages/AdminDashboard"
 
 function App() {
   return (
