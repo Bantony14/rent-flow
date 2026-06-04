@@ -1,15 +1,19 @@
 import mongoose from "mongoose";
 import { config } from "dotenv";
 config();
-
+import dns from "dns";
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const databaseConnection = async () => {
 
     try {
+
+        console.log(process.env.MONGO_DB_URL)
         const db = await mongoose.connect(process.env.MONGO_DB_URL)
+
         console.log("✅ mongoDb connected sucessfully", db.connection.host)
 
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
         process.exit(1)
     }
 
