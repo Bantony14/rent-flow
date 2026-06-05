@@ -145,7 +145,7 @@ function Navbar() {
                     {user.role === "ADMIN" ?
                         <Button className="hidden xl:block px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/30">
                             <NavLink
-                                to="/dashbord"
+                                to="/admindashboard"
                                 className={({ isActive }) =>
                                     isActive
                                         ? "text-cyan-400 font-bold"

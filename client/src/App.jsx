@@ -8,6 +8,7 @@ import Login from "./assets/pages/login"
 import TenantDashboard from "./assets/pages/TenantPages/TenantDashboard"
 import ProtectedRoute from "./assets/routes/ProtectedRoute"
 import AdminDashboard from "./assets/pages/AdminPages/AdminDashboard"
+import AllTenants from "./assets/pages/AdminPages/AllTenants"
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/tenantdashboard" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
           <Route path="/admindashboard" element={<AdminDashboard />} />
+          <Route path="/alltenants" element={<AllTenants />} />
         </Route>
 
       </Routes>

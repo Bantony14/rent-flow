@@ -28,11 +28,13 @@ const AdminDashboard = () => {
 
             </div>
 
-            {/* Search */}
-            <SearchBar props={{ search: search, setSearch: setSearch, placeholder: placeholder }} />
+
 
             {/* All buttons */}
             <TenantActions />
+
+            {/* Search */}
+            <SearchBar props={{ search: search, setSearch: setSearch, placeholder: placeholder }} />
 
             {/* Users Card */}
 

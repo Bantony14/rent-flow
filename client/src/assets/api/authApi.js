@@ -1,7 +1,8 @@
 import axios from "axios"
 
 const API = axios.create({
-    baseURL: "http://localhost:5000/api/v1/user"
+    baseURL: "http://localhost:5000/api/v1/user",
+    withCredentials: true
 })
 
 export function userRegistrationApi(data) {
@@ -9,19 +10,17 @@ export function userRegistrationApi(data) {
 }
 
 export function userLogin(data) {
-    return API.post("/userlogin", data, {
-        withCredentials: true,
-    })
+    return API.post("/userlogin", data)
 }
 
 export function getMe() {
-    return API.get("/me", {
-        withCredentials: true,
-    })
+    return API.get("/me")
 }
 
 export function userLogout() {
-    return API.post("/userlogout", {}, {
-        withCredentials: true,
-    })
+    return API.post("/userlogout")
+}
+
+export function getAllUser() {
+    return API.get("/getalluser")
 }

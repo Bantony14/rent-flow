@@ -81,8 +81,8 @@ export const getAllUser = async (req, res, next) => {
 
 export const getUser = async (req, res, next) => {
     try {
-        const { mobileNumber, building, roomNumber } = req.body;
-        const allowedFiled = ["mobileNumber", "building", "roomNumber"];
+        const { mobileNumber, email, fullName } = req.body;
+        const allowedFiled = ["mobileNumber", "email", "fullName"];
         const filter = {};
         allowedFiled.forEach((filed) => {
             if (req.body[filed]) {
@@ -358,6 +358,7 @@ export const getMe = async (req, res, next) => {
         if (!user) {
             return next(new ErrorHandler("user Not Found", 400))
         }
+
         res.status(200).json({
             success: true,
             message: "Here your information",
