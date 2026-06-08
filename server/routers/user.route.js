@@ -8,7 +8,7 @@ route.post("/registeruser", userRegistration);
 route.post("/userlogin", userLogin);
 route.post("/userlogout", userLogout);
 route.get("/me", isLoggedIn, getMe);
-route.post("/userupdate", isLoggedIn, isAuthorized("ADMIN"), userUpdate);
+route.post("/userupdate/:id", isLoggedIn, isAuthorized("ADMIN"), userUpdate);
 route.get("/getuser", isLoggedIn, isAuthorized("ADMIN"), getUser);
 route.get("/getalluser", isLoggedIn, isAuthorized("ADMIN"), getAllUser);
 route.get("/getalluserbybuilding", isLoggedIn, isAuthorized("ADMIN"), getAllUserByBuilding);

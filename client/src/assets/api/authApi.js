@@ -24,3 +24,7 @@ export function userLogout() {
 export function getAllUser() {
     return API.get("/getalluser")
 }
+
+export function updateUser(id, editData) {
+    return API.post(`/userupdate/${id}`, editData)
+}

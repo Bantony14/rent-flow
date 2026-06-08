@@ -42,11 +42,31 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
-    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email } = req.body;
+    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, } = req.body;
+    const { id } = req.params
+
+    if ("role" in req.body) {
+        return next(new ErrorHandler("you can't change role  "))
+    }
+
+    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus"]
+
+    const filter = {};
+
+    allowedFiled.map((value) => {
+        if (req.body[value]) {
+            filter[value] = req.body[value]
+        }
+    })
+
+    const filterValueForMessage = Object.keys(filter).join(" and ",)
     try {
-        const user = await User.findOneAndUpdate({ mobileNumber },
-            req.body,
-            { new: true }
+        const user = await User.findByIdAndUpdate(id,
+            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email },
+            {
+                new: true,
+                runValidators: true
+            }
         )
 
         if (!user) {
@@ -55,11 +75,20 @@ export const userUpdate = async (req, res, next) => {
 
         res.status(200).json({
             success: true,
-            message: "User updated successfully",
+            message: `User ${filterValueForMessage} updated successfully `,
             user,
         })
     } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+        if (error.code === 11000) {
+            let field = Object.keys(error.keyValue)[0];
+            if (field === "hashAadhaar") {
+                field = "Aadhaar"
+            }
+            return next(
+                new ErrorHandler(`${field} already exists`, 400)
+            );
+        }
+        return next(new ErrorHandler(error.message, 500))
     }
 
 };

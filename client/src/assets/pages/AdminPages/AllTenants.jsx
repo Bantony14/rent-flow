@@ -11,13 +11,14 @@ import {
     Check,
     X,
 } from "lucide-react";
-import { getAllUser } from "../../api/authApi";
+import { getAllUser, updateUser } from "../../api/authApi";
 import toast from "react-hot-toast";
 
 export default function AllTenants() {
     const [alltenantDetails, setAlltenantDetails] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [editId, setEditId] = useState("")
+    const [editData, setEditData] = useState({})
 
 
     useEffect(() => {
@@ -37,6 +38,45 @@ export default function AllTenants() {
         func();
     }, []);
 
+    const handleChange = (e, id) => {
+
+        setAlltenantDetails((prev) => {
+            return (
+                prev.map((value) => (
+                    value._id === id
+                        ? { ...value, [e.target.name]: e.target.value }
+                        : value
+                )
+                )
+            )
+        })
+
+        setEditData((prev) => ({
+            ...prev,
+            [e.target.name]: e.target.value
+        }))
+
+    }
+
+    const sendApi = async (id) => {
+        try {
+            const res = await updateUser(id, editData);
+            setEditData({})
+            setEditId("")
+            toast.success(res.data.message);
+
+
+        } catch (error) {
+            console.log(error)
+            toast.error(error?.response?.data?.message)
+        }
+
+
+
+    }
+
+    console.log("editData>>", editData)
+
     const filtered = alltenantDetails.filter((u) =>
         [u.fullName, u.email, u.mobileNumber, u.building, u.roomNumber]
             .join(" ")
@@ -48,7 +88,6 @@ export default function AllTenants() {
     const admins = alltenantDetails.filter((u) => u.role === "ADMIN").length;
     const tenants = alltenantDetails.filter((u) => u.role === "USER").length;
 
-    console.log(alltenantDetails)
 
     return (
 
@@ -146,53 +185,72 @@ export default function AllTenants() {
                                 <td className="px-4 py-4">
                                     <input
                                         type="text"
-                                        defaultValue={value.fullName}
+                                        name="fullName"
+                                        value={value.fullName}
                                         className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                                        onChange={(e) => handleChange(e, value._id)}
                                     />
                                 </td>
 
                                 <td className="px-4 py-4">
                                     <input
                                         type="email"
-                                        defaultValue={value.email}
+                                        name="email"
+                                        value={value.email}
                                         className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                                        onChange={(e) => handleChange(e, value._id)}
                                     />
                                 </td>
 
                                 <td className="px-4 py-4">
                                     <input
                                         type="text"
-                                        defaultValue={value.mobileNumber}
+                                        name="mobileNumber"
+                                        value={value.mobileNumber}
                                         className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-                                    />
-                                </td>
-
-                                <td className="px-4 py-4">
-                                    <input
-                                        type="text"
-                                        defaultValue={value.building}
-                                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-                                    />
-                                </td>
-
-                                <td className="px-4 py-4">
-                                    <input
-                                        type="text"
-                                        defaultValue={value.roomNumber}
-                                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                                        onChange={(e) => handleChange(e, value._id)}
                                     />
                                 </td>
 
                                 <td className="px-4 py-4">
                                     <select
-                                        defaultValue={value.paymentStatus}
+                                        value={value.building}
                                         className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                        name="building"
+                                        onChange={(e) => handleChange(e, value._id)}
                                     >
-                                        <option value={value.paymentStatus}>
+                                        <option>
+                                            {value.building}
+                                        </option>
+
+                                        <option>
+                                            {value.building === "Shivam Residency" ? "Krishna Tower" : "Shivam Residency"}
+                                        </option>
+                                    </select>
+                                </td>
+
+                                <td className="px-4 py-4">
+                                    <input
+                                        type="text"
+                                        name="roomNumber"
+                                        value={value.roomNumber}
+                                        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+                                        onChange={(e) => handleChange(e, value._id)}
+                                    />
+                                </td>
+
+                                <td className="px-4 py-4">
+                                    <select
+                                        value={value.paymentStatus}
+                                        className="w-full rounded-lg border border-slate-300 px-3 py-2"
+                                        name="paymentStatus"
+                                        onChange={(e) => handleChange(e, value._id)}
+                                    >
+                                        <option>
                                             {value.paymentStatus}
                                         </option>
 
-                                        <option value={value.paymentStatus === "Paid" ? "Unpaid" : "Paid"}>
+                                        <option>
                                             {value.paymentStatus === "Paid" ? "Unpaid" : "Paid"}
                                         </option>
                                     </select>
@@ -200,7 +258,8 @@ export default function AllTenants() {
 
                                 <td className="px-4 py-4">
                                     <div className="flex gap-2">
-                                        <button className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700">
+                                        <button className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                                            onClick={() => sendApi(value._id)}>
                                             Save
                                         </button>
 
