@@ -45,6 +45,12 @@ export const userUpdate = async (req, res, next) => {
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, } = req.body;
     const { id } = req.params
 
+    const forNoChanges = Object.keys(req.body).length === 0
+
+    if (forNoChanges) {
+        return next(new ErrorHandler("There is no changes in your data"))
+    }
+
     if ("role" in req.body) {
         return next(new ErrorHandler("you can't change role  "))
     }
@@ -60,6 +66,7 @@ export const userUpdate = async (req, res, next) => {
     })
 
     const filterValueForMessage = Object.keys(filter).join(" and ",)
+
     try {
         const user = await User.findByIdAndUpdate(id,
             { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email },
