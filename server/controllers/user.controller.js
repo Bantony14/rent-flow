@@ -100,6 +100,25 @@ export const userUpdate = async (req, res, next) => {
 
 };
 
+export const userDelete = async (req, res, next) => {
+    const { id } = req.params;
+
+
+    try {
+        const user = await User.findByIdAndDelete(id)
+
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+        res.status(200).json({
+            success: true,
+            message: `User Delete SuccessFully`
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+}
+
 export const getAllUser = async (req, res, next) => {
     try {
 

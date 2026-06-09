@@ -100,7 +100,8 @@ const userSchema = new mongoose.Schema(
             default: 5000
         },
         paymentStatus: {
-            type: String
+            type: String,
+            default: "unpaid"
         },
 
         otp: String,

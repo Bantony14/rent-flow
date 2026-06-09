@@ -1,5 +1,5 @@
 import express from "express";
-import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUser, removeMember, resetPassword, updateMemberInfo, userLogin, userLogout, userRegistration, userUpdate } from "../controllers/user.controller.js";
+import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUser, removeMember, resetPassword, updateMemberInfo, userDelete, userLogin, userLogout, userRegistration, userUpdate } from "../controllers/user.controller.js";
 import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 
 const route = express.Router();
@@ -7,6 +7,7 @@ const route = express.Router();
 route.post("/registeruser", userRegistration);
 route.post("/userlogin", userLogin);
 route.post("/userlogout", userLogout);
+route.post("/userdelete/:id", isLoggedIn, isAuthorized("ADMIN"), userDelete)
 route.get("/me", isLoggedIn, getMe);
 route.post("/userupdate/:id", isLoggedIn, isAuthorized("ADMIN"), userUpdate);
 route.get("/getuser", isLoggedIn, isAuthorized("ADMIN"), getUser);
