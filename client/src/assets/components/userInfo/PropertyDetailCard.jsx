@@ -1,4 +1,4 @@
-function PropertyDetails({ user, edit }) {
+function PropertyDetails({ user, edit, onChange }) {
     return (
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300">
 
@@ -13,9 +13,11 @@ function PropertyDetails({ user, edit }) {
                     {edit ? (
                         <input
                             type="text"
-                            defaultValue={user?.building}
+                            value={user?.building}
+                            name="building"
                             className="flex-1 border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                             placeholder="Building Name"
+                            onChange={onChange}
                         />
                     ) : (
                         <span className="text-sm font-medium text-slate-800">{user?.building}</span>
@@ -27,9 +29,11 @@ function PropertyDetails({ user, edit }) {
                     {edit ? (
                         <input
                             type="text"
-                            defaultValue={user?.roomNumber}
+                            name="roomNumber"
+                            value={user?.roomNumber}
                             className="flex-1 border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
                             placeholder="Room Number"
+                            onChange={onChange}
                         />
                     ) : (
                         <span className="text-sm font-medium text-slate-800">{user?.roomNumber}</span>

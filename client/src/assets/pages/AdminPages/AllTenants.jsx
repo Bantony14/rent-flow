@@ -99,17 +99,17 @@ export default function AllTenants() {
         setDeleteTenant(structuredClone(...tenant))
     }
 
-    // removing deleteTenants details
+    // removing deleteTenants card details
 
     const cancelDeleteTenants = () => setDeleteTenant("")
+
     // This Api is for deleting the data
     const deleteTenantApi = async (id) => {
         try {
             const res = await deleteUser(id)
-            setFormData(prev => {
-                const updated = prev.filter(value => value._id !== id);
-                return updated;
-            });
+            const updated = formData.filter(value => value._id !== id);
+            setFormData(updated)
+            setAlltenantDetails(updated)
             setDeleteTenant("")
             toast.success(res.data.message)
             console.log(res.data.message)

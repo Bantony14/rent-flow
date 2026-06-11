@@ -42,8 +42,28 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
-    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, paymentStatus } = req.body;
+    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus"]
+
     const { id } = req.params
+
+    console.log("req.body>>>>", req.body)
+
+    const validation = Object.keys(req.body);
+    console.log(validation)
+
+    const notAllowedFiled = validation.filter((value) => !allowedFiled.includes(value));
+
+    if (notAllowedFiled.length > 0) {
+        return next(new ErrorHandler(`You cannot changes this filed ${notAllowedFiled.join(" and ")}`))
+    }
+
+    const filter = {};
+
+    allowedFiled.map((value) => {
+        if (req.body[value]) {
+            filter[value] = req.body[value]
+        }
+    })
 
     const forNoChanges = Object.keys(req.body).length === 0
 
@@ -55,23 +75,15 @@ export const userUpdate = async (req, res, next) => {
         return next(new ErrorHandler("you can't change role  "))
     }
 
-    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus"]
 
-    const filter = {};
-
-    allowedFiled.map((value) => {
-        if (req.body[value]) {
-            filter[value] = req.body[value]
-        }
-    })
 
     const filterValueForMessage = Object.keys(filter).join(" and ",)
 
     try {
         const user = await User.findByIdAndUpdate(id,
-            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, paymentStatus },
+            req.body,
             {
-                new: true,
+                returnDocument: "after",
                 runValidators: true
             }
         )
@@ -137,7 +149,6 @@ export const getAllUser = async (req, res, next) => {
 export const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
-        console.log(id)
         const user = await User.findById(id);
 
         if (!user) {

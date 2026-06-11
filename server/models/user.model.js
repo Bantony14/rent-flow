@@ -101,7 +101,8 @@ const userSchema = new mongoose.Schema(
         },
         paymentStatus: {
             type: String,
-            default: "unpaid"
+            enum: ["Paid", "Unpaid"],
+            default: "Unpaid"
         },
 
         otp: String,

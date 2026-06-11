@@ -1,18 +1,28 @@
-function TenantProfileHeader({ user, edit, onEditToggle, onDelete }) {
+function ProfileCard({ user, edit, onEditToggle, onSave, onCancel, onDelete }) {
     return (
         <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-6 md:p-8 text-white shadow-xl">
 
-
-            {/* Top bar - Edit/Delete buttons */}
+            {/* Top bar */}
             <div className="flex justify-end gap-3 mb-6">
 
                 {edit ? (
-                    <button
-                        onClick={onSave}
-                        className="flex items-center gap-2 px-4 py-2 bg-white text-blue-600 rounded-xl text-sm font-semibold hover:bg-blue-50 transition"
-                    >
-                        Save
-                    </button>
+                    <>
+                        <button className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-semibold transition"
+                            onClick={onSave}>
+                            Save
+                        </button>
+
+                        <button className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl text-sm font-semibold text-white hover:bg-white/30 transition"
+                            onClick={() => {
+                                onEditToggle();
+                                onCancel();
+                            }}>
+                            Cancel
+                        </button>
+                    </>
+
+
+
                 ) : (
                     <button
                         onClick={onEditToggle}
@@ -22,19 +32,8 @@ function TenantProfileHeader({ user, edit, onEditToggle, onDelete }) {
                     </button>
                 )}
 
-                {edit && (
-                    <button
-                        onClick={onEditToggle}
-                        className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl text-sm font-semibold hover:bg-white/30 transition"
-                    >
-                        Cancel
-                    </button>
-                )}
-
-                <button
-                    onClick={onDelete}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold transition"
-                >
+                <button className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-xl text-sm font-semibold transition"
+                    onClick={onDelete}>
                     Delete
                 </button>
 
@@ -51,29 +50,11 @@ function TenantProfileHeader({ user, edit, onEditToggle, onDelete }) {
                 <div className="flex-1 w-full text-center lg:text-left">
 
                     <h1 className="text-3xl md:text-4xl font-bold">
-                        {edit ? (
-                            <input
-                                type="text"
-                                defaultValue={user?.fullName}
-                                className="w-full bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl px-4 py-2 text-white placeholder-white/60 outline-none focus:border-white text-2xl md:text-3xl font-bold"
-                                placeholder="Full Name"
-                            />
-                        ) : (
-                            user?.fullName
-                        )}
+                        {user?.fullName}
                     </h1>
 
                     <p className="text-white/80 mt-2">
-                        {edit ? (
-                            <input
-                                type="email"
-                                defaultValue={user?.email}
-                                className="w-full bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl px-4 py-2 text-white placeholder-white/60 outline-none focus:border-white text-sm"
-                                placeholder="Email"
-                            />
-                        ) : (
-                            user?.email
-                        )}
+                        {user?.email}
                     </p>
 
                     <div className="flex flex-wrap justify-center lg:justify-start gap-3 mt-4">
@@ -103,51 +84,21 @@ function TenantProfileHeader({ user, edit, onEditToggle, onDelete }) {
                 <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm">
                     <p className="text-white/70 text-sm">Room Number</p>
                     <h3 className="text-xl font-bold mt-1">
-                        {edit ? (
-                            <input
-                                type="text"
-                                defaultValue={user?.roomNumber}
-                                className="w-full bg-white/20 border border-white/40 rounded-lg px-3 py-1.5 text-white placeholder-white/60 outline-none focus:border-white text-base font-bold"
-                                placeholder="Room No."
-                            />
-                        ) : (
-                            user?.roomNumber
-                        )}
+                        {user?.roomNumber}
                     </h3>
                 </div>
 
                 <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm">
                     <p className="text-white/70 text-sm">Building</p>
                     <h3 className="text-xl font-bold mt-1">
-                        {edit ? (
-                            <input
-                                type="text"
-                                defaultValue={user?.building}
-                                className="w-full bg-white/20 border border-white/40 rounded-lg px-3 py-1.5 text-white placeholder-white/60 outline-none focus:border-white text-base font-bold"
-                                placeholder="Building"
-                            />
-                        ) : (
-                            user?.building
-                        )}
+                        {user?.building}
                     </h3>
                 </div>
 
                 <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm">
                     <p className="text-white/70 text-sm">Monthly Rent</p>
                     <h3 className="text-xl font-bold mt-1">
-                        {edit ? (
-                            <div className="flex items-center gap-1">
-                                <span className="shrink-0">₹</span>
-                                <input
-                                    type="number"
-                                    defaultValue={user?.rentPrice}
-                                    className="w-full bg-white/20 border border-white/40 rounded-lg px-3 py-1.5 text-white placeholder-white/60 outline-none focus:border-white text-base font-bold"
-                                    placeholder="Rent"
-                                />
-                            </div>
-                        ) : (
-                            `₹ ${user?.rentPrice}`
-                        )}
+                        ₹ {user?.rentPrice}
                     </h3>
                 </div>
 
@@ -164,4 +115,4 @@ function TenantProfileHeader({ user, edit, onEditToggle, onDelete }) {
     );
 }
 
-export default TenantProfileHeader;
+export default ProfileCard;
