@@ -32,3 +32,7 @@ export function updateUser(id, editData) {
 export function deleteUser(id) {
     return API.post(`/userdelete/${id}`)
 }
+
+export function getUser(id) {
+    return API.post(`/getuser/${id}`,)
+}

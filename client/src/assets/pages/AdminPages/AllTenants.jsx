@@ -15,6 +15,7 @@ import { deleteUser, getAllUser, updateUser } from "../../api/authApi";
 import toast from "react-hot-toast";
 import LoadingScreen from "../../components/LoadingScreen";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
+import { useNavigate } from "react-router-dom";
 
 export default function AllTenants() {
     const [alltenantDetails, setAlltenantDetails] = useState([]);
@@ -24,6 +25,7 @@ export default function AllTenants() {
     const [editData, setEditData] = useState({})
     const [loading, setLoading] = useState(true)
     const [deleteTenant, setDeleteTenant] = useState("")
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -384,6 +386,7 @@ export default function AllTenants() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             className="rounded-lg bg-sky-100 p-2 text-sky-600 hover:bg-sky-200"
+                                                            onClick={() => navigate(`/viewtenantdetail/${value._id}`)}
                                                         >
                                                             <Eye size={18} />
                                                         </button>

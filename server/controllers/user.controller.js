@@ -42,7 +42,7 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
-    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, } = req.body;
+    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, paymentStatus } = req.body;
     const { id } = req.params
 
     const forNoChanges = Object.keys(req.body).length === 0
@@ -69,7 +69,7 @@ export const userUpdate = async (req, res, next) => {
 
     try {
         const user = await User.findByIdAndUpdate(id,
-            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email },
+            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, paymentStatus },
             {
                 new: true,
                 runValidators: true
@@ -134,23 +134,14 @@ export const getAllUser = async (req, res, next) => {
     }
 };
 
-export const getUser = async (req, res, next) => {
+export const getUserById = async (req, res, next) => {
     try {
-        const { mobileNumber, email, fullName } = req.body;
-        const allowedFiled = ["mobileNumber", "email", "fullName"];
-        const filter = {};
-        allowedFiled.forEach((filed) => {
-            if (req.body[filed]) {
-                filter[filed] = req.body[filed]
-            }
-        })
-        const user = await User.find(filter);
+        const { id } = req.params;
+        console.log(id)
+        const user = await User.findById(id);
 
-        if (user.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "user not found"
-            });
+        if (!user) {
+            return next(new ErrorHandler("user not found", 500))
         }
         res.status(200).json({
             success: true,

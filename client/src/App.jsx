@@ -9,7 +9,7 @@ import TenantDashboard from "./assets/pages/TenantPages/TenantDashboard"
 import ProtectedRoute from "./assets/routes/ProtectedRoute"
 import AdminDashboard from "./assets/pages/AdminPages/AdminDashboard"
 import AllTenants from "./assets/pages/AdminPages/AllTenants"
-import UserInfoCard from "./assets/pages/AdminPages/UserInfoPage"
+import UserInfoCard from "./assets/pages/AdminPages/UserInfo"
 
 function App() {
   return (
@@ -24,7 +24,7 @@ function App() {
           <Route path="/tenantdashboard" element={<ProtectedRoute><TenantDashboard /></ProtectedRoute>} />
           <Route path="/admindashboard" element={<AdminDashboard />} />
           <Route path="/alltenants" element={<AllTenants />} />
-          <Route path="/viewtenantdetail" element={<UserInfoCard />} />
+          <Route path="/viewtenantdetail/:tenantid" element={<UserInfoCard />} />
         </Route>
 
       </Routes>
