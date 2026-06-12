@@ -36,3 +36,7 @@ export function deleteUser(id) {
 export function getUser(id) {
     return API.post(`/getuser/${id}`,)
 }
+
+export function getOneUser(data) {
+    return API.post("/getoneuser", data)
+}

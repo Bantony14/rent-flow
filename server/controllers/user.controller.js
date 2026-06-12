@@ -146,6 +146,40 @@ export const getAllUser = async (req, res, next) => {
     }
 };
 
+export const getOneUser = async (req, res, next) => {
+
+    console.log("req.body?>>>>>", req.body)
+    try {
+        const filed = Object.keys(req.body).join("")
+        console.log(filed)
+        console.log(req.body[filed])
+
+        let user;
+
+        if (filed === "_id") {
+            user = await User.findById(req.body._id)
+        }
+        else {
+            user = await User.findOne({
+                [filed]: { $regex: req.body[filed], $options: "i" }
+            });
+        }
+
+        if (!user) {
+            return next(new ErrorHandler("user not found", 500))
+        }
+        res.status(200).json({
+            success: true,
+            message: "here is your user data",
+            user,
+        })
+
+
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 400))
+    }
+};
+
 export const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;
