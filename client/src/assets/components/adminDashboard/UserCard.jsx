@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 function UserCard({ user, onView }) {
+
+    const navigate = useNavigate();
     return (
         <div className="bg-white rounded-3xl shadow-lg border border-slate-100 p-6 hover:shadow-2xl transition-all duration-300 mb-6">
 
@@ -53,18 +57,10 @@ function UserCard({ user, onView }) {
                 </div>
             </div>
 
-            {/* Note */}
-            {user?.note && (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3">
-                    <p className="text-amber-600 text-sm font-medium mb-1">📝 Note</p>
-                    <p className="text-slate-700 text-sm break-words">{user?.note}</p>
-                </div>
-            )}
-
             {/* Button */}
             <div className="mt-6">
                 <button
-                    onClick={() => onView(user)}
+                    onClick={() => navigate(`/viewtenantdetail/${user._id}`)}
                     className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:opacity-90 transition"
                 >
                     View Details

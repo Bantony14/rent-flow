@@ -20,9 +20,7 @@ function TenantActions() {
                     All Tenant
                 </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
-                    Find One Tenant
-                </button>
+
 
                 <button className="px-5 py-4 rounded-2xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
                     Find Tenant By Building
@@ -40,17 +38,8 @@ function TenantActions() {
                     Unpaid Tenants
                 </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-yellow-100 text-yellow-700 font-semibold hover:bg-yellow-200 transition">
-                    Check Payment Status
-                </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200 transition">
-                    Payment Details By Status
-                </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-indigo-100 text-indigo-700 font-semibold hover:bg-indigo-200 transition">
-                    Get All Payment Details
-                </button>
 
             </div>
 

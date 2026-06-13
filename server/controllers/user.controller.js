@@ -148,29 +148,37 @@ export const getAllUser = async (req, res, next) => {
 
 export const getOneUser = async (req, res, next) => {
 
-    console.log("req.body?>>>>>", req.body)
+
     try {
-        const filed = Object.keys(req.body).join("")
-        console.log(filed)
-        console.log(req.body[filed])
+        const field = Object.keys(req.body).join("")
+        console.log(field)
+        console.log(req.body[field])
 
         let user;
 
-        if (filed === "_id") {
+        if (field === "_id") {
             user = await User.findById(req.body._id)
+        }
+        else if (field === "role") {
+            user = await User.findOne(req.body.role)
         }
         else {
             user = await User.findOne({
-                [filed]: { $regex: req.body[filed], $options: "i" }
+                [field]: { $regex: req.body[field], $options: "i" }
             });
         }
 
         if (!user) {
-            return next(new ErrorHandler("user not found", 500))
+            return next(
+                new ErrorHandler(
+                    `No tenant found with ${field}: ${req.body[field]}`,
+                    404
+                )
+            );
         }
         res.status(200).json({
             success: true,
-            message: "here is your user data",
+            message: `Matching tenant records found for ${field}.`,
             user,
         })
 
