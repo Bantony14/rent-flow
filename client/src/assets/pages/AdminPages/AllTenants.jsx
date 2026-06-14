@@ -16,6 +16,8 @@ import toast from "react-hot-toast";
 import LoadingScreen from "../../components/LoadingScreen";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
 import { useNavigate } from "react-router-dom";
+import AllTenantsHeader from "../../components/allTenantsdetails/Header";
+import NumberOfUsers from "../../components/allTenantsdetails/NumberOfUser";
 
 export default function AllTenants() {
     const [alltenantDetails, setAlltenantDetails] = useState([]);
@@ -25,16 +27,23 @@ export default function AllTenants() {
     const [editData, setEditData] = useState({})
     const [loading, setLoading] = useState(true)
     const [deleteTenant, setDeleteTenant] = useState("")
+    const [building, setBuilding] = useState("");
+    const [paymentStatus, setPaymentStatus] = useState("")
+    const params = {}
     const navigate = useNavigate();
 
+    if (building) {
+        params.building = building
+    }
+    if (paymentStatus) {
+        params.paymentStatus = paymentStatus
+    }
 
     useEffect(() => {
         const func = async () => {
             try {
                 const res = await getAllUser();
                 setAlltenantDetails(res.data.user);
-
-
             } catch (error) {
                 toast.error(error?.response?.data?.message || "Failed to fetch users");
             }
@@ -45,6 +54,8 @@ export default function AllTenants() {
         };
         func();
     }, []);
+
+
 
     useEffect(() => {
         setFormData(structuredClone(alltenantDetails))
@@ -137,7 +148,9 @@ export default function AllTenants() {
     const admins = formData.filter((u) => u.role === "ADMIN").length;
     const tenants = formData.filter((u) => u.role === "USER").length;
 
-    console.log(deleteTenant)
+    console.log("building>>>", building)
+    console.log("payment>>>", paymentStatus)
+    console.log("params>>>", params)
 
     return (
         <>
@@ -145,78 +158,71 @@ export default function AllTenants() {
             {deleteTenant ? <DeleteCard data={deleteTenant} onCancel={cancelDeleteTenants}
                 onDelete={() => deleteTenantApi(deleteTenant._id)} /> : ""}
 
+
+
             <div className="p-4 sm:p-6 lg:p-8">
 
                 {/* Header */}
-                <div className="mb-6 sm:mb-8 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-blue-600 to-cyan-500 p-5 sm:p-8 text-white shadow-lg">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                        <div>
-                            <p className="text-xs sm:text-sm font-medium uppercase tracking-wider text-blue-100">
-                                RentFlow Admin Panel
-                            </p>
-
-                            <h1 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-bold">
-                                User Management
-                            </h1>
-
-                            <p className="mt-2 text-sm sm:text-base text-blue-100">
-                                Manage, monitor and control all registered users from one place.
-                            </p>
-                        </div>
-
-
-                    </div>
-                </div>
+                <AllTenantsHeader />
 
                 {/* total number of user */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-
-                    <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-slate-200">
-                        <p className="text-sm font-medium text-slate-500">
-                            Total Users
-                        </p>
-                        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-800">
-                            {totalUsers}
-                        </h1>
-                    </div>
-
-                    <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-slate-200">
-                        <p className="text-sm font-medium text-slate-500">
-                            Total Tenants
-                        </p>
-                        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-blue-600">
-                            {tenants}
-                        </h1>
-                    </div>
-
-                    <div className="rounded-2xl bg-white p-5 sm:p-6 shadow-sm border border-slate-200">
-                        <p className="text-sm font-medium text-slate-500">
-                            Total Admins
-                        </p>
-                        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-emerald-600">
-                            {admins}
-                        </h1>
-                    </div>
-
-                </div>
+                <NumberOfUsers totalUsers={totalUsers} tenants={tenants} admins={admins} />
 
 
 
                 {/*searchQuery*/}
-                <div className="relative w-full max-w-md mb-6">
-                    <Search
-                        size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
+                <div className="flex flex-col lg:flex-row gap-4 items-end mb-6">
 
-                    <input
-                        type="text"
-                        placeholder="Search users..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-slate-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                    />
+                    {/* Search */}
+                    <div className="relative flex-1">
+                        <Search
+                            size={18}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-slate-700 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        />
+                    </div>
+
+                    {/* Building Filter */}
+                    <div className="w-full lg:w-60">
+                        <label className="block mb-2 text-sm font-semibold text-slate-700">
+                            Building
+                        </label>
+
+                        <select
+                            value={building}
+                            onChange={(e) => setBuilding(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        >
+                            <option value="">All Buildings</option>
+                            <option value="Shivam Residency">Shivam Residency</option>
+                            <option value="Krishna Tower">Krishna Tower</option>
+                        </select>
+                    </div>
+
+                    {/* Payment Status Filter */}
+                    <div className="w-full lg:w-60">
+                        <label className="block mb-2 text-sm font-semibold text-slate-700">
+                            Payment Status
+                        </label>
+
+                        <select
+                            value={paymentStatus}
+                            onChange={(e) => setPaymentStatus(e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                        >
+                            <option value="">All Status</option>
+                            <option value="Paid">✅ Paid</option>
+                            <option value="UnPaid">❌ Unpaid</option>
+                        </select>
+                    </div>
+
                 </div>
 
                 {/* Data Table */}
@@ -235,6 +241,8 @@ export default function AllTenants() {
                         </thead>
 
                         <tbody>
+
+                            {/* loading screen if no data found */}
                             {loading ? <tr>
                                 <td colSpan={7} className="text-center py-8">
                                     <LoadingScreen />

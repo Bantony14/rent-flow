@@ -30,13 +30,11 @@ function TenantActions() {
                     Find Tenant By Room No
                 </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-green-100 text-green-700 font-semibold hover:bg-green-200 transition">
-                    Paid Tenants
+                <button className="px-5 py-4 rounded-2xl bg-gradient-to-r from-red-100 to-green-100 text-slate-700 font-semibold hover:from-red-200 hover:to-green-200 transition">
+                    Find Tenant By Payment Status
                 </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-red-100 text-red-700 font-semibold hover:bg-red-200 transition">
-                    Unpaid Tenants
-                </button>
+
 
 
 

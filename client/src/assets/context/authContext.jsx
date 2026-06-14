@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
 
             } catch (error) {
                 setUser("")
-                console.log(error.res.data.message)
+                console.log(error?.response?.data?.message)
             }
             finally {
                 setLoading(false);

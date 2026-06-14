@@ -133,11 +133,21 @@ export const userDelete = async (req, res, next) => {
 
 export const getAllUser = async (req, res, next) => {
     try {
+        if (req.body) {
+            const user = await User.find(req.body);
+            return (
+                res.status(200).json({
+                    success: true,
+                    message: `Here your all data by ${Object.keys(req.body).join("")} tenants`,
+                    user,
+                })
+            )
+        }
 
         const user = await User.find({});
         res.status(200).json({
             success: true,
-            message: "here your all data",
+            message: "Here your all data",
             user,
         })
 
@@ -158,9 +168,6 @@ export const getOneUser = async (req, res, next) => {
 
         if (field === "_id") {
             user = await User.findById(req.body._id)
-        }
-        else if (field === "role") {
-            user = await User.findOne(req.body.role)
         }
         else {
             user = await User.findOne({
@@ -452,17 +459,21 @@ export const updateMemberInfo = async (req, res, next) => {
 
 export const getMe = async (req, res, next) => {
     const { id } = req.user;
+
     try {
+
         const user = await User.findById(id);
+
         if (!user) {
             return next(new ErrorHandler("user Not Found", 400))
         }
-
         res.status(200).json({
             success: true,
             message: "Here your information",
             user,
         })
+
+
 
     } catch (error) {
         return next(new ErrorHandler(error.message, 400))

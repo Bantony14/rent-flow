@@ -93,7 +93,6 @@ function UserInfoPage() {
 
     const cancelDeleteTenants = () => setDeleteTenant("")
 
-    console.log("editdata>>>", editdata)
 
     // This Api is for deleting the data
     const deleteTenantApi = async (id) => {
