@@ -39,11 +39,14 @@ export default function AllTenants() {
         params.paymentStatus = paymentStatus
     }
 
+    console.log("params>>", params)
+
     useEffect(() => {
         const func = async () => {
             try {
-                const res = await getAllUser();
+                const res = await getAllUser(params);
                 setAlltenantDetails(res.data.user);
+                toast.success(res.data.message)
             } catch (error) {
                 toast.error(error?.response?.data?.message || "Failed to fetch users");
             }
@@ -53,7 +56,7 @@ export default function AllTenants() {
 
         };
         func();
-    }, []);
+    }, [paymentStatus, building]);
 
 
 
@@ -131,8 +134,7 @@ export default function AllTenants() {
         }
     }
 
-    console.log("editData>>", editData)
-    console.log("formdata>>>>", formData)
+
 
 
     const filtered = formData.filter((u) =>
@@ -142,15 +144,9 @@ export default function AllTenants() {
             .includes(searchQuery.toLowerCase())
     );
 
-
-
     const totalUsers = formData.length;
     const admins = formData.filter((u) => u.role === "ADMIN").length;
     const tenants = formData.filter((u) => u.role === "USER").length;
-
-    console.log("building>>>", building)
-    console.log("payment>>>", paymentStatus)
-    console.log("params>>>", params)
 
     return (
         <>
@@ -218,8 +214,8 @@ export default function AllTenants() {
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
                         >
                             <option value="">All Status</option>
-                            <option value="Paid">✅ Paid</option>
-                            <option value="UnPaid">❌ Unpaid</option>
+                            <option value="Paid">🟢 Paid</option>
+                            <option value="Unpaid">🔴 Unpaid</option>
                         </select>
                     </div>
 

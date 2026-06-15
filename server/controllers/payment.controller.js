@@ -7,11 +7,10 @@ export const paymentOrderCreate = async (req, res, next) => {
     if (!id) {
         return next(new ErrorHandler("user Not Found", 400))
     }
-
     try {
 
         const user = await User.findById(id);
-        if (!id) {
+        if (!user) {
             return next(new ErrorHandler("user Not Found", 400))
         }
         const order = await razorpay.orders.create({
@@ -21,6 +20,7 @@ export const paymentOrderCreate = async (req, res, next) => {
         })
 
         console.log(id)
+        console.log("order>>>", order)
 
         res.status(201).json({
             success: true,
@@ -39,6 +39,7 @@ export const verifyPayment = async (req, res, next) => {
     const { id } = req.user
 
     try {
+        console.log("req.body>>>>", req.body)
 
         const user = await User.findById(id);
 
@@ -48,11 +49,15 @@ export const verifyPayment = async (req, res, next) => {
             .digest("hex")
 
         console.log(generatedSignature)
+        console.log(razorpay_signature)
         if (generatedSignature !== razorpay_signature) {
             return next(new ErrorHandler("payment not verify ", 400))
         }
-        user.paymentStatus = true;
+        console.log("done")
+        user.paymentStatus = "Paid";
         await user.save()
+        console.log("done")
+        console.log("done")
 
         res.status(200).json({
             success: true,

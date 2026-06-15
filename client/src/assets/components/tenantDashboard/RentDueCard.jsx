@@ -1,4 +1,7 @@
-import { CreditCard, Calendar } from "lucide-react";
+import { CreditCard, Calendar, Currency, OptionIcon } from "lucide-react";
+import { paymentOrderCreate } from "../../api/paymentApi";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const rentInfo = {
     amount: "₹12,000",
@@ -7,8 +10,40 @@ const rentInfo = {
 };
 
 function RentDueCard({ rentDue, }) {
-    const handlePayNow = () => {
-        console.log("Pay Now clicked");
+
+    const handlePayNow = async () => {
+        try {
+            const { data } = await paymentOrderCreate();
+
+            const options = {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+                amount: data.order.amount,
+                currency: data.order.currency,
+                order_id: data.order.id,
+
+                handler: async (response) => {
+                    const { data } = await axios.post("http://localhost:5000/api/v1/payment/verify-payment", {
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                    }, { withCredentials: true }
+                    )
+
+                    if (data.success) {
+                        toast.success("Payment Successful");
+                    }
+
+
+                }
+            }
+            const razorpay = new window.Razorpay(options);
+            razorpay.open();
+
+
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     return (

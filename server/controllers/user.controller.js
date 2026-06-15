@@ -132,22 +132,21 @@ export const userDelete = async (req, res, next) => {
 }
 
 export const getAllUser = async (req, res, next) => {
-    try {
-        if (req.body) {
-            const user = await User.find(req.body);
-            return (
-                res.status(200).json({
-                    success: true,
-                    message: `Here your all data by ${Object.keys(req.body).join("")} tenants`,
-                    user,
-                })
-            )
-        }
+    const filter = {}
 
-        const user = await User.find({});
+    if (req.query.building) {
+        filter.building = req.query.building
+    }
+    if (req.query.paymentStatus) {
+        filter.paymentStatus = req.query.paymentStatus
+    }
+    try {
+
+
+        const user = await User.find(filter);
         res.status(200).json({
             success: true,
-            message: "Here your all data",
+            message: `Here your all data by ${!Object.keys(filter).join("") ? " tenants" : Object.keys(filter).join(" and ")}`,
             user,
         })
 

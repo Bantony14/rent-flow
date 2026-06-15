@@ -22,18 +22,6 @@ function TenantActions() {
 
 
 
-                <button className="px-5 py-4 rounded-2xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
-                    Find Tenant By Building
-                </button>
-
-                <button className="px-5 py-4 rounded-2xl bg-slate-100 text-slate-700 font-semibold hover:bg-slate-200 transition">
-                    Find Tenant By Room No
-                </button>
-
-                <button className="px-5 py-4 rounded-2xl bg-gradient-to-r from-red-100 to-green-100 text-slate-700 font-semibold hover:from-red-200 hover:to-green-200 transition">
-                    Find Tenant By Payment Status
-                </button>
-
 
 
 
