@@ -104,6 +104,11 @@ const userSchema = new mongoose.Schema(
             enum: ["Paid", "Unpaid"],
             default: "Unpaid"
         },
+        dueAmount: {
+            type: Number,
+            default: 5000
+        },
+
 
         otp: String,
         otpExpiry: Date,

@@ -1,15 +1,16 @@
-import { CreditCard, Calendar, Currency, OptionIcon } from "lucide-react";
+import { CreditCard, Calendar, CheckCircle2 } from "lucide-react";
 import { paymentOrderCreate } from "../../api/paymentApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const rentInfo = {
-    amount: "₹12,000",
-    dueDate: "05 June 2026",
-    status: "Upcoming",
-};
+function RentDueCard({ user }) {
+    const totalRent = user?.rentAmount || 5000;
+    const isPaid = user?.dueAmount === 0;
 
-function RentDueCard({ rentDue, }) {
+    const currentMonth = new Date().toLocaleString("en-US", {
+        month: "long",
+        year: "numeric",
+    });
 
     const handlePayNow = async () => {
         try {
@@ -17,56 +18,146 @@ function RentDueCard({ rentDue, }) {
 
             const options = {
                 key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-
                 amount: data.order.amount,
                 currency: data.order.currency,
                 order_id: data.order.id,
 
-                handler: async (response) => {
-                    const { data } = await axios.post("http://localhost:5000/api/v1/payment/verify-payment", {
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                    }, { withCredentials: true }
-                    )
+                name: "Rent Payment",
+                description: `${currentMonth} Rent Payment`,
 
-                    if (data.success) {
-                        toast.success("Payment Successful");
+                handler: async (response) => {
+                    try {
+                        const { data } = await axios.post(
+                            "http://localhost:5000/api/v1/payment/verify-payment",
+                            {
+                                razorpay_order_id:
+                                    response.razorpay_order_id,
+                                razorpay_payment_id:
+                                    response.razorpay_payment_id,
+                                razorpay_signature:
+                                    response.razorpay_signature,
+                            },
+                            {
+                                withCredentials: true,
+                            }
+                        );
+
+                        if (data.success) {
+                            toast.success("Rent paid successfully");
+
+
+                            navigate("/payment-success", {
+                                state: {
+                                    paymentId: response.razorpay_payment_id,
+                                    orderId: response.razorpay_order_id,
+                                    amount: data.order.amount / 100,
+                                },
+                            });
+
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+
+
+                        toast.error("Payment verification failed");
+
+                        navigate("/payment-failed");
+
+
                     }
 
+                },
+            };
 
-                }
-            }
             const razorpay = new window.Razorpay(options);
             razorpay.open();
-
-
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            toast.error("Unable to initiate payment");
         }
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-            <div className="flex items-center gap-2 mb-4">
-                <CreditCard size={18} className="text-red-500" />
-                <h2 className="text-sm font-semibold text-slate-800">Rent Due</h2>
-                <span className="ml-auto text-xs font-semibold bg-red-50 text-red-700 px-2.5 py-0.5 rounded-full">
-                    {rentInfo.status}
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                    <CreditCard size={18} className="text-blue-600" />
+                    <h2 className="font-semibold text-slate-800">
+                        Rent Status
+                    </h2>
+                </div>
+
+                <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${isPaid
+                        ? "bg-green-100 text-green-700"
+                        : "bg-red-100 text-red-700"
+                        }`}
+                >
+                    {isPaid ? "PAID" : "UNPAID"}
                 </span>
             </div>
-            <p className="text-4xl font-bold text-slate-800 font-mono tracking-tight">
-                ₹{rentDue}/-
-            </p>
-            <p className="text-slate-500 text-sm mt-1 mb-4 flex items-center gap-1">
-                <Calendar size={13} /> Due on {rentInfo.dueDate}
-            </p>
-            <button
-                onClick={handlePayNow}
-                className="bg-gradient-to-r from-blue-600 to-sky-500 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:scale-105 transition-transform"
+
+            {/* Rent Amount */}
+            <div
+                className={`rounded-2xl p-5 mb-5 ${isPaid
+                    ? "bg-green-50 border border-green-100"
+                    : "bg-red-50 border border-red-100"
+                    }`}
             >
-                Pay Now →
-            </button>
+                <p className="text-sm text-slate-500 mb-2">
+                    {currentMonth} Rent
+                </p>
+
+                <h1
+                    className={`text-4xl font-bold mb-2 ${isPaid
+                        ? "text-green-700"
+                        : "text-red-700"
+                        }`}
+                >
+                    ₹{totalRent.toLocaleString()}
+                </h1>
+
+                <p className="text-sm text-slate-600">
+                    {isPaid
+                        ? `Rent for ${currentMonth} has been paid successfully.`
+                        : `Rent payment for ${currentMonth} is pending.`}
+                </p>
+            </div>
+
+            {/* Due Date */}
+            <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+                <Calendar size={15} />
+                <span>
+                    Due Date:{" "}
+                    {user?.dueDate
+                        ? new Date(user.dueDate).toLocaleDateString(
+                            "en-IN",
+                            {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                            }
+                        )
+                        : "Not Available"}
+                </span>
+            </div>
+
+            {/* Action */}
+            {isPaid ? (
+                <div className="flex items-center justify-center gap-2 bg-green-100 text-green-700 py-3 rounded-2xl font-semibold">
+                    <CheckCircle2 size={18} />
+                    Rent Paid Successfully
+                </div>
+            ) : (
+                <button
+                    onClick={handlePayNow}
+                    className="w-full bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold py-3 rounded-2xl transition hover:opacity-90"
+                >
+                    Pay Rent ₹{totalRent.toLocaleString()}
+                </button>
+            )}
         </div>
     );
 }

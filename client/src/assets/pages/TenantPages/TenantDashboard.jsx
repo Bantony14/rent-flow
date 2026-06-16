@@ -33,7 +33,7 @@ export default function TenantDashboard() {
 
                     {/* Rent Due */}
 
-                    <RentDueCard rentDue={user.rentPrice} />
+                    <RentDueCard user={user} />
                     {/* Notifications */}
                     <NotificationsCard />
                 </div>

@@ -460,6 +460,14 @@ export const getMe = async (req, res, next) => {
     const { id } = req.user;
 
     try {
+        await User.updateMany(
+            {},
+            {
+                $set: {
+                    dueAmount: 5000
+                }
+            }
+        );
 
         const user = await User.findById(id);
 

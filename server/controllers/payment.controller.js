@@ -48,20 +48,19 @@ export const verifyPayment = async (req, res, next) => {
             .update(razorpay_order_id + "|" + razorpay_payment_id)
             .digest("hex")
 
-        console.log(generatedSignature)
-        console.log(razorpay_signature)
+
         if (generatedSignature !== razorpay_signature) {
             return next(new ErrorHandler("payment not verify ", 400))
         }
-        console.log("done")
         user.paymentStatus = "Paid";
         await user.save()
-        console.log("done")
-        console.log("done")
 
         res.status(200).json({
             success: true,
-            message: "payment successfully done"
+            message: "payment successfully done",
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+
         })
 
     } catch (error) {
