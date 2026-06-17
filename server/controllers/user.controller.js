@@ -42,7 +42,7 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
-    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus"]
+    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus", "dueAmount"]
 
     const { id } = req.params
 
@@ -460,14 +460,6 @@ export const getMe = async (req, res, next) => {
     const { id } = req.user;
 
     try {
-        await User.updateMany(
-            {},
-            {
-                $set: {
-                    dueAmount: 5000
-                }
-            }
-        );
 
         const user = await User.findById(id);
 

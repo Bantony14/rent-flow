@@ -102,7 +102,7 @@ function Navbar() {
 
                     <Button className="px-5 py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900/70 hover:bg-zinc-800 hover:border-cyan-500 transition duration-300 text-sm font-medium">
                         {user ? <NavLink
-                            to="/tenantdashboard"
+                            to="/tenant/dashboard"
                             className={({ isActive }) =>
                                 isActive
                                     ? "text-cyan-400 font-bold"
@@ -145,7 +145,7 @@ function Navbar() {
                     {user.role === "ADMIN" ?
                         <Button className="hidden xl:block px-5 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/30">
                             <NavLink
-                                to="/admindashboard"
+                                to="/admin/dashboard"
                                 className={({ isActive }) =>
                                     isActive
                                         ? "text-cyan-400 font-bold"

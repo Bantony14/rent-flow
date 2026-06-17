@@ -16,7 +16,7 @@ function TenantActions() {
                     Add New Tenant
                 </button>
 
-                <button className="px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg hover:scale-105 transition" onClick={() => { navigate("/alltenants") }}>
+                <button className="px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold shadow-lg hover:scale-105 transition" onClick={() => { navigate("/all-tenants") }}>
                     All Tenant
                 </button>
 

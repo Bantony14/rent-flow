@@ -40,3 +40,4 @@ export function getUser(id) {
 export function getOneUser(data) {
     return API.post("/getoneuser", data)
 }
+

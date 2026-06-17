@@ -49,6 +49,29 @@ function RentInfoCard({ user, edit, onChange }) {
                     )}
                 </div>
 
+                {/* due status  */}
+
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                    <span className="text-sm text-slate-500 sm:w-36 shrink-0">Due Amount</span>
+                    {edit ? (
+                        <div className="flex items-center gap-2 flex-1">
+                            <span className="text-sm text-slate-800 shrink-0">₹</span>
+                            <input
+                                type="number"
+                                value={user?.dueAmount}
+                                name="dueAmount"
+                                className="flex-1 border border-slate-300 rounded-xl px-4 py-2 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+                                placeholder="Rent Amount"
+                                onChange={onChange}
+                            />
+                        </div>
+                    ) : (
+                        <span className="text-sm font-medium text-slate-800">₹ {user?.dueAmount}</span>
+                    )}
+                </div>
+
+
+
             </div>
 
         </div>

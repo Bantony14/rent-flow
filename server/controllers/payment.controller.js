@@ -52,14 +52,22 @@ export const verifyPayment = async (req, res, next) => {
         if (generatedSignature !== razorpay_signature) {
             return next(new ErrorHandler("payment not verify ", 400))
         }
+        console.log("Before:", user.paymentStatus, user.dueAmount);
+
         user.paymentStatus = "Paid";
-        await user.save()
+        user.dueAmount = 0;
+
+        await user.save();
+
+        console.log("After Save:", user.paymentStatus, user.dueAmount);
+        console.log("donrrrrrr")
 
         res.status(200).json({
             success: true,
             message: "payment successfully done",
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
+            amount: 500000
 
         })
 

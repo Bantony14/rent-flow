@@ -2,10 +2,13 @@ import { CreditCard, Calendar, CheckCircle2 } from "lucide-react";
 import { paymentOrderCreate } from "../../api/paymentApi";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function RentDueCard({ user }) {
+    const navigate = useNavigate();
     const totalRent = user?.rentAmount || 5000;
-    const isPaid = user?.dueAmount === 0;
+    const isPaid = user?.paymentStatus
+    const dueAmount = user?.dueAmount
 
     const currentMonth = new Date().toLocaleString("en-US", {
         month: "long",
@@ -44,13 +47,11 @@ function RentDueCard({ user }) {
 
                         if (data.success) {
                             toast.success("Rent paid successfully");
-
-
                             navigate("/payment-success", {
                                 state: {
                                     paymentId: response.razorpay_payment_id,
                                     orderId: response.razorpay_order_id,
-                                    amount: data.order.amount / 100,
+                                    amount: data.amount / 100,
                                 },
                             });
 
@@ -58,10 +59,7 @@ function RentDueCard({ user }) {
 
                     } catch (error) {
                         console.error(error);
-
-
                         toast.error("Payment verification failed");
-
                         navigate("/payment-failed");
 
 
@@ -90,62 +88,64 @@ function RentDueCard({ user }) {
                 </div>
 
                 <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${isPaid
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${isPaid === "Paid"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                         }`}
                 >
-                    {isPaid ? "PAID" : "UNPAID"}
+                    {isPaid}
                 </span>
             </div>
 
             {/* Rent Amount */}
             <div
-                className={`rounded-2xl p-5 mb-5 ${isPaid
-                    ? "bg-green-50 border border-green-100"
-                    : "bg-red-50 border border-red-100"
+                className={`rounded-2xl p-6 mb-5 shadow-sm ${isPaid === "Paid"
+                    ? "bg-green-50 border border-green-200"
+                    : "bg-red-50 border border-red-200"
                     }`}
             >
-                <p className="text-sm text-slate-500 mb-2">
-                    {currentMonth} Rent
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                    <div>
+                        <p className="text-sm text-slate-500">{currentMonth} Rent</p>
 
-                <h1
-                    className={`text-4xl font-bold mb-2 ${isPaid
-                        ? "text-green-700"
-                        : "text-red-700"
-                        }`}
-                >
-                    ₹{totalRent.toLocaleString()}
-                </h1>
+                        <h1
+                            className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
+                                }`}
+                        >
+                            ₹{totalRent.toLocaleString()}
+                        </h1>
+                    </div>
 
-                <p className="text-sm text-slate-600">
-                    {isPaid
+                </div>
+
+                <p className="text-sm text-slate-600 mb-4">
+                    {isPaid === "Paid"
                         ? `Rent for ${currentMonth} has been paid successfully.`
                         : `Rent payment for ${currentMonth} is pending.`}
                 </p>
+
+                <div className="flex items-center justify-between bg-white rounded-xl p-4 border">
+                    <span className="text-slate-600 font-medium">Due Amount</span>
+
+                    <span
+                        className={`text-xl font-bold ${dueAmount > 0 ? "text-red-600" : "text-green-600"
+                            }`}
+                    >
+                        ₹{dueAmount.toLocaleString()}
+                    </span>
+                </div>
             </div>
 
             {/* Due Date */}
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
                 <Calendar size={15} />
                 <span>
-                    Due Date:{" "}
-                    {user?.dueDate
-                        ? new Date(user.dueDate).toLocaleDateString(
-                            "en-IN",
-                            {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                            }
-                        )
-                        : "Not Available"}
+                    {isPaid === "Paid" ? (<span>next dueDate : next month</span>) : (<span>dueDate:  this month</span>)}
                 </span>
             </div>
 
             {/* Action */}
-            {isPaid ? (
+            {isPaid === "Paid" ? (
                 <div className="flex items-center justify-center gap-2 bg-green-100 text-green-700 py-3 rounded-2xl font-semibold">
                     <CheckCircle2 size={18} />
                     Rent Paid Successfully

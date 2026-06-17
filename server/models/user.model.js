@@ -106,7 +106,6 @@ const userSchema = new mongoose.Schema(
         },
         dueAmount: {
             type: Number,
-            default: 5000
         },
 
 
