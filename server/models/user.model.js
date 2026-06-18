@@ -106,7 +106,28 @@ const userSchema = new mongoose.Schema(
         },
         dueAmount: {
             type: Number,
+            default: null
         },
+
+        lastRentGeneratedMonth: {
+            type: String,
+            default: null
+        },
+
+        joiningDate: {
+            type: Date,
+        },
+
+        rentHistory: [
+            {
+                month: { type: String, },
+                dueAmount: { type: Number },
+                paymentStatus: { type: String, enum: ["Paid", "Unpaid"] }
+
+            }
+        ],
+
+
 
 
         otp: String,

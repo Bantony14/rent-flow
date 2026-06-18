@@ -4,13 +4,17 @@ import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
 
 export const userRegistration = async (req, res, next) => {
-    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email } = req.body;
-    if (!fullName || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building) {
+    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
+
+    if (req.body.role) {
+        return next(new ErrorHandler("cannot enter role field", 400))
+    }
+    if (!fullName || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate) {
         return next(new ErrorHandler("all filed is required", 400))
     }
     try {
         const user = await User.create(
-            req.body
+            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate }
         )
 
         if (!user) {
