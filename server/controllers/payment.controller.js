@@ -86,13 +86,33 @@ export const paymentCheck = async (req, res, next) => {
 
     try {
         const tenant = await User.findById(id);
-        const today = new Date();
-        const dateOfJoining = tenant.joiningDate.getDate();
-        const monthOfJoining = tenant.joiningDate.getMonth();
-        const yearOfJoining = tenant.joiningDate.getFullYear();
 
-        const currentMonth = today.getMonth();
+        // this is for current date month and year
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1;
         const currentYear = today.getFullYear();
+
+        // here is all month name to help to maintrain a record of paid aur unpaid of each month
+        const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+
+
+        // this is for only first month 
+        let dateOfJoining = tenant.joiningDate.getDate();
+        let monthOfJoining = tenant.joiningDate.getMonth() + 1;
+        let yearOfJoining = tenant.joiningDate.getFullYear();
 
         const monthDifference =
             (currentYear - yearOfJoining) * 12 +
@@ -101,32 +121,90 @@ export const paymentCheck = async (req, res, next) => {
         const nextMonthReached = currentYear > yearOfJoining || (currentYear === yearOfJoining && currentMonth > monthOfJoining)
 
 
+
         if (!tenant.lastRentGeneratedMonth && nextMonthReached) {
             const totalDaysInMonth = new Date(
                 yearOfJoining,
-                monthOfJoining + 1,
+                monthOfJoining,
                 0
             ).getDate();
 
-            const remainingDays = totalDaysInMonth - dateOfJoining + 1;
-            const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * remainingDays
+            const remainingDays = totalDaysInMonth - dateOfJoining;
+            const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * remainingDays + 1
             tenant.dueAmount = Math.round(calculateDueAmount);
             tenant.lastRentGeneratedMonth = `${yearOfJoining}-${monthOfJoining}`;
 
+            tenant.rentHistory.push({
+                month: ` ${monthNames[monthOfJoining - 1]} ${yearOfJoining}`,
+                dueAmount: tenant.dueAmount,
+                paymentStatus: "Unpaid"
+            })
+
             if (monthDifference >= 2) {
-                const firstMonthRent = calculateDueAmount
                 const everyMonthRent = tenant.rentPrice * (monthDifference - 1)
                 tenant.dueAmount = calculateDueAmount + everyMonthRent
 
+                for (let i = 0; i < monthDifference - 1; i++) {
+                    let monthIndex = monthOfJoining % 12
+
+                    if (monthOfJoining === 12) {
+                        monthOfJoining = 1;
+                        yearOfJoining++;
+                    }
+
+                    tenant.rentHistory.push({
+                        month: ` ${monthNames[monthIndex]} ${yearOfJoining}`,
+                        dueAmount: tenant.rentPrice,
+                        paymentStatus: "Unpaid"
+                    })
+                    monthOfJoining++
+
+
+
+                }
+
+                tenant.lastRentGeneratedMonth = `${yearOfJoining}-${monthOfJoining}`;
+
             }
+
+            await tenant.save();
+            return;
         }
 
-        else if (tenant.lastRentGeneratedMonth) {
+        // this structure for only lastRentGeneratedMonth
+        let [lastRentYear, lastRentMonth] = tenant.lastRentGeneratedMonth.split("-").map(Number);
+        // this nextMonthReached for lastRentGenerated
+        const nextMonthReached = currentYear > lastRentYear || (currentYear === lastRentYear && currentMonth > lastRentMonth)
+
+        if (tenant.lastRentGeneratedMonth && nextMonthReached) {
+            const monthDifference =
+                (currentYear - lastRentYear) * 12 +
+                (currentMonth - lastRentMonth);
+
+
+            for (let i = 0; i < monthDifference; i++) {
+                let monthIndex = (lastRentMonth - 1) % 12
+
+                tenant.rentHistory.push({
+                    month: ` ${monthNames[monthIndex]} ${lastRentYear}`,
+                    dueAmount: tenant.rentPrice,
+                    paymentStatus: "Unpaid"
+                })
+                lastRentMonth++
+
+
+                if (lastRentMonth > 12) {
+                    lastRentMonth = 1;
+                    lastRentYear++;
+                }
+            }
+
+            const totalRent = monthDifference * tenant.rentPrice
+            tenant.dueAmount += totalRent;
+            tenant.lastRentGeneratedMonth = `${currentYear}-${currentMonth}`;
+            await tenant.save()
 
         }
-
-        await tenant.save();
-
 
     } catch (error) {
         return new (ErrorHandler(error.message, 500))
