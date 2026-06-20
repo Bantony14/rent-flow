@@ -390,7 +390,7 @@ export default function AllTenants() {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             className="rounded-lg bg-sky-100 p-2 text-sky-600 hover:bg-sky-200"
-                                                            onClick={() => navigate(`/viewtenantdetail/${value._id}`)}
+                                                            onClick={() => navigate(`/view-tenant-detail/${value._id}`)}
                                                         >
                                                             <Eye size={18} />
                                                         </button>

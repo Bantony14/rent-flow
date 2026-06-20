@@ -89,8 +89,9 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 1;
+        const currentMonth = today.getMonth() + 10;
         const currentYear = today.getFullYear();
+
 
         // here is all month name to help to maintrain a record of paid aur unpaid of each month
         const monthNames = [
@@ -119,10 +120,18 @@ export const paymentCheck = async (req, res, next) => {
             (currentMonth - monthOfJoining);
 
         const nextMonthReached = currentYear > yearOfJoining || (currentYear === yearOfJoining && currentMonth > monthOfJoining)
+        console.log("currentMonth>>>", currentMonth)
+        console.log("monthOfjoining>>>>", monthOfJoining)
+        console.log("nextMonthReached>>>", nextMonthReached)
+        console.log(tenant.lastRentGeneratedMonth)
 
-
+        if (!nextMonthReached) {
+            return next(new ErrorHandler("existing month joining"))
+        }
+        console.log(!tenant.lastRentGeneratedMonth, nextMonthReached)
 
         if (!tenant.lastRentGeneratedMonth && nextMonthReached) {
+            console.log("start")
             const totalDaysInMonth = new Date(
                 yearOfJoining,
                 monthOfJoining,
@@ -130,9 +139,10 @@ export const paymentCheck = async (req, res, next) => {
             ).getDate();
 
             const remainingDays = totalDaysInMonth - dateOfJoining;
-            const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * remainingDays + 1
+            const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1)
             tenant.dueAmount = Math.round(calculateDueAmount);
-            tenant.lastRentGeneratedMonth = `${yearOfJoining}-${monthOfJoining}`;
+
+            tenant.lastRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
             tenant.rentHistory.push({
                 month: ` ${monthNames[monthOfJoining - 1]} ${yearOfJoining}`,
@@ -148,7 +158,7 @@ export const paymentCheck = async (req, res, next) => {
                     let monthIndex = monthOfJoining % 12
 
                     if (monthOfJoining === 12) {
-                        monthOfJoining = 1;
+                        monthOfJoining = 0;
                         yearOfJoining++;
                     }
 
@@ -159,22 +169,39 @@ export const paymentCheck = async (req, res, next) => {
                     })
                     monthOfJoining++
 
-
-
                 }
 
-                tenant.lastRentGeneratedMonth = `${yearOfJoining}-${monthOfJoining}`;
+                tenant.lastRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
             }
 
+            console.log(tenant.lastRentGeneratedMonth, "tenant.lastRentGeneratedMonth")
+
             await tenant.save();
-            return;
+            return res.status(200).json({
+                success: true,
+                message: "tenant due added by joining date successfully",
+                tenant
+            })
+
         }
 
+
         // this structure for only lastRentGeneratedMonth
+
         let [lastRentYear, lastRentMonth] = tenant.lastRentGeneratedMonth.split("-").map(Number);
+        console.log("lastRentYear", lastRentYear)
+        console.log("lastRentMonth", lastRentMonth)
+        console.log(currentYear, "currentYear")
+        console.log(currentMonth, "currentMonth")
+
+
         // this nextMonthReached for lastRentGenerated
-        const nextMonthReached = currentYear > lastRentYear || (currentYear === lastRentYear && currentMonth > lastRentMonth)
+        const nextMonthReachedRentGenerated = currentYear > lastRentYear || (currentYear === lastRentYear && currentMonth > lastRentMonth)
+
+        if (!nextMonthReachedRentGenerated) {
+            return next(new ErrorHandler("existing month for generated month"))
+        }
 
         if (tenant.lastRentGeneratedMonth && nextMonthReached) {
             const monthDifference =
@@ -204,9 +231,16 @@ export const paymentCheck = async (req, res, next) => {
             tenant.lastRentGeneratedMonth = `${currentYear}-${currentMonth}`;
             await tenant.save()
 
+
         }
 
+        res.status(200).json({
+            success: true,
+            message: "tenant due added by lastRentGeneratedMonth date successfully",
+            tenant
+        })
+
     } catch (error) {
-        return new (ErrorHandler(error.message, 500))
+        return next(new ErrorHandler(error.message, 500))
     }
 }
