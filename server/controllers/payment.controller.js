@@ -2,6 +2,7 @@ import { razorpay } from "../app.js";
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import ErrorHandler from "../utils/error.js";
+import PaymentHistory from "../models/paymentHistory.model.js";
 
 
 
@@ -43,7 +44,7 @@ export const verifyPayment = async (req, res, next) => {
     const { id } = req.user
 
     try {
-        console.log("req.body>>>>", req.body)
+
 
         const user = await User.findById(id);
 
@@ -57,14 +58,47 @@ export const verifyPayment = async (req, res, next) => {
             return next(new ErrorHandler("payment not verify ", 400))
         }
         console.log("Before:", user.paymentStatus, user.dueAmount);
+        let month;
+
+        if (user.lastRentGeneratedMonth) {
+            month = Number(user.lastRentGeneratedMonth.split("-")[1]);
+        } else {
+            month = new Date(user.joiningDate).toLocaleString("en-US", {
+                month: "long",
+            });
+        }
+        // here is all month name to help to maintrain a record of paid aur unpaid of each month
+        const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+
+        const payment = PaymentHistory.create({
+            tenant: id,
+            amount: 5000,
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            month: monthNames[month - 1],
+            status: "Paid",
+        })
 
         user.paymentStatus = "Paid";
         user.dueAmount = 0;
 
         await user.save();
 
-        console.log("After Save:", user.paymentStatus, user.dueAmount);
-        console.log("donrrrrrr")
+
+
 
         res.status(200).json({
             success: true,

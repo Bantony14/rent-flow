@@ -47,6 +47,7 @@ function Login() {
 
     async function handleSubmit(e) {
         e.preventDefault()
+        console.log(formData)
         if (!strongEmail.test(formData.email)) {
             return;
         }
@@ -58,10 +59,10 @@ function Login() {
             navigate("/tenantdashboard")
 
         } catch (error) {
-            toast.error(error.response.data.message)
+            toast.error(error?.response?.data?.message)
         }
 
-        console.log(formData)
+
     }
     return (
         <>
