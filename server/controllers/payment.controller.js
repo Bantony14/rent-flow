@@ -41,75 +41,109 @@ export const paymentOrderCreate = async (req, res, next) => {
 // this api use for payment verify tenant succesfully pay or not
 export const verifyPayment = async (req, res, next) => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
     const { id } = req.user
+    let user;
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
+    let month;
+    let year;
 
     try {
 
+        user = await User.findById(id);
+        const dueAmountPreserve = user.dueAmount;
 
-        const user = await User.findById(id);
+        // const generatedSignature = crypto
+        //     .createHmac("sha256", process.env.RAZORPAY_SECRET)
+        //     .update(razorpay_order_id + "|" + razorpay_payment_id)
+        //     .digest("hex")
 
-        const generatedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_SECRET)
-            .update(razorpay_order_id + "|" + razorpay_payment_id)
-            .digest("hex")
+        const generatedSignature = "a";
+        const razorpay_signature = "b";
+
+        console.log(dueAmountPreserve)
 
 
-        if (generatedSignature !== razorpay_signature) {
-            return next(new ErrorHandler("payment not verify ", 400))
-        }
-        console.log("Before:", user.paymentStatus, user.dueAmount);
-        let month;
+        console.log(month)
+        console.log(user.lastRentGeneratedMonth)
+        console.log(Number(user.lastRentGeneratedMonth.split("-")[1]))
 
         if (user.lastRentGeneratedMonth) {
             month = Number(user.lastRentGeneratedMonth.split("-")[1]);
+            year = Number(user.lastRentGeneratedMonth.split("-")[0]);
         } else {
             month = new Date(user.joiningDate).toLocaleString("en-US", {
                 month: "long",
             });
         }
-        // here is all month name to help to maintrain a record of paid aur unpaid of each month
-        const monthNames = [
-            "January",
-            "February",
-            "March",
-            "April",
-            "May",
-            "June",
-            "July",
-            "August",
-            "September",
-            "October",
-            "November",
-            "December"
-        ];
 
-        const payment = PaymentHistory.create({
+        console.log(month)
+
+        if (generatedSignature !== razorpay_signature) {
+            let payment = PaymentHistory.create({
+                tenant: id,
+                amount: dueAmountPreserve,
+                paymentId: razorpay_payment_id,
+                orderId: razorpay_order_id,
+                month: `${monthNames[month - 2]} ${year}`,
+                status: "Failed",
+            })
+
+            return next(new ErrorHandler("payment not verify ", 400))
+        }
+
+
+        // here is all month name to help to maintrain a record of paid aur unpaid of each month
+
+
+        let payment = PaymentHistory.create({
             tenant: id,
-            amount: 5000,
+            amount: dueAmountPreserve,
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            month: monthNames[month - 1],
+            month: `${monthNames[month - 2]} ${year}`,
             status: "Paid",
         })
 
         user.paymentStatus = "Paid";
         user.dueAmount = 0;
 
+        user.rentHistory.forEach((status) => status.paymentStatus = "Paid")
+
         await user.save();
-
-
-
 
         res.status(200).json({
             success: true,
             message: "payment successfully done",
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            amount: 500000
+            amount: dueAmountPreserve
 
         })
 
     } catch (error) {
+        const payment = PaymentHistory.create({
+            tenant: id,
+            amount: user.dueAmount,
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            month: monthNames[month - 1],
+            status: "Failed",
+        })
+        await user.save()
         return next(new ErrorHandler(error.message, 400))
     }
 }
@@ -123,7 +157,7 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 10;
+        const currentMonth = today.getMonth() + 1;
         const currentYear = today.getFullYear();
 
 
