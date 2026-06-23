@@ -7,4 +7,9 @@ const API = axios.create({
 
 export function paymentOrderCreate() {
     return API.post("/create-order")
-} 
+}
+
+export function paymentCheck() {
+    return API.post("/payment-check")
+}
+

@@ -1,0 +1,96 @@
+import { History } from "lucide-react";
+
+const statusStyles = {
+  Paid: "bg-green-100 text-green-700",
+  Pending: "bg-yellow-100 text-yellow-700",
+  Overdue: "bg-red-100 text-red-700",
+};
+
+function RentHistoryCard({ userRentHistory }) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-5">
+      <div className="flex items-center gap-2 mb-5">
+        <div className="p-2 rounded-lg bg-blue-100">
+          <History size={18} className="text-blue-600" />
+        </div>
+
+        <div>
+          <h2 className="text-base font-semibold text-slate-800">
+            Rent History
+          </h2>
+          <p className="text-xs text-slate-500">
+            Previous rent payment records
+          </p>
+        </div>
+      </div>
+
+      {userRentHistory.length === 0 ? (
+        <div className="py-10 text-center">
+          <History size={35} className="mx-auto text-slate-300 mb-3" />
+          <p className="text-slate-500 text-sm">
+            No rent history available
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[500px] text-sm">
+            <thead>
+              <tr className="border-b border-slate-200">
+                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Month
+                </th>
+
+                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Rent
+                </th>
+
+                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Paid On
+                </th>
+
+                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {userRentHistory.map((rent, index) => (
+                <tr
+                  key={rent._id || index}
+                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
+                >
+                  <td className="py-4 px-2 font-medium text-slate-700">
+                    {rent.month}
+                  </td>
+
+                  <td className="py-4 px-2 font-semibold text-slate-800">
+                    ₹{rent.dueAmount?.toLocaleString("en-IN")}
+                  </td>
+
+                  <td className="py-4 px-2 text-slate-600">
+                    {rent.paidOn
+                      ? new Date(rent.paidOn).toLocaleDateString("en-IN")
+                      : "-"}
+                  </td>
+
+                  <td className="py-4 px-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[rent.status] ??
+                        "bg-slate-100 text-slate-700"
+                        }`}
+                    >
+                      {rent.paymentStatus}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default RentHistoryCard;

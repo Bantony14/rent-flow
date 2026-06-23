@@ -18,7 +18,7 @@ export const paymentOrderCreate = async (req, res, next) => {
             return next(new ErrorHandler("user Not Found", 400))
         }
         const order = await razorpay.orders.create({
-            amount: user.rentPrice * 100,
+            amount: user.dueAmount * 100,
             currency: "INR",
             receipt: `rent_${id.slice(-6)}_${Date.now()}`
         })
@@ -66,31 +66,21 @@ export const verifyPayment = async (req, res, next) => {
         user = await User.findById(id);
         const dueAmountPreserve = user.dueAmount;
 
-        // const generatedSignature = crypto
-        //     .createHmac("sha256", process.env.RAZORPAY_SECRET)
-        //     .update(razorpay_order_id + "|" + razorpay_payment_id)
-        //     .digest("hex")
-
-        const generatedSignature = "a";
-        const razorpay_signature = "b";
-
-        console.log(dueAmountPreserve)
+        const generatedSignature = crypto
+            .createHmac("sha256", process.env.RAZORPAY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest("hex")
 
 
-        console.log(month)
-        console.log(user.lastRentGeneratedMonth)
-        console.log(Number(user.lastRentGeneratedMonth.split("-")[1]))
-
-        if (user.lastRentGeneratedMonth) {
-            month = Number(user.lastRentGeneratedMonth.split("-")[1]);
-            year = Number(user.lastRentGeneratedMonth.split("-")[0]);
+        if (user.nextRentGeneratedMonth) {
+            month = Number(user.nextRentGeneratedMonth.split("-")[1]);
+            year = Number(user.nextRentGeneratedMonth.split("-")[0]);
         } else {
             month = new Date(user.joiningDate).toLocaleString("en-US", {
                 month: "long",
             });
         }
 
-        console.log(month)
 
         if (generatedSignature !== razorpay_signature) {
             let payment = PaymentHistory.create({
@@ -106,9 +96,6 @@ export const verifyPayment = async (req, res, next) => {
         }
 
 
-        // here is all month name to help to maintrain a record of paid aur unpaid of each month
-
-
         let payment = PaymentHistory.create({
             tenant: id,
             amount: dueAmountPreserve,
@@ -121,7 +108,11 @@ export const verifyPayment = async (req, res, next) => {
         user.paymentStatus = "Paid";
         user.dueAmount = 0;
 
-        user.rentHistory.forEach((status) => status.paymentStatus = "Paid")
+        // updating status in rent history
+        user.rentHistory.forEach((status) => {
+            status.paymentStatus = "Paid"
+            status.paidOn = Date.now();
+        })
 
         await user.save();
 
@@ -150,14 +141,14 @@ export const verifyPayment = async (req, res, next) => {
 
 // this api use for every check use is paid or not 
 export const paymentCheck = async (req, res, next) => {
-    const { id } = req.body;
+    const { id } = req.user
 
     try {
         const tenant = await User.findById(id);
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 1;
+        const currentMonth = today.getMonth() + 2;
         const currentYear = today.getFullYear();
 
 
@@ -188,17 +179,14 @@ export const paymentCheck = async (req, res, next) => {
             (currentMonth - monthOfJoining);
 
         const nextMonthReached = currentYear > yearOfJoining || (currentYear === yearOfJoining && currentMonth > monthOfJoining)
-        console.log("currentMonth>>>", currentMonth)
-        console.log("monthOfjoining>>>>", monthOfJoining)
-        console.log("nextMonthReached>>>", nextMonthReached)
-        console.log(tenant.lastRentGeneratedMonth)
+
 
         if (!nextMonthReached) {
-            return next(new ErrorHandler("existing month joining"))
+            return next(new ErrorHandler("existing month joining", 400))
         }
-        console.log(!tenant.lastRentGeneratedMonth, nextMonthReached)
+        console.log(!tenant.nextRentGeneratedMonth, nextMonthReached)
 
-        if (!tenant.lastRentGeneratedMonth && nextMonthReached) {
+        if (!tenant.nextRentGeneratedMonth && nextMonthReached) {
             console.log("start")
             const totalDaysInMonth = new Date(
                 yearOfJoining,
@@ -210,7 +198,7 @@ export const paymentCheck = async (req, res, next) => {
             const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1)
             tenant.dueAmount = Math.round(calculateDueAmount);
 
-            tenant.lastRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
+            tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
             tenant.rentHistory.push({
                 month: ` ${monthNames[monthOfJoining - 1]} ${yearOfJoining}`,
@@ -239,11 +227,11 @@ export const paymentCheck = async (req, res, next) => {
 
                 }
 
-                tenant.lastRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
+                tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
             }
 
-            console.log(tenant.lastRentGeneratedMonth, "tenant.lastRentGeneratedMonth")
+            console.log(tenant.nextRentGeneratedMonth, "tenant.nextRentGeneratedMonth")
 
             await tenant.save();
             return res.status(200).json({
@@ -257,21 +245,17 @@ export const paymentCheck = async (req, res, next) => {
 
         // this structure for only lastRentGeneratedMonth
 
-        let [lastRentYear, lastRentMonth] = tenant.lastRentGeneratedMonth.split("-").map(Number);
-        console.log("lastRentYear", lastRentYear)
-        console.log("lastRentMonth", lastRentMonth)
-        console.log(currentYear, "currentYear")
-        console.log(currentMonth, "currentMonth")
+        let [lastRentYear, lastRentMonth] = tenant.nextRentGeneratedMonth.split("-").map(Number);
 
 
         // this nextMonthReached for lastRentGenerated
         const nextMonthReachedRentGenerated = currentYear > lastRentYear || (currentYear === lastRentYear && currentMonth > lastRentMonth)
 
         if (!nextMonthReachedRentGenerated) {
-            return next(new ErrorHandler("existing month for generated month"))
+            return next(new ErrorHandler("existing month for generated month", 400))
         }
 
-        if (tenant.lastRentGeneratedMonth && nextMonthReached) {
+        if (tenant.nextRentGeneratedMonth && nextMonthReachedRentGenerated) {
             const monthDifference =
                 (currentYear - lastRentYear) * 12 +
                 (currentMonth - lastRentMonth);
@@ -296,15 +280,14 @@ export const paymentCheck = async (req, res, next) => {
 
             const totalRent = monthDifference * tenant.rentPrice
             tenant.dueAmount += totalRent;
-            tenant.lastRentGeneratedMonth = `${currentYear}-${currentMonth}`;
+            tenant.nextRentGeneratedMonth = `${currentYear}-${currentMonth}`;
             await tenant.save()
-
 
         }
 
         res.status(200).json({
             success: true,
-            message: "tenant due added by lastRentGeneratedMonth date successfully",
+            message: "tenant due added by nextMonthReachedRentGenerated date successfully",
             tenant
         })
 

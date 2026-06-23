@@ -109,7 +109,7 @@ const userSchema = new mongoose.Schema(
             default: null
         },
 
-        lastRentGeneratedMonth: {
+        nextRentGeneratedMonth: {
             type: String,
             default: null
         },
@@ -122,7 +122,8 @@ const userSchema = new mongoose.Schema(
             {
                 month: { type: String, },
                 dueAmount: { type: Number },
-                paymentStatus: { type: String, enum: ["Paid", "Unpaid"] }
+                paymentStatus: { type: String, enum: ["Paid", "Unpaid"] },
+                paidOn: { type: Date, default: "" }
 
             }
         ],

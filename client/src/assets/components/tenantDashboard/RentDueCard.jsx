@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 function RentDueCard({ user }) {
     const navigate = useNavigate();
-    const totalRent = user?.rentAmount || 5000;
+    const totalRent = user?.rentPrice;
     const isPaid = user?.paymentStatus
     const dueAmount = user?.dueAmount
 
@@ -112,7 +112,7 @@ function RentDueCard({ user }) {
                             className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
                                 }`}
                         >
-                            ₹{totalRent.toLocaleString()}
+                            ₹{user.nextRentGeneratedMonth ? totalRent.toLocaleString() : dueAmount}
                         </h1>
                     </div>
 
@@ -155,7 +155,7 @@ function RentDueCard({ user }) {
                     onClick={handlePayNow}
                     className="w-full bg-gradient-to-r from-blue-600 to-sky-500 text-white font-semibold py-3 rounded-2xl transition hover:opacity-90"
                 >
-                    Pay Rent ₹{totalRent.toLocaleString()}
+                    Pay Rent ₹{dueAmount.toLocaleString()}
                 </button>
             )}
         </div>

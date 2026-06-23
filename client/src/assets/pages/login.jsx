@@ -56,7 +56,7 @@ function Login() {
             setUser(response.data.user)
             toast.success(response.data.message);
             setFormData(initialState);
-            navigate("/tenantdashboard")
+            navigate("/tenant/dashboard")
 
         } catch (error) {
             toast.error(error?.response?.data?.message)

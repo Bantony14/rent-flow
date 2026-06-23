@@ -6,6 +6,6 @@ const route = express.Router();
 
 route.post("/create-order", isLoggedIn, paymentOrderCreate);
 route.post("/verify-payment", isLoggedIn, verifyPayment);
-route.post("/payment-check", paymentCheck);
+route.post("/payment-check", isLoggedIn, paymentCheck);
 
 export default route;

@@ -9,7 +9,7 @@ export const userRegistration = async (req, res, next) => {
     if (req.body.role) {
         return next(new ErrorHandler("cannot enter role field", 400))
     }
-    if (!fullName || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate) {
+    if (!fullName || !email || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate) {
         return next(new ErrorHandler("all filed is required", 400))
     }
     try {
