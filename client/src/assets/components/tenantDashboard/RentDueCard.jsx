@@ -112,7 +112,7 @@ function RentDueCard({ user }) {
                             className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
                                 }`}
                         >
-                            ₹{user.nextRentGeneratedMonth ? totalRent.toLocaleString() : dueAmount}
+                            ₹{user.lastRentAmount}
                         </h1>
                     </div>
 

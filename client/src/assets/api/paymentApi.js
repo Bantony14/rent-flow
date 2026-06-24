@@ -13,3 +13,6 @@ export function paymentCheck() {
     return API.post("/payment-check")
 }
 
+export function paymentHistoryByUser() {
+    return API.get("/payment-history")
+}

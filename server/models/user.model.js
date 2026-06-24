@@ -118,6 +118,11 @@ const userSchema = new mongoose.Schema(
             type: Date,
         },
 
+        lastRentAmount: {
+            type: Number,
+            default: null,
+        },
+
         rentHistory: [
             {
                 month: { type: String, },

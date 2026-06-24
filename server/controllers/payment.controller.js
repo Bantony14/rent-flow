@@ -110,8 +110,13 @@ export const verifyPayment = async (req, res, next) => {
 
         // updating status in rent history
         user.rentHistory.forEach((status) => {
-            status.paymentStatus = "Paid"
-            status.paidOn = Date.now();
+            console.log(status)
+            console.log(typeof (status.paidOn))
+            if (status.paymentStatus === "Unpaid" && status.paidOn === null) {
+                status.paymentStatus = "Paid"
+                status.paidOn = Date.now();
+            }
+
         })
 
         await user.save();
@@ -148,7 +153,7 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 2;
+        const currentMonth = today.getMonth() + 4;
         const currentYear = today.getFullYear();
 
 
@@ -197,6 +202,7 @@ export const paymentCheck = async (req, res, next) => {
             const remainingDays = totalDaysInMonth - dateOfJoining;
             const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1)
             tenant.dueAmount = Math.round(calculateDueAmount);
+            tenant.lastRentAmount = calculateDueAmount
 
             tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
@@ -218,16 +224,20 @@ export const paymentCheck = async (req, res, next) => {
                         yearOfJoining++;
                     }
 
+
                     tenant.rentHistory.push({
                         month: ` ${monthNames[monthIndex]} ${yearOfJoining}`,
                         dueAmount: tenant.rentPrice,
                         paymentStatus: "Unpaid"
                     })
+
+                    tenant.lastRentAmount = tenant.rentPrice
                     monthOfJoining++
 
                 }
 
                 tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
+
 
             }
 
@@ -271,6 +281,9 @@ export const paymentCheck = async (req, res, next) => {
                 })
                 lastRentMonth++
 
+                tenant.paymentStatus = "Unpaid"
+                tenant.lastRentAmount = tenant.rentPrice
+
 
                 if (lastRentMonth > 12) {
                     lastRentMonth = 1;
@@ -294,4 +307,24 @@ export const paymentCheck = async (req, res, next) => {
     } catch (error) {
         return next(new ErrorHandler(error.message, 500))
     }
+}
+
+export const paymentHistory = async (req, res, next) => {
+    const { id } = req.user;
+
+    console.log("id>>>", id)
+
+    try {
+        const paymentHistoryByUser = await PaymentHistory.find({ tenant: id })
+        console.log(paymentHistoryByUser)
+
+        res.status(200).json({
+            success: true,
+            message: "here all the payment history",
+            paymentHistoryByUser
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+
 }

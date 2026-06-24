@@ -465,6 +465,7 @@ export const getMe = async (req, res, next) => {
 
     try {
 
+
         const user = await User.findById(id);
 
         if (!user) {

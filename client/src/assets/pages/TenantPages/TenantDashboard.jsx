@@ -1,10 +1,11 @@
 import RentDueCard from "../../components/tenantDashboard/RentDueCard";
-import NotificationsCard from "../../components/tenantDashboard/NotificationCard";
+import NotificationsCard from "../../components/tenantDashboard/PaymentHistoryCard";
 import ProfileCard from "../../components/tenantDashboard/ProfileCard";
 import RentHistoryCard from "../../components/tenantDashboard/RentHistoryCard";
 import QuickActionsCard from "../../components/tenantDashboard/QuickActionCard";
 import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
+import PaymentHistoryCard from "../../components/tenantDashboard/PaymentHistoryCard";
 
 export default function TenantDashboard() {
     const { user } = useContext(AuthContext)
@@ -48,7 +49,7 @@ export default function TenantDashboard() {
                     <ProfileCard name={user.fullName} email={user.email} phone={user.mobileNumber} room={user.roomNumber} />
 
                     {/* Notifications */}
-                    <NotificationsCard />
+                    <PaymentHistoryCard />
                 </div>
 
                 {/* Quick Actions */}
