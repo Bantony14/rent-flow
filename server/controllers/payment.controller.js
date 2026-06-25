@@ -102,7 +102,7 @@ export const verifyPayment = async (req, res, next) => {
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
             month: `${monthNames[month - 2]} ${year}`,
-            status: "Paid",
+            status: "success",
         })
 
         user.paymentStatus = "Paid";
@@ -140,7 +140,7 @@ export const verifyPayment = async (req, res, next) => {
             status: "Failed",
         })
         await user.save()
-        return next(new ErrorHandler(error.message, 400))
+        return next(new ErrorHandler(error.message, 500))
     }
 }
 
@@ -153,7 +153,7 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 4;
+        const currentMonth = today.getMonth() + 2;
         const currentYear = today.getFullYear();
 
 

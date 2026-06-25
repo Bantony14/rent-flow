@@ -43,13 +43,15 @@ export default function TenantDashboard() {
                 </div>
 
                 {/* Row 2 — Profile + Payment History */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 md:grid-cols-2 gap-4">
 
                     {/* Profile */}
-                    <ProfileCard name={user.fullName} email={user.email} phone={user.mobileNumber} room={user.roomNumber} />
+                    <ProfileCard tenant={user} />
 
-                    {/* Notifications */}
+                    {/* PaymentHistoryCard */}
+
                     <PaymentHistoryCard />
+
                 </div>
 
                 {/* Quick Actions */}

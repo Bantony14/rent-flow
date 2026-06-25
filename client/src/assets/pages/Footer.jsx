@@ -1,16 +1,12 @@
 function Footer() {
     return (
-        <footer className="w-full border-t border-cyan-500/10 bg-zinc-950 text-white">
-
+        <footer className="w-full border-t border-zinc-800 bg-zinc-950 text-white">
             <div className="max-w-7xl mx-auto px-6 lg:px-10 py-14">
-
-                {/* Top */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                     {/* Brand */}
-                    <div>
-                        <div className="flex items-center gap-3 mb-4">
-
+                    <div className="text-center lg:text-left">
+                        <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
                             <div className="w-11 h-11 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center text-white font-extrabold text-lg shadow-lg shadow-cyan-500/30">
                                 R
                             </div>
@@ -26,108 +22,70 @@ function Footer() {
                             </div>
                         </div>
 
-                        <p className="text-sm text-zinc-400 leading-relaxed">
-                            Modern rent management platform for owners,
-                            tenants, and property administrators.
+                        <p className="text-sm text-zinc-400 leading-relaxed max-w-md mx-auto lg:mx-0">
+                            Simplifying rent management with secure payments,
+                            tenant records, and a seamless experience for property owners.
                         </p>
                     </div>
 
-                    {/* Company */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-5 text-white">
-                            Company
+                    {/* Vision */}
+                    <div className="flex flex-col items-center">
+                        <h2 className="text-lg font-semibold text-white mb-4">
+                            Our Vision
                         </h2>
 
-                        <ul className="space-y-3 text-sm text-zinc-400">
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                About Us
-                            </li>
-
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Features
-                            </li>
-
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Pricing
-                            </li>
-
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Contact
-                            </li>
-                        </ul>
+                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 text-center w-full max-w-md">
+                            <p className="text-zinc-300 italic leading-relaxed text-sm">
+                                "Managing properties shouldn't be complicated.
+                                RentFlow helps owners and tenants stay organized,
+                                transparent, and stress-free."
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Services */}
+                    {/* Stats */}
                     <div>
-                        <h2 className="text-lg font-semibold mb-5 text-white">
-                            Services
+                        <h2 className="text-lg font-semibold text-white mb-4 text-center lg:text-left">
+                            Why RentFlow?
                         </h2>
 
-                        <ul className="space-y-3 text-sm text-zinc-400">
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Tenant Management
-                            </li>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 text-center">
+                                <h3 className="text-xl font-bold text-cyan-400">100%</h3>
+                                <p className="text-xs text-zinc-400 mt-1">
+                                    Digital Records
+                                </p>
+                            </div>
 
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Rent Tracking
-                            </li>
+                            <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 text-center">
+                                <h3 className="text-xl font-bold text-cyan-400">24/7</h3>
+                                <p className="text-xs text-zinc-400 mt-1">
+                                    Access Anytime
+                                </p>
+                            </div>
 
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Payment Analytics
-                            </li>
+                            <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 text-center">
+                                <h3 className="text-xl font-bold text-cyan-400">Secure</h3>
+                                <p className="text-xs text-zinc-400 mt-1">
+                                    Payment Tracking
+                                </p>
+                            </div>
 
-                            <li className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                                Property Dashboard
-                            </li>
-                        </ul>
-                    </div>
-
-                    {/* Newsletter */}
-                    <div>
-                        <h2 className="text-lg font-semibold mb-5 text-white">
-                            Stay Updated
-                        </h2>
-
-                        <p className="text-sm text-zinc-400 mb-4">
-                            Get updates about new features and releases.
-                        </p>
-
-                        <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-
-                            <input
-                                type="email"
-                                placeholder="Enter email"
-                                className="w-full bg-transparent px-4 py-3 outline-none text-sm placeholder:text-zinc-500"
-                            />
-
-                            <button className="px-5 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:opacity-90 transition duration-300">
-                                Join
-                            </button>
+                            <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 text-center">
+                                <h3 className="text-xl font-bold text-cyan-400">Easy</h3>
+                                <p className="text-xs text-zinc-400 mt-1">
+                                    Tenant Management
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom */}
-                <div className="mt-12 pt-6 border-t border-zinc-800 flex flex-col md:flex-row items-center justify-between gap-4">
-
+                <div className="mt-12 pt-6 border-t border-zinc-800 text-center">
                     <p className="text-sm text-zinc-500">
-                        © 2026 RentFlow. All rights reserved.
+                        © 2026 RentFlow. Built to simplify property management.
                     </p>
-
-                    <div className="flex items-center gap-6 text-sm text-zinc-400">
-
-                        <span className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                            Privacy Policy
-                        </span>
-
-                        <span className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                            Terms
-                        </span>
-
-                        <span className="hover:text-cyan-400 transition duration-300 cursor-pointer">
-                            Support
-                        </span>
-                    </div>
                 </div>
             </div>
         </footer>

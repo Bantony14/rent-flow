@@ -32,62 +32,107 @@ function RentHistoryCard({ userRentHistory }) {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[500px] text-sm">
-            <thead>
-              <tr className="border-b border-slate-200">
-                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Month
-                </th>
-
-                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Rent
-                </th>
-
-                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Paid On
-                </th>
-
-                <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  Status
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {userRentHistory.map((rent, index) => (
-                <tr
-                  key={rent._id || index}
-                  className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
-                >
-                  <td className="py-4 px-2 font-medium text-slate-700">
+        <>
+          {/* Mobile View */}
+          <div className="space-y-4 md:hidden">
+            {userRentHistory.map((rent, index) => (
+              <div
+                key={rent._id || index}
+                className="border border-slate-200 rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-semibold text-slate-800">
                     {rent.month}
-                  </td>
+                  </p>
 
-                  <td className="py-4 px-2 font-semibold text-slate-800">
-                    ₹{rent.dueAmount?.toLocaleString("en-IN")}
-                  </td>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[rent.paymentStatus] ??
+                      "bg-slate-100 text-slate-700"
+                      }`}
+                  >
+                    {rent.paymentStatus}
+                  </span>
+                </div>
 
-                  <td className="py-4 px-2 text-slate-600">
-                    {rent.paidOn
-                      ? new Date(rent.paidOn).toLocaleDateString("en-IN")
-                      : "-"}
-                  </td>
-
-                  <td className="py-4 px-2">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[rent.status] ??
-                        "bg-slate-100 text-slate-700"
-                        }`}
-                    >
-                      {rent.paymentStatus}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Rent</span>
+                    <span className="font-semibold text-slate-800">
+                      ₹{rent.dueAmount?.toLocaleString("en-IN")}
                     </span>
-                  </td>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Paid On</span>
+                    <span className="text-slate-700">
+                      {rent.paidOn
+                        ? new Date(rent.paidOn).toLocaleDateString("en-IN")
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table */}
+          <div className="hidden md:block">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Month
+                  </th>
+
+                  <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Rent
+                  </th>
+
+                  <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Paid On
+                  </th>
+
+                  <th className="text-left py-3 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Status
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+
+              <tbody>
+                {userRentHistory.map((rent, index) => (
+                  <tr
+                    key={rent._id || index}
+                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition"
+                  >
+                    <td className="py-4 px-2 font-medium text-slate-700">
+                      {rent.month}
+                    </td>
+
+                    <td className="py-4 px-2 font-semibold text-slate-800">
+                      ₹{rent.dueAmount?.toLocaleString("en-IN")}
+                    </td>
+
+                    <td className="py-4 px-2 text-slate-600">
+                      {rent.paidOn
+                        ? new Date(rent.paidOn).toLocaleDateString("en-IN")
+                        : "-"}
+                    </td>
+
+                    <td className="py-4 px-2">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[rent.paymentStatus] ??
+                          "bg-slate-100 text-slate-700"
+                          }`}
+                      >
+                        {rent.paymentStatus}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

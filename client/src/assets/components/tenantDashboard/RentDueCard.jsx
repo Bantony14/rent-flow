@@ -10,10 +10,29 @@ function RentDueCard({ user }) {
     const isPaid = user?.paymentStatus
     const dueAmount = user?.dueAmount
 
-    const currentMonth = new Date().toLocaleString("en-US", {
-        month: "long",
-        year: "numeric",
-    });
+
+    const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];
+
+    const date = new Date(user.joiningDate);
+
+    const joiningMonth = date.getMonth();
+    const joiningYear = date.getFullYear();
+
+    let month = Number(user.nextRentGeneratedMonth.split("-")[1]);
+    let year = Number(user.nextRentGeneratedMonth.split("-")[0]);
 
     const handlePayNow = async () => {
         try {
@@ -26,7 +45,9 @@ function RentDueCard({ user }) {
                 order_id: data.order.id,
 
                 name: "Rent Payment",
-                description: `${currentMonth} Rent Payment`,
+                description: user.nextRentGeneratedMonth
+                    ? `${monthNames[month - 2]} ${year} Rent Payment`
+                    : `${monthNames[joiningMonth - 1]} ${joiningYear} Rent Payment`,
 
                 handler: async (response) => {
                     try {
@@ -106,7 +127,10 @@ function RentDueCard({ user }) {
             >
                 <div className="flex items-center justify-between mb-4">
                     <div>
-                        <p className="text-sm text-slate-500">{currentMonth} Rent</p>
+                        <p className="text-sm text-slate-500">
+                            {user.nextRentGeneratedMonth ? (`${monthNames[month - 2]} ${year} Rent`)
+                                : (`${monthNames[joiningMonth - 2]} ${joiningYear} Rent`)}
+                        </p>
 
                         <h1
                             className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
@@ -120,8 +144,8 @@ function RentDueCard({ user }) {
 
                 <p className="text-sm text-slate-600 mb-4">
                     {isPaid === "Paid"
-                        ? `Rent for ${currentMonth} has been paid successfully.`
-                        : `Rent payment for ${currentMonth} is pending.`}
+                        ? `Rent for ${monthNames[month - 2]} ${year} has been paid successfully.`
+                        : `Rent payment for ${monthNames[month - 2]} ${year} is pending.`}
                 </p>
 
                 <div className="flex items-center justify-between bg-white rounded-xl p-4 border">
@@ -140,7 +164,15 @@ function RentDueCard({ user }) {
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
                 <Calendar size={15} />
                 <span>
-                    {isPaid === "Paid" ? (<span>next dueDate : next month</span>) : (<span>dueDate:  this month</span>)}
+                    {isPaid === "Paid" ? (
+                        <span>
+                            Next Rent Due: {monthNames[month - 1]} {year}
+                        </span>
+                    ) : (
+                        <span>
+                            Pending Rent: {monthNames[month - 2]} {year}
+                        </span>
+                    )}
                 </span>
             </div>
 
