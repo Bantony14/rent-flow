@@ -202,7 +202,7 @@ export const paymentCheck = async (req, res, next) => {
             const remainingDays = totalDaysInMonth - dateOfJoining;
             const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1)
             tenant.dueAmount = Math.round(calculateDueAmount);
-            tenant.lastRentAmount = calculateDueAmount
+            tenant.lastRentAmount = tenant.dueAmount
 
             tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 

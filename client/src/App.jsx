@@ -13,6 +13,7 @@ import AllTenants from "./assets/pages/AdminPages/AllTenants"
 import UserInfoCard from "./assets/pages/AdminPages/UserInfo"
 import PaymentSuccess from "./assets/components/paymentPage/PaymentSuccess.jsx"
 import PaymentFailed from "./assets/components/paymentPage/PaymentFailed"
+import TenantProfile from "./assets/pages/TenantPages/TenantProfile.jsx"
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path="/view-tenant-detail/:tenantid" element={<UserInfoCard />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
+          <Route path="/tenant/profile" element={<TenantProfile />} />
         </Route>
       </Routes>
     </>

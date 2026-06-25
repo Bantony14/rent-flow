@@ -1,4 +1,5 @@
 import User from "../models/user.model.js"
+import decrypt from "../utils/decrypt.js";
 import sendEmail from "../utils/emailSender.js";
 import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
@@ -465,12 +466,13 @@ export const getMe = async (req, res, next) => {
 
     try {
 
-
         const user = await User.findById(id);
 
         if (!user) {
             return next(new ErrorHandler("user Not Found", 400))
         }
+        const encryptedValue = decrypt(user.aadhaarNumber)
+        user.aadhaarNumber = encryptedValue
         res.status(200).json({
             success: true,
             message: "Here your information",

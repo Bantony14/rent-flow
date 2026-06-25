@@ -10,6 +10,8 @@ function RentDueCard({ user }) {
     const isPaid = user?.paymentStatus
     const dueAmount = user?.dueAmount
 
+    console.log(user)
+
 
     const monthNames = [
         "January",

@@ -13,7 +13,7 @@ import { deleteUser, getUser, updateUser } from "../../api/authApi";
 import ProfileCard from "../../components/userInfo/ProfileCard";
 import { useNavigate } from "react-router-dom";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
-function UserInfoPage() {
+function UserInfoPage({ profileUser }) {
     const { tenantid } = useParams()
     const [tenantDetail, setTenantDetail] = useState(null)
     const [isEdit, setIsEdit] = useState(false)
