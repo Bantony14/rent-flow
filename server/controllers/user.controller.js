@@ -5,7 +5,7 @@ import decrypt from "../utils/decrypt.js";
 import sendEmail from "../utils/emailSender.js";
 import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
-import fs from "fs"
+import fs from "fs/promises"
 
 export const userRegistration = async (req, res, next) => {
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
@@ -489,7 +489,8 @@ export const addMember = async (req, res, next) => {
             if (req.files) {
 
                 for (let i = 0; i < members.length; i++) {
-                    if (req.files.profileImage) {
+
+                    if (req.files.profileImage[i]) {
                         const profileResult = await cloudinary.uploader.upload(req.files.profileImage[i].path, {
                             folder: "rent/member/profile"
                         })
@@ -498,11 +499,11 @@ export const addMember = async (req, res, next) => {
                             public_id: profileResult.public_id,
                             secure_url: profileResult.secure_url
                         }
-                        await fs.promises.unlink(req.files.profileImage[i].path);
+                        await fs.unlink(req.files.profileImage[i].path);
 
                     }
 
-                    if (req.files.aadhaarFront) {
+                    if (req.files.aadhaarFront[i]) {
                         const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
                             folder: "rent/member/profile"
                         })
@@ -510,10 +511,10 @@ export const addMember = async (req, res, next) => {
                         members[i].aadhaarFront = {
                             public_id: aadhaarFrontResult.public_id,
                         }
-                        await fs.promises.unlink(req.files.aadhaarFront[i].path);
+                        await fs.unlink(req.files.aadhaarFront[i].path);
                     }
 
-                    if (req.files.aadhaarBack) {
+                    if (req.files.aadhaarBack[i]) {
                         const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
                             folder: "rent/member/profile"
                         })
@@ -521,7 +522,7 @@ export const addMember = async (req, res, next) => {
                         members[i].aadhaarBack = {
                             public_id: aadhaarBackResult.public_id,
                         }
-                        await fs.promises.unlink(req.files.aadhaarBack[i].path);
+                        await fs.unlink(req.files.aadhaarBack[i].path);
                     }
                 }
             }
@@ -529,8 +530,6 @@ export const addMember = async (req, res, next) => {
         } catch (error) {
             return next(new ErrorHandler(error.member, 500))
         }
-
-
 
         await user.member.push(...members);
         console.log("user.member>>>", user.member)
