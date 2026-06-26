@@ -1,3 +1,4 @@
+import { memo } from "react";
 import cloudinary from "../config/cloudinary.connect.js";
 import User from "../models/user.model.js"
 import decrypt from "../utils/decrypt.js";
@@ -112,14 +113,16 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
-    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus", "dueAmount"]
+    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus", "dueAmount", "joiningDate", "rentPrice", "nextRentMonthGenerated"]
+    console.log("heelo")
 
     const { id } = req.params
-
-    console.log("req.body>>>>", req.body)
+    console.log(id)
+    console.log(req.files)
+    console.log(req.body)
 
     const validation = Object.keys(req.body);
-    console.log(validation)
+    console.log(req.body)
 
     const notAllowedFiled = validation.filter((value) => !allowedFiled.includes(value));
 
@@ -141,13 +144,9 @@ export const userUpdate = async (req, res, next) => {
         return next(new ErrorHandler("There is no changes in your data"))
     }
 
-    if ("role" in req.body) {
-        return next(new ErrorHandler("you can't change role  "))
-    }
-
-
 
     const filterValueForMessage = Object.keys(filter).join(" and ",)
+
 
     try {
         const user = await User.findByIdAndUpdate(id,
@@ -161,6 +160,45 @@ export const userUpdate = async (req, res, next) => {
         if (!user) {
             return next(new ErrorHandler("user Not found", 400))
         }
+
+        if (req.files && Object.keys(req.files).length > 0) {
+            try {
+                if (req.files?.profileImage) {
+                    await cloudinary.uploader.destroy(user.profileImage.public_id)
+                    const profileImageResult = await cloudinary.uploader.upload(req.files.profileImage[0].path)
+
+                    if (profileImageResult) {
+                        user.profileImage.public_id = profileImageResult.public_id;
+                        user.profileImage.secure_url = profileImageResult.secure_url;
+                    }
+                    await fs.promises.unlink(req.files.profileImage[0].path);
+
+                }
+                if (req.files?.aadhaarFront) {
+                    await cloudinary.uploader.destroy(user.aadhaarFront.public_id)
+                    const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[0].path)
+
+                    if (aadhaarFrontResult) {
+                        user.aadhaarFront.public_id = aadhaarFrontResult.public_id;
+                    }
+                    await fs.promises.unlink(req.files.aadhaarFront[0].path);
+                }
+                if (req.files?.aadhaarBack) {
+                    await cloudinary.uploader.destroy(user.aadhaarBack.public_id)
+                    const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[0].path)
+
+                    if (aadhaarBackResult) {
+                        user.aadhaarBack.public_id = aadhaarBackResult.public_id;
+                    }
+                    await fs.promises.unlink(req.files.aadhaarBack[0].path);
+                }
+
+            } catch (err) {
+                console.log("Cloudinary Error:", err);
+            }
+        }
+
+        await user.save()
 
         res.status(200).json({
             success: true,
@@ -230,8 +268,6 @@ export const getOneUser = async (req, res, next) => {
 
     try {
         const field = Object.keys(req.body).join("")
-        console.log(field)
-        console.log(req.body[field])
 
         let user;
 
@@ -252,6 +288,10 @@ export const getOneUser = async (req, res, next) => {
                 )
             );
         }
+
+        const encryptedValue = decrypt(user.aadhaarNumber)
+        user.aadhaarNumber = encryptedValue
+
         res.status(200).json({
             success: true,
             message: `Matching tenant records found for ${field}.`,
@@ -272,6 +312,9 @@ export const getUserById = async (req, res, next) => {
         if (!user) {
             return next(new ErrorHandler("user not found", 500))
         }
+
+        const encryptedValue = decrypt(user.aadhaarNumber)
+        user.aadhaarNumber = encryptedValue
         res.status(200).json({
             success: true,
             message: "here is your user data",
@@ -309,7 +352,6 @@ export const getAllUserByBuilding = async (req, res, next) => {
         return next(new ErrorHandler(error.message, 400))
     }
 }
-
 
 export const userLogin = async (req, res, next) => {
     const { email, password } = req.body;
@@ -422,30 +464,90 @@ export const resetPassword = async (req, res, next) => {
 }
 
 export const addMember = async (req, res, next) => {
-    const { member, mobileNumber } = req.body;
+    console.log("hello")
+    const { id } = req.params;
 
+    const members = JSON.parse(req.body.members)
+    console.log("req.body>>>", req.body.members)
+    console.log(req.files)
+    console.log(members)
+
+    console.log(members.length, req.files.profileImage.length)
     try {
 
-        const user = await User.findOne({ mobileNumber });
+
+        const user = await User.findById(id);
 
         if (!user) {
             return next(new ErrorHandler("User not found", 404));
         }
+        if (members.length !== req.files.profileImage.length) {
+            return next(new ErrorHandler("Members and images count mismatch"));
+        }
 
-        user.member.push(...member);
+        try {
+            if (req.files) {
+
+                for (let i = 0; i < members.length; i++) {
+                    if (req.files.profileImage) {
+                        const profileResult = await cloudinary.uploader.upload(req.files.profileImage[i].path, {
+                            folder: "rent/member/profile"
+                        })
+
+                        members[i].profileImage = {
+                            public_id: profileResult.public_id,
+                            secure_url: profileResult.secure_url
+                        }
+                        await fs.promises.unlink(req.files.profileImage[i].path);
+
+                    }
+
+                    if (req.files.aadhaarFront) {
+                        const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
+                            folder: "rent/member/profile"
+                        })
+
+                        members[i].aadhaarFront = {
+                            public_id: aadhaarFrontResult.public_id,
+                        }
+                        await fs.promises.unlink(req.files.aadhaarFront[i].path);
+                    }
+
+                    if (req.files.aadhaarBack) {
+                        const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
+                            folder: "rent/member/profile"
+                        })
+
+                        members[i].aadhaarBack = {
+                            public_id: aadhaarBackResult.public_id,
+                        }
+                        await fs.promises.unlink(req.files.aadhaarBack[i].path);
+                    }
+                }
+            }
+
+        } catch (error) {
+            return next(new ErrorHandler(error.member, 500))
+        }
+
+
+
+        await user.member.push(...members);
+        console.log("user.member>>>", user.member)
 
         await user.save();
 
         res.status(200).json({
             success: true,
             message: "Member added successfully",
-            member,
+            member: user.member
         });
-
     } catch (error) {
-        return next(new ErrorHandler(error.message, 400));
+        console.log(error.message)
+        return next(new ErrorHandler(error.message, 500))
     }
-};
+
+}
 
 export const removeMember = async (req, res, next) => {
     const { mobileNumber } = req.body;

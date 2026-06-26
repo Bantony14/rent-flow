@@ -25,7 +25,7 @@ const upload = multer({
 });
 
 export const uploadImages = upload.fields([
-    { name: "profileImage", maxCount: 1 },
-    { name: "aadhaarFront", maxCount: 1 },
-    { name: "aadhaarBack", maxCount: 1 },
+    { name: "profileImage", maxCount: 5 },
+    { name: "aadhaarFront", maxCount: 5 },
+    { name: "aadhaarBack", maxCount: 5 },
 ]);

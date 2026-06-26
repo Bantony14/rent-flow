@@ -73,6 +73,33 @@ const userSchema = new mongoose.Schema(
             hashAadhaar: {
                 type: String,
             },
+            profileImage:
+            {
+
+                public_id: {
+                    type: String,
+                    default: null,
+                },
+                secure_url: {
+                    type: String,
+                    default: null,
+                },
+            },
+
+            aadhaarFront: {
+                public_id: {
+                    type: String,
+                    default: null,
+                },
+            },
+
+            aadhaarBack: {
+                public_id: {
+                    type: String,
+                    default: null,
+                },
+            },
+
 
 
         }]

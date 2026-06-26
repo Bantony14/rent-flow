@@ -164,8 +164,6 @@ export default function AllTenants() {
                 {/* total number of user */}
                 <NumberOfUsers totalUsers={totalUsers} tenants={tenants} admins={admins} />
 
-
-
                 {/*searchQuery*/}
                 <div className="flex flex-col lg:flex-row gap-4 items-end mb-6">
 
