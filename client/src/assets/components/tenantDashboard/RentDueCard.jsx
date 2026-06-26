@@ -33,8 +33,8 @@ function RentDueCard({ user }) {
     const joiningMonth = date.getMonth();
     const joiningYear = date.getFullYear();
 
-    let month = Number(user.nextRentGeneratedMonth.split("-")[1]);
-    let year = Number(user.nextRentGeneratedMonth.split("-")[0]);
+    let month = Number(user?.nextRentGeneratedMonth.split("-")[1]);
+    let year = Number(user?.nextRentGeneratedMonth.split("-")[0]);
 
     const handlePayNow = async () => {
         try {

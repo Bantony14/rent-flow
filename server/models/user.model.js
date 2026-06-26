@@ -123,6 +123,22 @@ const userSchema = new mongoose.Schema(
             default: null,
         },
 
+        profileImage:
+        {
+            public_id: String,
+            secure_url: String
+        },
+
+        aadhaarFront: {
+            public_id: String,
+        },
+
+        aadhaarBack: {
+            public_id: String,
+        },
+
+
+
         rentHistory: [
             {
                 month: { type: String, },

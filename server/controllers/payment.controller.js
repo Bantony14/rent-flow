@@ -18,7 +18,7 @@ export const paymentOrderCreate = async (req, res, next) => {
             return next(new ErrorHandler("user Not Found", 400))
         }
         const order = await razorpay.orders.create({
-            amount: user.dueAmount * 100,
+            amount: Math.round(user.dueAmount * 100),
             currency: "INR",
             receipt: `rent_${id.slice(-6)}_${Date.now()}`
         })

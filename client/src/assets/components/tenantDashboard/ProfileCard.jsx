@@ -64,9 +64,11 @@ function ProfileCard({ tenant }) {
 
             {/* Avatar */}
             <div className="flex flex-col items-center mb-6">
-                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
-                    {initials}
-                </div>
+                <img
+                    src={tenant?.profileImage?.secure_url}
+                    alt=""
+                    className="w-20 h-30 rounded-full object-cover"
+                />
 
                 <h3 className="mt-3 font-semibold text-slate-800 text-center">
                     {tenant?.fullName}

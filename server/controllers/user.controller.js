@@ -1,11 +1,15 @@
+import cloudinary from "../config/cloudinary.connect.js";
 import User from "../models/user.model.js"
 import decrypt from "../utils/decrypt.js";
 import sendEmail from "../utils/emailSender.js";
 import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
+import fs from "fs"
 
 export const userRegistration = async (req, res, next) => {
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
+    console.log("hello")
+
 
     if (req.body.role) {
         return next(new ErrorHandler("cannot enter role field", 400))
@@ -13,15 +17,76 @@ export const userRegistration = async (req, res, next) => {
     if (!fullName || !email || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate) {
         return next(new ErrorHandler("all filed is required", 400))
     }
+
+
+    let profileResult;
+    let aadhaarFrontResult;
+    let aadhaarBackResult;
+
+    if (req.files) {
+
+        try {
+            [profileResult, aadhaarFrontResult, aadhaarBackResult] =
+                await Promise.all([
+                    cloudinary.uploader.upload(req.files.profileImage[0].path, {
+                        folder: "rentflow/profile",
+                    }),
+                    cloudinary.uploader.upload(req.files.aadhaarFront[0].path, {
+                        folder: "rentflow/aadhaar",
+                        type: "private",
+                    }),
+                    cloudinary.uploader.upload(req.files.aadhaarBack[0].path, {
+                        folder: "rentflow/aadhaar",
+                        type: "private",
+                    }),
+                ]);
+
+            await fs.promises.unlink(req.files.profileImage[0].path);
+            await fs.promises.unlink(req.files.aadhaarFront[0].path);
+            await fs.promises.unlink(req.files.aadhaarBack[0].path);
+
+        } catch (err) {
+            console.log("Cloudinary Error:", err);
+        }
+
+    }
+
+
     try {
         const user = await User.create(
-            { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate }
+            {
+                fullName,
+                aadhaarNumber,
+                mobileNumber,
+                dob,
+                password,
+                roomNumber,
+                building,
+                email,
+                rentPrice,
+                joiningDate,
+                profileImage: {
+                    public_id: profileResult.public_id,
+                    secure_url: profileResult.secure_url,
+                },
+                aadhaarFront: {
+                    public_id: aadhaarFrontResult.public_id
+                },
+                aadhaarBack: {
+                    public_id: aadhaarBackResult.public_id
+                }
+
+            }
         )
+
+
 
         if (!user) {
             return next(new ErrorHandler("Account not created please try again", 400))
         }
         user.password = undefined;
+
+
         res.status(200).json({
             success: true,
             message: "User Registered successfully",
@@ -473,6 +538,7 @@ export const getMe = async (req, res, next) => {
         }
         const encryptedValue = decrypt(user.aadhaarNumber)
         user.aadhaarNumber = encryptedValue
+
         res.status(200).json({
             success: true,
             message: "Here your information",

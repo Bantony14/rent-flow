@@ -7,6 +7,9 @@ import RazorPay from "razorpay";
 import paymentRoute from "./routers/payment.route.js"
 import cors from "cors"
 const app = express();
+
+
+
 export const razorpay = new RazorPay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_SECRET
