@@ -114,15 +114,10 @@ export const userRegistration = async (req, res, next) => {
 
 export const userUpdate = async (req, res, next) => {
     const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus", "dueAmount", "joiningDate", "rentPrice", "nextRentMonthGenerated"]
-    console.log("heelo")
 
     const { id } = req.params
-    console.log(id)
-    console.log(req.files)
-    console.log(req.body)
 
     const validation = Object.keys(req.body);
-    console.log(req.body)
 
     const notAllowedFiled = validation.filter((value) => !allowedFiled.includes(value));
 
@@ -171,7 +166,7 @@ export const userUpdate = async (req, res, next) => {
                         user.profileImage.public_id = profileImageResult.public_id;
                         user.profileImage.secure_url = profileImageResult.secure_url;
                     }
-                    await fs.promises.unlink(req.files.profileImage[0].path);
+                    await fs.unlink(req.files.profileImage[0].path);
 
                 }
                 if (req.files?.aadhaarFront) {
@@ -181,7 +176,7 @@ export const userUpdate = async (req, res, next) => {
                     if (aadhaarFrontResult) {
                         user.aadhaarFront.public_id = aadhaarFrontResult.public_id;
                     }
-                    await fs.promises.unlink(req.files.aadhaarFront[0].path);
+                    await fs.unlink(req.files.aadhaarFront[0].path);
                 }
                 if (req.files?.aadhaarBack) {
                     await cloudinary.uploader.destroy(user.aadhaarBack.public_id)
@@ -190,7 +185,7 @@ export const userUpdate = async (req, res, next) => {
                     if (aadhaarBackResult) {
                         user.aadhaarBack.public_id = aadhaarBackResult.public_id;
                     }
-                    await fs.promises.unlink(req.files.aadhaarBack[0].path);
+                    await fs.unlink(req.files.aadhaarBack[0].path);
                 }
 
             } catch (err) {
@@ -464,15 +459,12 @@ export const resetPassword = async (req, res, next) => {
 }
 
 export const addMember = async (req, res, next) => {
-    console.log("hello")
+
     const { id } = req.params;
 
     const members = JSON.parse(req.body.members)
-    console.log("req.body>>>", req.body.members)
-    console.log(req.files)
-    console.log(members)
+    members.isActive = true
 
-    console.log(members.length, req.files.profileImage.length)
     try {
 
 
@@ -489,40 +481,42 @@ export const addMember = async (req, res, next) => {
             if (req.files) {
 
                 for (let i = 0; i < members.length; i++) {
+                    const [profileResult, aadhaarFrontResult, aadhaarBackResult] = await Promise.all(
+                        [
+                            cloudinary.uploader.upload(req.files.profileImage[i].path, {
+                                folder: "rent/member/profile",
+                            }),
 
-                    if (req.files.profileImage[i]) {
-                        const profileResult = await cloudinary.uploader.upload(req.files.profileImage[i].path, {
-                            folder: "rent/member/profile"
-                        })
+                            cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
+                                folder: "rent/member/profile",
+                            }),
 
+                            cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
+                                folder: "rent/member/profile",
+                            })
+                        ]
+                    )
+                    await fs.unlink(req.files.profileImage[i].path);
+                    await fs.unlink(req.files.aadhaarFront[i].path);
+                    await fs.unlink(req.files.aadhaarBack[i].path);
+
+                    if (profileResult) {
                         members[i].profileImage = {
                             public_id: profileResult.public_id,
                             secure_url: profileResult.secure_url
                         }
-                        await fs.unlink(req.files.profileImage[i].path);
-
                     }
 
-                    if (req.files.aadhaarFront[i]) {
-                        const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
-                            folder: "rent/member/profile"
-                        })
-
+                    if (aadhaarFrontResult) {
                         members[i].aadhaarFront = {
                             public_id: aadhaarFrontResult.public_id,
                         }
-                        await fs.unlink(req.files.aadhaarFront[i].path);
                     }
 
-                    if (req.files.aadhaarBack[i]) {
-                        const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
-                            folder: "rent/member/profile"
-                        })
-
+                    if (aadhaarBackResult) {
                         members[i].aadhaarBack = {
                             public_id: aadhaarBackResult.public_id,
                         }
-                        await fs.unlink(req.files.aadhaarBack[i].path);
                     }
                 }
             }
@@ -549,14 +543,11 @@ export const addMember = async (req, res, next) => {
 }
 
 export const removeMember = async (req, res, next) => {
-    const { mobileNumber } = req.body;
-    const memberId = req.params.id
-
+    const id = req.params.id
+    const memberId = req.params.memberid
     try {
 
-        const user = await User.findOne(
-            { mobileNumber },
-        )
+        const user = await User.findById(id)
         const removedUserInfo = user.member.find((member) =>
             member._id.toString() === memberId
         )
@@ -565,13 +556,11 @@ export const removeMember = async (req, res, next) => {
             return next(new ErrorHandler("member not found", 400))
         }
 
-        await user.updateOne({
-            $pull: {
-                member: {
-                    _id: memberId
-                }
-            }
-        })
+        if (removedUserInfo) {
+            removedUserInfo.isActive = false
+        }
+
+        await user.save()
         res.status(200).json({
             success: true,
             message: "member remove succesfully",

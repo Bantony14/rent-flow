@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
             hashAadhaar: {
                 type: String,
             },
+            isActive: {
+                type: Boolean,
+            },
+
             profileImage:
             {
 

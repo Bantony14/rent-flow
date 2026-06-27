@@ -19,7 +19,7 @@ route.get("/getalluserbybuilding", isLoggedIn, isAuthorized("ADMIN"), getAllUser
 route.post("/forgotpassword", forgotPassword);
 route.post("/resetpassword", resetPassword);
 route.put("/addmember/:id", uploadImages, addMember);
-route.put("/removemember/:id", isLoggedIn, isAuthorized("ADMIN"), removeMember);
+route.put("/removemember/:id/:memberid", removeMember);
 route.put("/updatemember/:id", isLoggedIn, isAuthorized("ADMIN"), updateMemberInfo);
 
 
