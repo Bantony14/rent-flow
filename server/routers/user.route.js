@@ -20,7 +20,7 @@ route.post("/forgotpassword", forgotPassword);
 route.post("/resetpassword", resetPassword);
 route.put("/addmember/:id", uploadImages, addMember);
 route.put("/removemember/:id/:memberid", removeMember);
-route.put("/updatemember/:id", isLoggedIn, isAuthorized("ADMIN"), updateMemberInfo);
+route.put("/updatemember/:id/:memberid", uploadImages, updateMemberInfo);
 
 
 export default route;

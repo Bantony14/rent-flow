@@ -95,6 +95,10 @@ export const userRegistration = async (req, res, next) => {
         })
     } catch (error) {
 
+        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
+
         if (error.code === 11000) {
             let field = Object.keys(error.keyValue)[0];
             if (field === "hashAadhaar") {
@@ -201,6 +205,10 @@ export const userUpdate = async (req, res, next) => {
             user,
         })
     } catch (error) {
+        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
+
         if (error.code === 11000) {
             let field = Object.keys(error.keyValue)[0];
             if (field === "hashAadhaar") {
@@ -259,7 +267,6 @@ export const getAllUser = async (req, res, next) => {
 };
 
 export const getOneUser = async (req, res, next) => {
-
 
     try {
         const field = Object.keys(req.body).join("")
@@ -461,12 +468,24 @@ export const resetPassword = async (req, res, next) => {
 export const addMember = async (req, res, next) => {
 
     const { id } = req.params;
-
     const members = JSON.parse(req.body.members)
-    members.isActive = true
+
+    // find all tenants for checking member aadhaar
+    const allTenants = await User.find({})
+
+    //  checking existing addhar in member info
+    for (let details of allTenants) {
+        for (let member of details.member || []) {
+            console.log(member)
+            for (let i = 0; i < members.length; i++) {
+                if (members[i].aadhaarNumber === decrypt(member.aadhaarNumber)) {
+                    return next(new ErrorHandler("aadhaarNumber already Exist"))
+                }
+            }
+        }
+    }
 
     try {
-
 
         const user = await User.findById(id);
 
@@ -479,6 +498,10 @@ export const addMember = async (req, res, next) => {
 
         try {
             if (req.files) {
+
+                if (!req.files.profileImage || !req.files.aadhaarFront || !req.files.aadhaarBack) {
+                    return next(new ErrorHandler("all image required", 400))
+                }
 
                 for (let i = 0; i < members.length; i++) {
                     const [profileResult, aadhaarFrontResult, aadhaarBackResult] = await Promise.all(
@@ -522,11 +545,11 @@ export const addMember = async (req, res, next) => {
             }
 
         } catch (error) {
-            return next(new ErrorHandler(error.member, 500))
+            return next(new ErrorHandler(error.message, 500))
         }
 
         await user.member.push(...members);
-        console.log("user.member>>>", user.member)
+
 
         await user.save();
 
@@ -536,6 +559,19 @@ export const addMember = async (req, res, next) => {
             member: user.member
         });
     } catch (error) {
+        for (let i = 0; i < members.length; i++) {
+            if (req.files.profileImage?.[i]?.path) {
+                await fs.unlink(req.files.profileImage[i].path).catch(() => { });
+            }
+
+            if (req.files.aadhaarFront?.[i]?.path) {
+                await fs.unlink(req.files.aadhaarFront[i].path).catch(() => { });
+            }
+
+            if (req.files.aadhaarBack?.[i]?.path) {
+                await fs.unlink(req.files.aadhaarBack[i].path).catch(() => { });
+            }
+        }
         console.log(error.message)
         return next(new ErrorHandler(error.message, 500))
     }
@@ -572,11 +608,12 @@ export const removeMember = async (req, res, next) => {
 }
 
 export const updateMemberInfo = async (req, res, next) => {
-    const { mobileNumber, name, aadhaarNumber, dob } = req.body
-    const memberId = req.params.id;
+    const { name, aadhaarNumber, dob } = req.body
+    const id = req.params.id;
+    const memberId = req.params.memberid;
 
     try {
-        const user = await User.findOne({ mobileNumber });
+        const user = await User.findById(id);
         console.log(user)
 
         const findMember = user.member.find((member) =>
@@ -595,8 +632,59 @@ export const updateMemberInfo = async (req, res, next) => {
             findMember.dob = dob;
         }
 
+        // find all tenants for checking member aadhaar
+        const allTenants = await User.find({})
         if (aadhaarNumber) {
+            //  checking existing addhar in member info
+            for (let details of allTenants) {
+                for (let member of details.member || []) {
+                    if (aadhaarNumber === decrypt(member.aadhaarNumber)) {
+                        return next(new ErrorHandler("aadhaarNumber already Exist"))
+                    }
+
+                }
+            }
             findMember.aadhaarNumber = aadhaarNumber;
+            findMember.hashAadhaar = undefined
+        }
+
+        // image update process
+
+        if (req.files && Object.keys(req.files).length > 0) {
+            try {
+                if (req.files?.profileImage) {
+                    await cloudinary.uploader.destroy(findMember.profileImage.public_id)
+                    const profileImageResult = await cloudinary.uploader.upload(req.files.profileImage[0].path)
+
+                    if (profileImageResult) {
+                        findMember.profileImage.public_id = profileImageResult.public_id;
+                        findMember.profileImage.secure_url = profileImageResult.secure_url;
+                    }
+                    await fs.unlink(req.files.profileImage[0].path);
+
+                }
+                if (req.files?.aadhaarFront) {
+                    await cloudinary.uploader.destroy(findMember.aadhaarFront.public_id)
+                    const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[0].path)
+
+                    if (aadhaarFrontResult) {
+                        findMember.aadhaarFront.public_id = aadhaarFrontResult.public_id;
+                    }
+                    await fs.unlink(req.files.aadhaarFront[0].path);
+                }
+                if (req.files?.aadhaarBack) {
+                    await cloudinary.uploader.destroy(findMember.aadhaarBack.public_id)
+                    const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[0].path)
+
+                    if (aadhaarBackResult) {
+                        findMember.aadhaarBack.public_id = aadhaarBackResult.public_id;
+                    }
+                    await fs.unlink(req.files.aadhaarBack[0].path);
+                }
+
+            } catch (err) {
+                console.log("Cloudinary Error:", err);
+            }
         }
 
         await user.save();
@@ -611,6 +699,9 @@ export const updateMemberInfo = async (req, res, next) => {
 
 
     } catch (error) {
+        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
+        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
         return next(new ErrorHandler(error.message, 400))
     }
 
