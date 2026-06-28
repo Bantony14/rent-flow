@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import User from "./user.model";
-import PaymentHistory from "./paymentHistory.model";
+import User from "./user.model.js";
+import PaymentHistory from "./paymentHistory.model.js";
 
 const receiptSchema = new mongoose.Schema(
     {
@@ -36,6 +36,6 @@ const receiptSchema = new mongoose.Schema(
     }
 );
 
-const receiptHistory = mongoose.model("receiptHistory", receiptSchema)
+const ReceiptHistory = mongoose.model("receiptHistory", receiptSchema)
 
-export default receiptHistory;
+export default ReceiptHistory;

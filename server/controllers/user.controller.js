@@ -6,6 +6,7 @@ import sendEmail from "../utils/emailSender.js";
 import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
 import fs from "fs/promises"
+import otpTemplate from "../utils/optTemplate.js";
 
 export const userRegistration = async (req, res, next) => {
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
@@ -413,8 +414,9 @@ export const forgotPassword = async (req, res, next) => {
         user.otp = otp;
         user.otpExpiry = Date.now() + 10 * 60 * 1000;
         const subject = "THIS IS FOR RESET YOUR PASSWORD"
-        const message = otp;
+        const message = otpTemplate(otp);
         console.log(otp);
+
 
         await user.save();
         sendEmail({ email, subject, message })

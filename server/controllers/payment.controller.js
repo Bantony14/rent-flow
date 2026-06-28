@@ -3,6 +3,9 @@ import User from "../models/user.model.js";
 import crypto from "crypto";
 import ErrorHandler from "../utils/error.js";
 import PaymentHistory from "../models/paymentHistory.model.js";
+import ReceiptHistory from "../models/receiptHistory.model.js";
+import sendEmail from "../utils/emailSender.js";
+import receiptTemplate from "../utils/receiptTemplate.js";
 
 
 
@@ -23,9 +26,6 @@ export const paymentOrderCreate = async (req, res, next) => {
             receipt: `rent_${id.slice(-6)}_${Date.now()}`
         })
 
-        console.log(id)
-        console.log("order>>>", order)
-
         res.status(201).json({
             success: true,
             message: "Order created successfully",
@@ -44,22 +44,8 @@ export const verifyPayment = async (req, res, next) => {
 
     const { id } = req.user
     let user;
-    const monthNames = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December"
-    ];
-    let month;
-    let year;
+    let pendingMonth;
+
 
     try {
 
@@ -73,10 +59,20 @@ export const verifyPayment = async (req, res, next) => {
 
 
         const filterMonth = user.rentHistory.filter((value) => value.paymentStatus === "Unpaid")
-        console.log(filterMonth)
+        console.log("filterMonth>>", filterMonth)
 
-        const pendingMonth = filterMonth.map((month) => month.month)
-        console.log(pendingMonth)
+        pendingMonth = filterMonth.map((month) => month.month)
+        console.log("pendingMonth>>>", pendingMonth)
+
+
+        const receiptMonths = filterMonth.map((item) => ({
+            month: item.month,
+            amount: item.dueAmount
+        }));
+
+        console.log("receiptMonths>>", receiptMonths)
+
+
 
         if (generatedSignature !== razorpay_signature) {
             let payment = PaymentHistory.create({
@@ -84,30 +80,56 @@ export const verifyPayment = async (req, res, next) => {
                 amount: dueAmountPreserve,
                 paymentId: razorpay_payment_id,
                 orderId: razorpay_order_id,
-                month: [...pendingMonth],
+                month: pendingMonth,
                 status: "Failed",
             })
 
             return next(new ErrorHandler("payment not verify ", 400))
         }
 
+        const paymentMode = await razorpay.payments.fetch(
+            razorpay_payment_id
+        );
 
-        let payment = PaymentHistory.create({
+        let payment = await PaymentHistory.create({
             tenant: id,
             amount: dueAmountPreserve,
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            month: [...pendingMonth],
+            month: pendingMonth,
             status: "success",
         })
 
+        let receipt = await ReceiptHistory.create({
+            tenantId: id,
+            paymentId: payment?._id,
+            receipt: `rent_${id.slice(-6)}_${Date.now()}`,
+            months: receiptMonths,
+            totalAmount: user.dueAmount,
+            paymentMethod: paymentMode.method
+
+        })
+
+
         user.paymentStatus = "Paid";
         user.dueAmount = 0;
+        const subject = "Your This Month Rent reciept "
+        const message = receiptTemplate({
+            fullName: "bantony",
+            amount: 17000,
+            paymentId: "cyzz",
+            orderId: "123",
+            roomNumber: "123",
+            building: "shivam",
+            paymentDate: "12-12-2026",
+        })
+        const email = user.email
+        console.log(email)
+
+        sendEmail({ email, subject, message })
 
         // updating status in rent history
         user.rentHistory.forEach((status) => {
-            console.log(status)
-            console.log(typeof (status.paidOn))
             if (status.paymentStatus === "Unpaid" && status.paidOn === null) {
                 status.paymentStatus = "Paid"
                 status.paidOn = Date.now();
@@ -132,7 +154,7 @@ export const verifyPayment = async (req, res, next) => {
             amount: user.dueAmount,
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            month: monthNames[month - 1],
+            month: pendingMonth,
             status: "Failed",
         })
         await user.save()
@@ -185,10 +207,9 @@ export const paymentCheck = async (req, res, next) => {
         if (!nextMonthReached) {
             return next(new ErrorHandler("existing month joining", 400))
         }
-        console.log(!tenant.nextRentGeneratedMonth, nextMonthReached)
+
 
         if (!tenant.nextRentGeneratedMonth && nextMonthReached) {
-            console.log("start")
             const totalDaysInMonth = new Date(
                 yearOfJoining,
                 monthOfJoining,
@@ -312,8 +333,6 @@ export const paymentHistory = async (req, res, next) => {
 
     try {
         const paymentHistoryByUser = await PaymentHistory.find({ tenant: id })
-        console.log(paymentHistoryByUser)
-
         res.status(200).json({
             success: true,
             message: "here all the payment history",
