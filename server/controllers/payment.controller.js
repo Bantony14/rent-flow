@@ -72,15 +72,11 @@ export const verifyPayment = async (req, res, next) => {
             .digest("hex")
 
 
-        if (user.nextRentGeneratedMonth) {
-            month = Number(user.nextRentGeneratedMonth.split("-")[1]);
-            year = Number(user.nextRentGeneratedMonth.split("-")[0]);
-        } else {
-            month = new Date(user.joiningDate).toLocaleString("en-US", {
-                month: "long",
-            });
-        }
+        const filterMonth = user.rentHistory.filter((value) => value.paymentStatus === "Unpaid")
+        console.log(filterMonth)
 
+        const pendingMonth = filterMonth.map((month) => month.month)
+        console.log(pendingMonth)
 
         if (generatedSignature !== razorpay_signature) {
             let payment = PaymentHistory.create({
@@ -88,7 +84,7 @@ export const verifyPayment = async (req, res, next) => {
                 amount: dueAmountPreserve,
                 paymentId: razorpay_payment_id,
                 orderId: razorpay_order_id,
-                month: `${monthNames[month - 2]} ${year}`,
+                month: [...pendingMonth],
                 status: "Failed",
             })
 
@@ -101,7 +97,7 @@ export const verifyPayment = async (req, res, next) => {
             amount: dueAmountPreserve,
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            month: `${monthNames[month - 2]} ${year}`,
+            month: [...pendingMonth],
             status: "success",
         })
 
@@ -200,14 +196,14 @@ export const paymentCheck = async (req, res, next) => {
             ).getDate();
 
             const remainingDays = totalDaysInMonth - dateOfJoining;
-            const calculateDueAmount = (tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1)
+            const calculateDueAmount = Math.round((tenant.rentPrice / totalDaysInMonth) * (remainingDays + 1))
             tenant.dueAmount = Math.round(calculateDueAmount);
             tenant.lastRentAmount = tenant.dueAmount
 
             tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
 
             tenant.rentHistory.push({
-                month: ` ${monthNames[monthOfJoining - 1]} ${yearOfJoining}`,
+                month: `${monthNames[monthOfJoining - 1]} ${yearOfJoining}`,
                 dueAmount: tenant.dueAmount,
                 paymentStatus: "Unpaid"
             })
@@ -226,7 +222,7 @@ export const paymentCheck = async (req, res, next) => {
 
 
                     tenant.rentHistory.push({
-                        month: ` ${monthNames[monthIndex]} ${yearOfJoining}`,
+                        month: `${monthNames[monthIndex]} ${yearOfJoining}`,
                         dueAmount: tenant.rentPrice,
                         paymentStatus: "Unpaid"
                     })
@@ -275,7 +271,7 @@ export const paymentCheck = async (req, res, next) => {
                 let monthIndex = (lastRentMonth - 1) % 12
 
                 tenant.rentHistory.push({
-                    month: ` ${monthNames[monthIndex]} ${lastRentYear}`,
+                    month: `${monthNames[monthIndex]} ${lastRentYear}`,
                     dueAmount: tenant.rentPrice,
                     paymentStatus: "Unpaid"
                 })

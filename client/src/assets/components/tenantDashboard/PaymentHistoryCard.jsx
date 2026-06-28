@@ -44,7 +44,7 @@ function PaymentHistoryCard() {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="font-semibold text-slate-800">
-                                    {payment.month}
+                                    {payment.month.join(", ")}
                                 </p>
 
                                 <p className="text-sm text-slate-500">

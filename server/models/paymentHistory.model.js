@@ -9,7 +9,7 @@ const paymentSchema = new mongoose.Schema({
     amount: Number,
     paymentId: String,
     orderId: String,
-    month: String,
+    month: [],
     status: {
         type: String,
         enum: ["success", "Failed", "Pending"]
@@ -23,3 +23,5 @@ const paymentSchema = new mongoose.Schema({
 const PaymentHistory = mongoose.model("paymentHistory", paymentSchema)
 
 export default PaymentHistory;
+
+
