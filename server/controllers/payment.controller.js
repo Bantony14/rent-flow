@@ -6,6 +6,7 @@ import PaymentHistory from "../models/paymentHistory.model.js";
 import ReceiptHistory from "../models/receiptHistory.model.js";
 import sendEmail from "../utils/emailSender.js";
 import receiptTemplate from "../utils/receiptTemplate.js";
+import { generateReceiptPdf } from "../utils/generateReceiptPdf.js";
 
 
 
@@ -113,22 +114,32 @@ export const verifyPayment = async (req, res, next) => {
 
         user.paymentStatus = "Paid";
         user.dueAmount = 0;
+
+        // form here to send email its for sending receipt to email 
+        // start email
         const subject = "Your This Month Rent reciept "
-        const message = receiptTemplate({
-            fullName: "bantony",
-            amount: 17000,
-            paymentId: "cyzz",
-            orderId: "123",
-            roomNumber: "123",
-            building: "shivam",
-            paymentDate: "12-12-2026",
-        })
+        const receiptData = {
+            fullName: user.fullName,
+            months: receiptMonths, // in array 2 object month 2026 and amount 
+            totalAmount: payment.amount,
+            paymentId: razorpay_payment_id,
+            orderId: razorpay_order_id,
+            roomNumber: user.roomNumber,
+            building: user.building,
+            paymentDate: new Date(receipt.createdAt),
+        };
+
+        const message = receiptTemplate(receiptData)
         const email = user.email
+
+        const pdfBuffer = await generateReceiptPdf(receiptData);
         console.log(email)
 
-        sendEmail({ email, subject, message })
+        sendEmail({ email, subject, message, pdfBuffer })
+        // end email 
 
         // updating status in rent history
+        // start updating status
         user.rentHistory.forEach((status) => {
             if (status.paymentStatus === "Unpaid" && status.paidOn === null) {
                 status.paymentStatus = "Paid"
@@ -136,6 +147,7 @@ export const verifyPayment = async (req, res, next) => {
             }
 
         })
+        // end updating status
 
         await user.save();
 
@@ -144,7 +156,7 @@ export const verifyPayment = async (req, res, next) => {
             message: "payment successfully done",
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
-            amount: dueAmountPreserve
+            amount: payment.amount
 
         })
 
@@ -171,7 +183,7 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 2;
+        const currentMonth = today.getMonth() + 3;
         const currentYear = today.getFullYear();
 
 

@@ -14,12 +14,19 @@ const transporter = nodemailer.createTransport({
 });
 
 
-const sendEmail = async ({ email, subject, message }) => {
+const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
   await transporter.sendMail({
     from: `Rent Management App <${process.env.SMTP_EMAIL}>`,
     to: email,
     subject,
-    html: message
+    html: message,
+    attachments: pdfBuffer
+      ? [
+        {
+          filename: "receipt.pdf",
+          content: pdfBuffer,
+        },
+      ] : [],
   });
 };
 

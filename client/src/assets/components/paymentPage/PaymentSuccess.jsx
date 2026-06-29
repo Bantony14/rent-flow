@@ -9,7 +9,7 @@ function PaymentSuccess() {
     const paymentId = location.state?.paymentId;
     const orderId = location.state?.orderId;
     const amount = location.state?.amount;
-    console.log("location>>", location)
+
 
     useEffect(() => {
         const timer = setTimeout(() => {

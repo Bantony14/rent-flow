@@ -1,7 +1,7 @@
 
 const otpTemplate = (otp) => {
     return `
-    < !DOCTYPE html >
+    <!DOCTYPE html>
         <html>
             <head>
                 <meta charset="UTF-8" />
