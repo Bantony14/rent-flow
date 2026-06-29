@@ -7,6 +7,7 @@ import ReceiptHistory from "../models/receiptHistory.model.js";
 import sendEmail from "../utils/emailSender.js";
 import receiptTemplate from "../utils/receiptTemplate.js";
 import { generateReceiptPdf } from "../utils/generateReceiptPdf.js";
+import { uploadPdfToCloudinary } from "../utils/uploadPdfToCloudinary.js";
 
 
 
@@ -116,8 +117,7 @@ export const verifyPayment = async (req, res, next) => {
         user.dueAmount = 0;
 
         // form here to send email its for sending receipt to email 
-        // start email
-        const subject = "Your This Month Rent reciept "
+
         const receiptData = {
             fullName: user.fullName,
             months: receiptMonths, // in array 2 object month 2026 and amount 
@@ -129,13 +129,22 @@ export const verifyPayment = async (req, res, next) => {
             paymentDate: new Date(receipt.createdAt),
         };
 
-        const message = receiptTemplate(receiptData)
-        const email = user.email
+
 
         const pdfBuffer = await generateReceiptPdf(receiptData);
-        console.log(email)
+
+        //upload pdf to cloudinary and updating in receipt
+        const result = await uploadPdfToCloudinary(pdfBuffer);
+        receipt.pdf.public_id = result.public_id;
+        receipt.pdf.secure_url = result.secure_url;
+
+        // start email
+        const email = user.email
+        const subject = "Your This Month Rent reciept "
+        const message = receiptTemplate(receiptData)
 
         sendEmail({ email, subject, message, pdfBuffer })
+        console.log(email)
         // end email 
 
         // updating status in rent history
@@ -150,6 +159,7 @@ export const verifyPayment = async (req, res, next) => {
         // end updating status
 
         await user.save();
+        await receipt.save();
 
         res.status(200).json({
             success: true,
@@ -183,7 +193,7 @@ export const paymentCheck = async (req, res, next) => {
 
         // this is for current date month and year
         const today = new Date();
-        const currentMonth = today.getMonth() + 3;
+        const currentMonth = today.getMonth() + 1;
         const currentYear = today.getFullYear();
 
 
@@ -251,6 +261,7 @@ export const paymentCheck = async (req, res, next) => {
                     if (monthOfJoining === 12) {
                         monthOfJoining = 0;
                         yearOfJoining++;
+
                     }
 
 
@@ -260,12 +271,13 @@ export const paymentCheck = async (req, res, next) => {
                         paymentStatus: "Unpaid"
                     })
 
-                    tenant.lastRentAmount = tenant.rentPrice
-                    monthOfJoining++
+                    tenant.lastRentAmount = tenant.rentPrice;
+                    monthOfJoining++;
 
                 }
+                console.log("monthOfJoining >>", monthOfJoining)
 
-                tenant.nextRentGeneratedMonth = `${monthOfJoining === 12 ? yearOfJoining + 1 : yearOfJoining}-${monthOfJoining === 12 ? 1 : monthOfJoining + 1}`;
+                tenant.nextRentGeneratedMonth = `${yearOfJoining}-${monthOfJoining + 1}`;
 
 
             }

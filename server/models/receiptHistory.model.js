@@ -29,7 +29,12 @@ const receiptSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        paymentMethod: String
+        paymentMethod: String,
+
+        pdf: {
+            public_id: { type: String, default: null },
+            secure_url: { type: String, default: null }
+        }
     },
     {
         timestamps: true
