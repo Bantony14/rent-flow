@@ -1,9 +1,11 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs/promises"
 
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/");
+    destination: async (req, file, cb) => {
+        await fs.mkdir("./uploads", { recursive: true });
+        cb(null, "./uploads");
     },
 
     filename: (req, file, cb) => {
@@ -20,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({
     storage,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 5MB
+        fileSize: 10 * 1024 * 1024, //  10 MB
     },
 });
 
@@ -29,3 +31,8 @@ export const uploadImages = upload.fields([
     { name: "aadhaarFront", maxCount: 5 },
     { name: "aadhaarBack", maxCount: 5 },
 ]);
+
+export const uploadRoomImage = upload.array(
+    "roomImage",
+    6
+);

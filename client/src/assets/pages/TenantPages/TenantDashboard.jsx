@@ -13,13 +13,6 @@ export default function TenantDashboard() {
     return (
 
         <div className="min-h-screen bg-slate-100 font-sans">
-            <a
-                href="https://res.cloudinary.com/dtzr8k1wr/raw/upload/fl_attachment/v1782731334/rentflow/receipts/mfftkxguclrumh7jwokn.pdf"
-                target="_blank"
-                rel="noopener noreferrer"
-            >
-                Download Receipt
-            </a>
 
             {/* Hero */}
             <section className="bg-gradient-to-br from-blue-700 to-sky-500 px-6 py-8 pb-12">

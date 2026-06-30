@@ -64,7 +64,6 @@ export const verifyPayment = async (req, res, next) => {
         console.log("filterMonth>>", filterMonth)
 
         pendingMonth = filterMonth.map((month) => month.month)
-        console.log("pendingMonth>>>", pendingMonth)
 
 
         const receiptMonths = filterMonth.map((item) => ({
@@ -72,7 +71,6 @@ export const verifyPayment = async (req, res, next) => {
             amount: item.dueAmount
         }));
 
-        console.log("receiptMonths>>", receiptMonths)
 
 
 
@@ -128,8 +126,6 @@ export const verifyPayment = async (req, res, next) => {
             building: user.building,
             paymentDate: new Date(receipt.createdAt),
         };
-
-
 
         const pdfBuffer = await generateReceiptPdf(receiptData);
 

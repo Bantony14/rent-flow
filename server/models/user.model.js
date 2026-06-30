@@ -104,8 +104,6 @@ const userSchema = new mongoose.Schema(
                 },
             },
 
-
-
         }]
         ,
         roomNumber: {

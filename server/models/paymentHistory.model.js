@@ -6,14 +6,20 @@ const paymentSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
+
     amount: Number,
+
     paymentId: String,
+
     orderId: String,
+
     month: [],
+
     status: {
         type: String,
         enum: ["success", "Failed", "Pending"]
     },
+
     paidAt: {
         type: Date,
         default: Date.now

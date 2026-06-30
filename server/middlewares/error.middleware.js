@@ -1,6 +1,7 @@
 const errorMiddleware = (err, req, res, next) => {
 
     console.log(err);
+    console.log(err.filed)
 
 
     err.statusCode = err.statusCode || 400;

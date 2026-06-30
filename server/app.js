@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import RazorPay from "razorpay";
 import paymentRoute from "./routers/payment.route.js"
 import cors from "cors"
+import roomRoute from "./routers/room.route.js";
 const app = express();
 
 
@@ -27,6 +28,7 @@ app.use(cookieParser());
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/payment", paymentRoute);
+app.use("/api/v1/room", roomRoute)
 app.use((req, res, next) => {
     res.send("404 page is not found")
 })
