@@ -18,9 +18,9 @@ route.get("/getalluser", isLoggedIn, isAuthorized("ADMIN"), getAllUser);
 route.get("/getalluserbybuilding", isLoggedIn, isAuthorized("ADMIN"), getAllUserByBuilding);
 route.post("/forgotpassword", forgotPassword);
 route.post("/resetpassword", resetPassword);
-route.put("/addmember/:id", uploadImages, addMember);
-route.put("/removemember/:id/:memberid", removeMember);
-route.put("/updatemember/:id/:memberid", uploadImages, updateMemberInfo);
+route.put("/addmember/:id", isLoggedIn, isAuthorized("ADMIN"), uploadImages, addMember);
+route.put("/removemember/:id/:memberid", isLoggedIn, isAuthorized("ADMIN"), removeMember);
+route.put("/updatemember/:id/:memberid", isLoggedIn, isAuthorized("ADMIN"), uploadImages, updateMemberInfo);
 
 
 export default route;

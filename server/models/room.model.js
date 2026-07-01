@@ -20,6 +20,11 @@ const roomSchema = mongoose.Schema({
         trim: true,
     },
 
+    rent: {
+        type: Number,
+        required: true
+    },
+
     buildingName: {
         type: String,
         required: true,
