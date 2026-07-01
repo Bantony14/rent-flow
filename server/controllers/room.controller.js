@@ -41,6 +41,27 @@ export const roomCreate = async (req, res, next) => {
 
 }
 
+export const roomDelete = async (req, res, next) => {
+    const id = req.params.id;
+
+    if (!id) {
+        return next(new ErrorHandler("room not found", 400))
+    }
+    try {
+
+        const room = await Room.findByIdAndDelete(id)
+
+        res.status(200).json({
+            success: true,
+            message: "room delete updated sucessfully",
+
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+
+}
+
 export const roomImageUpdate = async (req, res, next) => {
     const id = req.params.id
     const imageId = req.params.imageid
@@ -124,4 +145,84 @@ export const roomDetailUpdate = async (req, res, next) => {
 
 
 }
+
+export const roomImageRemove = async (req, res, next) => {
+    const id = req.params.id
+    const imageId = req.params.imageid
+
+
+    if (!id) {
+        return next(new ErrorHandler("please enter id  ", 400))
+    }
+    if (!imageId) {
+        return next(new ErrorHandler("imageId does not exist ", 400))
+    }
+
+    try {
+        const room = await Room.findByIdAndUpdate(id, {
+            $pull: {
+                roomImage: { _id: imageId }
+            }
+        }, {
+            new: true,
+            runValidation: true
+        })
+
+        if (!room) {
+            return next(new ErrorHandler("room not have ", 400))
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "room image remove successful",
+            room
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+
+}
+
+export const addRoomImage = async (req, res, next) => {
+    const id = req.params.id
+
+    try {
+
+        const room = await Room.findById(id)
+
+        console.log(req.files)
+
+        try {
+            if (req.files) {
+                for (let i = 0; i < req.files.length; i++) {
+                    const result = await cloudinary.uploader.upload(req.files[i].path, {
+                        folder: "roomImage"
+                    })
+                    room.roomImage.push({
+                        public_id: result.public_id,
+                        secure_url: result.secure_url
+                    })
+                    await fs.unlink(req.files[i].path)
+                }
+            }
+        } catch (error) {
+            return next(new ErrorHandler(error.message, 500))
+        }
+
+        await room.save();
+
+        res.status(200).json({
+            success: true,
+            message: "image upload sucessfully",
+            room
+        })
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500))
+    }
+
+
+
+}
+
+
 
