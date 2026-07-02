@@ -2,10 +2,15 @@ import cloudinary from "../config/cloudinary.connect.js"
 import Room from "../models/room.model.js"
 import fs from "fs/promises"
 import ErrorHandler from "../utils/error.js"
+import User from "../models/user.model.js"
 
 export const roomCreate = async (req, res, next) => {
     console.log("hello")
+    // const { id } = req.user
+    const { buildingName, id } = req.body
+    console.log(buildingName, id)
     try {
+        const admin = User.findById(id)
         const room = await Room.create(req.body)
 
         console.log(req.files)
@@ -28,6 +33,9 @@ export const roomCreate = async (req, res, next) => {
             return next(new ErrorHandler(error.message, 500))
         }
 
+        if (!admin.properties.include(buildingName)) {
+            admin.properties.push(buildingName)
+        }
         await room.save();
         res.status(200).json({
             success: true,

@@ -152,18 +152,30 @@ const userSchema = new mongoose.Schema(
             default: null,
         },
 
-        profileImage:
-        {
-            public_id: String,
-            secure_url: String
+        profileImage: {
+            public_id: {
+                type: String,
+                required: true,
+            },
+            secure_url: {
+                type: String,
+                required: true,
+            },
         },
 
+
         aadhaarFront: {
-            public_id: String,
+            public_id: {
+                type: String,
+                required: true,
+            },
         },
 
         aadhaarBack: {
-            public_id: String,
+            public_id: {
+                type: String,
+                required: true,
+            },
         },
 
 
@@ -177,6 +189,8 @@ const userSchema = new mongoose.Schema(
 
             }
         ],
+
+        properties: [],
 
 
 

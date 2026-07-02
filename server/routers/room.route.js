@@ -5,7 +5,7 @@ import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 
 const route = express.Router();
 
-route.post("/roomadd", isLoggedIn, isAuthorized("ADMIN"), uploadRoomImage, roomCreate);
+route.post("/roomadd", uploadRoomImage, roomCreate);
 route.post("/roomimageupdate/:id/:imageid", isLoggedIn, isAuthorized("ADMIN"), uploadRoomImage, roomImageUpdate)
 route.post("/roomdetailupdate/:id", isLoggedIn, isAuthorized("ADMIN"), roomDetailUpdate)
 route.delete("/roomdelete/:id", isLoggedIn, isAuthorized("ADMIN"), roomDelete)

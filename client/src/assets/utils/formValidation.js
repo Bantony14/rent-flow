@@ -58,6 +58,7 @@ export const input = (roomOptions) => {
             name: "dob",
             placeholder: "Select date of birth"
         },
+
         {
             type: "password",
             name: "password",
@@ -76,6 +77,16 @@ export const input = (roomOptions) => {
             minLength: 1,
             maxLength: 5,
             options: roomOptions,
+        },
+        {
+            type: "text",
+            name: "rentPrice",
+            placeholder: "Enter rent",
+        },
+        {
+            type: "date",
+            name: "joiningDate",
+            placeholder: "Select date of joining"
         },
         {
             type: "email",

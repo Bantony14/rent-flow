@@ -9,16 +9,25 @@ import fs from "fs/promises"
 import otpTemplate from "../utils/optTemplate.js";
 
 export const userRegistration = async (req, res, next) => {
+
+    console.log(req.headers["content-type"]);
+    console.log("req.body>>>", req.body)
+    console.log("req.files>>>", req.files)
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
-    console.log("hello")
+    const { profileImage, aadhaarFront, aadhaarBack } = req.files
+
+
+
 
 
     if (req.body.role) {
         return next(new ErrorHandler("cannot enter role field", 400))
     }
-    if (!fullName || !email || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate) {
+    if (!fullName || !email || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate || !profileImage || !aadhaarFront || !aadhaarBack) {
         return next(new ErrorHandler("all filed is required", 400))
     }
+
+
 
 
     let profileResult;
@@ -43,9 +52,9 @@ export const userRegistration = async (req, res, next) => {
                     }),
                 ]);
 
-            await fs.promises.unlink(req.files.profileImage[0].path);
-            await fs.promises.unlink(req.files.aadhaarFront[0].path);
-            await fs.promises.unlink(req.files.aadhaarBack[0].path);
+            await fs.unlink(req.files.profileImage[0].path);
+            await fs.unlink(req.files.aadhaarFront[0].path);
+            await fs.unlink(req.files.aadhaarBack[0].path);
 
         } catch (err) {
             console.log("Cloudinary Error:", err);
@@ -348,7 +357,7 @@ export const getAllUserByBuilding = async (req, res, next) => {
         res.status(200).json({
             success: true,
             message: "here your user data ",
-            user,
+            user
         })
 
     } catch (error) {

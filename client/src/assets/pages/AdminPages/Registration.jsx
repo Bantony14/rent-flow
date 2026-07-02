@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { userRegistrationApi } from "../../api/authApi.js";
@@ -15,13 +15,24 @@ function Registration() {
         password: "",
         roomNumber: "",
         building: "",
-        email: ""
+        email: "",
+        joiningDate: "",
+        rent: "",
+
     };
     const [formData, setFormData] = useState(initialState);
     const [showPassword, setShowPassword] = useState(false)
     const [roomOptions, setRoomOptions] = useState([]);
     const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
     const strongEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    const [profileImage, setProfileImage] = useState("");
+    const [addhaarFront, setAddhaarFront] = useState("");
+    const [addhaarBack, setAddhaarBack] = useState("");
+    const [loading, setloading] = useState(false)
+    // enter filed in formData
+
+
+
 
 
 
@@ -67,40 +78,67 @@ function Registration() {
             return;
         }
 
+        if (!profileImage || !addhaarFront || !addhaarBack) {
+            toast.error("please upload all image")
+            return;
+        }
+
+        // tenantDetails add 
+
+        const tenantDetails = new FormData(); // reset value
+
+        function tenant() {
+            tenantDetails.set("profileImage", profileImage);
+            tenantDetails.set("aadhaarFront", addhaarFront);
+            tenantDetails.set("aadhaarBack", addhaarBack);
+
+            Object.keys(formData).forEach((key) => {
+                tenantDetails.set(key, formData[key]);
+            });
+        }
+
+        tenant();
+
+        setloading(true)
+
         try {
-            const response = await userRegistrationApi(formData);
+            const response = await userRegistrationApi(tenantDetails);
             toast.success(response.data.message);
             setFormData(initialState)
-
+            setaddhaarFront("")
+            setAddhaarBack("");
+            setProfileImage("")
 
         } catch (error) {
             return toast.error(error.response.data.message);
 
+        } finally {
+            setloading(false)
         }
 
-
-        console.log(formData)
     }
+
+
 
     return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
             <form
                 onSubmit={handleSubmit}
                 className="
-      w-full 
-      max-w-2xl 
-      p-6 
-      sm:p-8
-      bg-white 
-      rounded-2xl 
-      border border-gray-200
-      shadow-lg 
-      shadow-gray-200/60
-    "
+                        w-full 
+                        max-w-2xl 
+                        p-6 
+                        sm:p-8
+                        bg-white 
+                        rounded-2xl 
+                        border border-gray-200
+                        shadow-lg 
+                        shadow-gray-200/60
+                        "
             >
 
                 {/* Title */}
-                <div className="mb-6 md:mb-8 text-center">
+                <div className="mb-2 md:mb-2 text-center">
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
                         Registration Form
                     </h1>
@@ -108,6 +146,41 @@ function Registration() {
                     <p className="text-sm text-gray-500 mt-2">
                         Fill in Tenant details to create account
                     </p>
+                </div>
+
+                {/* profile image upload here */}
+
+                <div className="flex flex-col items-center mb-4">
+                    <label
+                        htmlFor="profileImage"
+                        className="cursor-pointer flex flex-col items-center group"
+                    >
+                        <div className="w-32 h-38 rounded-full overflow-hidden border-2 border-gray-300 group-hover:border-blue-500 transition-all duration-300">
+                            <img
+                                src={
+                                    profileImage
+                                        ? URL.createObjectURL(profileImage)
+                                        : "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                                }
+                                alt="Profile"
+                                className="w-full h-full object-stretch"
+                            />
+                        </div>
+
+                        <p className="mt-3 text-sm font-medium text-gray-600 group-hover:text-blue-500 transition-colors">
+                            {profileImage
+                                ? "Click to change profile picture"
+                                : "Click to upload profile picture"}
+                        </p>
+                    </label>
+
+                    <input
+                        id="profileImage"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => setProfileImage(e.target.files[0])}
+                    />
                 </div>
 
                 {/* Inputs */}
@@ -231,13 +304,13 @@ function Registration() {
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
                                             className="
-                  absolute
-                  right-4
-                  top-3.5
-                  text-gray-500
-                  hover:text-cyan-600
-                  transition
-                "
+                                                        absolute
+                                                        right-4
+                                                        top-3.5
+                                                        text-gray-500
+                                                        hover:text-cyan-600
+                                                        transition
+                                                        "
                                         >
 
                                             {
@@ -254,35 +327,125 @@ function Registration() {
                         )
                     })}
 
+                    {/* addhaar Image uplode front and back */}
+                    {/* addhaar Image uplode front */}
+
+                    <div className="flex justify-center">
+                        <label
+                            htmlFor="aadhaarFront"
+                            className="w-100 h-40 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300"
+                        >
+                            <img
+                                src={
+                                    addhaarFront
+                                        ? URL.createObjectURL(addhaarFront)
+                                        : "https://www.freeiconspng.com/thumbs/plus-icon/plus-icon-black-2.png"
+                                }
+                                alt="Aadhaar Front"
+                                className={
+                                    addhaarFront
+                                        ? "w-full h-full object-cover rounded-xl"
+                                        : "w-12 h-12 opacity-60"
+                                }
+                            />
+
+                            {!addhaarFront && (
+                                <p className="mt-3 text-sm text-gray-500 font-medium">
+                                    Click to upload Aadhaar Front
+                                </p>
+                            )}
+                        </label>
+
+                        <input
+                            id="aadhaarFront"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => setAddhaarFront(e.target.files[0])}
+                        />
+                    </div>
+
+
+                    {/* addhaar Image uplode back */}
+                    <div className="flex justify-center">
+                        <label
+                            htmlFor="aadhaarBack"
+                            className="w-100 h-40 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-all duration-300"
+                        >
+                            <img
+                                src={
+                                    addhaarBack
+                                        ? URL.createObjectURL(addhaarBack)
+                                        : "https://www.freeiconspng.com/thumbs/plus-icon/plus-icon-black-2.png"
+                                }
+                                alt="Aadhaar Back"
+                                className={`${addhaarBack
+                                    ? "w-full h-full object-cover rounded-xl"
+                                    : "w-12 h-12 opacity-60"
+                                    }`}
+                            />
+
+                            {!addhaarBack && (
+                                <p className="mt-3 text-sm text-gray-500 font-medium">
+                                    Click to upload Aadhaar Back
+                                </p>
+                            )}
+                        </label>
+
+                        <input
+                            id="aadhaarBack"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => setAddhaarBack(e.target.files[0])}
+                        />
+                    </div>
+
+
                     {/* Submit Button */}
 
                     <div className="md:col-span-2 pt-2">
 
-                        <input
+                        <button
                             type="submit"
-                            value="Create Account"
+                            disabled={loading}
                             className="
-          w-full
-          h-12
-          rounded-xl
-          font-semibold
-          text-white
-          bg-gradient-to-r
-          from-blue-600
-          to-cyan-500
-          cursor-pointer
-          transition-all
-          duration-200
-          hover:scale-[1.01]
-          active:scale-95
-          shadow-lg
-          shadow-cyan-200/50
-        "
-                        />
+    w-full
+    h-12
+    rounded-xl
+    font-semibold
+    text-white
+    bg-gradient-to-r
+    from-blue-600
+    to-cyan-500
+    transition-all
+    duration-200
+    hover:scale-[1.01]
+    active:scale-95
+    shadow-lg
+    shadow-cyan-200/50
+    disabled:opacity-70
+    disabled:cursor-not-allowed
+    flex
+    items-center
+    justify-center
+    gap-2
+  "
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Registering...
+                                </>
+                            ) : (
+                                "Register"
+                            )}
+                        </button>
 
                     </div>
 
                 </div>
+
 
             </form>
         </div>
