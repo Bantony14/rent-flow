@@ -30,7 +30,7 @@ export const rooms = {
     ]
 };
 
-export const input = (roomOptions) => {
+export const input = (roomOptions, buildingOption) => {
     const value = [
         {
             type: "text",
@@ -69,14 +69,14 @@ export const input = (roomOptions) => {
         {
             type: "select",
             name: "building",
-            options: ["Shivam Residency", "Krishna Tower"]
+            options: buildingOption || [],
         },
         {
             type: "select",
             name: "roomNumber",
             minLength: 1,
             maxLength: 5,
-            options: roomOptions,
+            options: roomOptions || [],
         },
         {
             type: "text",

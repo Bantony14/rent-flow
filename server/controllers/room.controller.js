@@ -5,49 +5,63 @@ import ErrorHandler from "../utils/error.js"
 import User from "../models/user.model.js"
 
 export const roomCreate = async (req, res, next) => {
-    console.log("hello")
-    // const { id } = req.user
-    const { buildingName, id } = req.body
-    console.log(buildingName, id)
-    try {
-        const admin = User.findById(id)
-        const room = await Room.create(req.body)
+    const { buildingName, id, room } = req.body;
 
-        console.log(req.files)
+    try {
+        const roomExist = await Room.findOne({
+            room,
+            buildingName,
+        });
+
+        if (roomExist) {
+            return next(
+                new ErrorHandler("Room already exists in this building", 400)
+            );
+        }
+
+        const admin = await User.findById(id);
+
+        if (!admin) {
+            return next(new ErrorHandler("Admin not found", 404));
+        }
+
+        const newRoom = await Room.create(req.body);
 
         try {
-            if (req.files) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const result = await cloudinary.uploader.upload(req.files[i].path, {
-                        folder: "roomImage"
-                    })
-                    room.roomImage.push({
+            if (req.files?.length) {
+                for (const file of req.files) {
+                    const result = await cloudinary.uploader.upload(file.path, {
+                        folder: "roomImage",
+                    });
+
+                    newRoom.roomImage.push({
                         public_id: result.public_id,
-                        secure_url: result.secure_url
-                    })
-                    await fs.unlink(req.files[i].path)
+                        secure_url: result.secure_url,
+                    });
+
+                    await fs.unlink(file.path);
                 }
             }
         } catch (error) {
-            console.log("error in image upload")
-            return next(new ErrorHandler(error.message, 500))
+            return next(new ErrorHandler(error.message, 500));
         }
 
-        if (!admin.properties.include(buildingName)) {
-            admin.properties.push(buildingName)
+        if (!admin.properties.includes(buildingName)) {
+            admin.properties.push(buildingName);
         }
-        await room.save();
+
+        await newRoom.save();
+        await admin.save();
+
         res.status(200).json({
             success: true,
-            message: "room created successfully",
-            room
-        })
-
+            message: "Room created successfully",
+            room: newRoom,
+        });
     } catch (error) {
-        return next(new ErrorHandler(error.message, 500))
+        return next(new ErrorHandler(error.message, 500));
     }
-
-}
+};
 
 export const roomDelete = async (req, res, next) => {
     const id = req.params.id;

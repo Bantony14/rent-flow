@@ -16,7 +16,6 @@ const roomSchema = mongoose.Schema({
     room: {
         type: String,
         required: true,
-        unique: true,
         trim: true,
     },
 

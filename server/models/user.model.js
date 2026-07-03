@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema(
         building: {
             type: String,
             required: [true, "Building name is required"],
-            enum: ["Shivam Residency", "Krishna Tower"]
+
         },
         role: {
             type: String,
@@ -155,11 +155,11 @@ const userSchema = new mongoose.Schema(
         profileImage: {
             public_id: {
                 type: String,
-                required: true,
+                // required: true,
             },
             secure_url: {
                 type: String,
-                required: true,
+                // required: true,
             },
         },
 
@@ -167,14 +167,14 @@ const userSchema = new mongoose.Schema(
         aadhaarFront: {
             public_id: {
                 type: String,
-                required: true,
+                // required: true,
             },
         },
 
         aadhaarBack: {
             public_id: {
                 type: String,
-                required: true,
+                // required: true,
             },
         },
 

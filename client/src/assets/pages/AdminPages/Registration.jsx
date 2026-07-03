@@ -1,9 +1,11 @@
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { userRegistrationApi } from "../../api/authApi.js";
+import { getRoomByBuilding, userRegistrationApi } from "../../api/authApi.js";
 import toast from "react-hot-toast";
 import { rooms, errorMsg, validation, input } from "../../utils/formValidation.js"
+import { AuthContext } from "../../context/authContext.jsx";
+import { useContext } from "react";
 
 function Registration() {
 
@@ -17,33 +19,74 @@ function Registration() {
         building: "",
         email: "",
         joiningDate: "",
-        rent: "",
+        rentPrice: "",
 
     };
+    const { user } = useContext(AuthContext);
     const [formData, setFormData] = useState(initialState);
-    const [showPassword, setShowPassword] = useState(false)
+    const [showPassword, setShowPassword] = useState(false);
     const [roomOptions, setRoomOptions] = useState([]);
+    const [buildingOption, setBuildingOption] = useState([]);
     const strongPassword = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
     const strongEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     const [profileImage, setProfileImage] = useState("");
     const [addhaarFront, setAddhaarFront] = useState("");
     const [addhaarBack, setAddhaarBack] = useState("");
-    const [loading, setloading] = useState(false)
-    // enter filed in formData
+    const [loading, setloading] = useState(false);
+    const params = {};
+    if (formData.building) {
+        params.building = formData.building
+    }
+    if (formData.roomNumber) {
+        params.roomNumber = formData.roomNumber
+    }
 
 
-
-
-
+    // fetching room via building name 
 
     useEffect(() => {
-        setRoomOptions(rooms[formData.building] || []);
-    }, [formData.building]);
+        const fetchRooms = async () => {
+            setBuildingOption(user.properties);
 
-    const inputs = input(roomOptions);
+            if (!formData.building) {
+                return
+            }
+
+            try {
+                const res = await getRoomByBuilding(params);
+                const rooms = res.data.building.map((room) => room.room);
+                setRoomOptions(rooms);
+
+            } catch (error) {
+                toast.error(error?.response?.data?.message);
+            }
+        };
+
+        fetchRooms();
+    }, [formData.building, user]);
+
+    // rent via building and room
+    useEffect(() => {
+        if (!formData.roomNumber) return;
+
+        (async () => {
+            try {
+                const res = await getRoomByBuilding(params);
+
+                setFormData((prev) => ({
+                    ...prev,
+                    rentPrice: res.data.building[0].rent,
+                }));
+            } catch (error) {
+                toast.error(error?.response?.data?.message || "Failed to fetch rent");
+            }
+        })();
+    }, [formData.roomNumber]);
+
+    const inputs = input(roomOptions, buildingOption);
     const validations = validation(formData, strongPassword, strongEmail)
 
-
+    //  changing value of form data
     function handleChange(e) {
 
         if ((e.target.name === "aadhaarNumber" || e.target.name === "mobileNumber") && !/^\d*$/.test(e.target.value)) {
@@ -51,14 +94,16 @@ function Registration() {
         }
 
         if (e.target.name === "building") {
-            setFormData({
-                ...formData,
+            setFormData((prev) => ({
+                ...prev,
                 [e.target.name]: e.target.value,
-                roomNumber: ""
-            })
+                roomNumber: "",
+                rentPrice: "",
+            }));
 
             return;
         }
+
         setFormData(
             {
                 ...formData,
@@ -68,6 +113,7 @@ function Registration() {
 
     }
 
+    // submit form and registration tanant
     async function handleSubmit(e) {
         e.preventDefault();
 
@@ -192,27 +238,26 @@ function Registration() {
 
                             return (
                                 <div key={index}>
-
                                     <select
                                         name={value.name}
                                         value={formData[value.name]}
                                         onChange={handleChange}
                                         required
                                         className="
-                w-full
-                h-12
-                px-4
-                border border-gray-300
-                rounded-xl
-                bg-white
-                text-gray-700
-                outline-none
-                transition-all
-                duration-200
-                focus:border-cyan-500
-                focus:ring-4
-                focus:ring-cyan-100
-              "
+                                                    w-full
+                                                    h-12
+                                                    px-4
+                                                    border border-gray-300
+                                                    rounded-xl
+                                                    bg-white
+                                                    text-gray-700
+                                                    outline-none
+                                                    transition-all
+                                                    duration-200
+                                                    focus:border-cyan-500
+                                                    focus:ring-4
+                                                    focus:ring-cyan-100
+                                                "
                                     >
 
                                         <option value="">
@@ -260,6 +305,7 @@ function Registration() {
                                     placeholder={value.placeholder}
                                     minLength={value.minLength}
                                     maxLength={value.maxLength}
+                                    readOnly={value.name === "rentPrice" ? true : false}
 
                                     max={
                                         value.type === "date"
@@ -270,20 +316,20 @@ function Registration() {
                                     required
 
                                     className="
-              w-full
-              h-12
-              px-4
-              border border-gray-300
-              rounded-xl
-              outline-none
-              text-gray-700
-              placeholder:text-gray-400
-              transition-all
-              duration-200
-              focus:border-cyan-500
-              focus:ring-4
-              focus:ring-cyan-100
-            "
+                                                    w-full
+                                                    h-12
+                                                    px-4
+                                                    border border-gray-300
+                                                    rounded-xl
+                                                    outline-none
+                                                    text-gray-700
+                                                    placeholder:text-gray-400
+                                                    transition-all
+                                                    duration-200
+                                                    focus:border-cyan-500
+                                                    focus:ring-4
+                                                    focus:ring-cyan-100
+                                                    "
                                 />
 
                                 {

@@ -7,6 +7,7 @@ import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
 import fs from "fs/promises"
 import otpTemplate from "../utils/optTemplate.js";
+import Room from "../models/room.model.js";
 
 export const userRegistration = async (req, res, next) => {
 
@@ -15,9 +16,6 @@ export const userRegistration = async (req, res, next) => {
     console.log("req.files>>>", req.files)
     const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
     const { profileImage, aadhaarFront, aadhaarBack } = req.files
-
-
-
 
 
     if (req.body.role) {
@@ -97,6 +95,17 @@ export const userRegistration = async (req, res, next) => {
         }
         user.password = undefined;
 
+        const roomAvailabilityUpdate = await Room.findOne({
+            buildingName: building,
+            room: roomNumber
+        })
+        console.log(roomAvailabilityUpdate)
+
+        if (roomAvailabilityUpdate) {
+            roomAvailabilityUpdate.Avaliablity = false
+            await roomAvailabilityUpdate.save()
+        }
+
 
         res.status(200).json({
             success: true,
@@ -168,6 +177,10 @@ export const userUpdate = async (req, res, next) => {
 
         if (!user) {
             return next(new ErrorHandler("user Not found", 400))
+        }
+
+        if (req.body.properties) {
+            user.properties.push(req.body.properties)
         }
 
         if (req.files && Object.keys(req.files).length > 0) {
@@ -341,23 +354,31 @@ export const getUserById = async (req, res, next) => {
 
 export const getAllUserByBuilding = async (req, res, next) => {
 
+    console.log(req.params.building)
+
     const { building, roomNumber } = req.query;
     const filter = {}
     if (building) {
-        filter.building = building
+        filter.buildingName = building,
+            filter.Avaliablity = true
     }
     if (roomNumber) {
-        filter.roomNumber = roomNumber
+        filter.room = roomNumber
+    }
+
+    if (Object.keys(filter).length < 1) {
+        return next(new ErrorHandler("room not found", 400))
     }
     try {
-        const user = await User.find(filter);
-        if (user.length === 0) {
-            return next(new ErrorHandler("user not found", 400))
+        const building = await Room.find(filter);
+        console.log(building)
+        if (building.length === 0) {
+            return next(new ErrorHandler("building not found", 400))
         }
         res.status(200).json({
             success: true,
-            message: "here your user data ",
-            user
+            message: "here your rooms",
+            building
         })
 
     } catch (error) {

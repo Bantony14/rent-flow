@@ -41,3 +41,7 @@ export function getOneUser(data) {
     return API.post("/getoneuser", data)
 }
 
+export function getRoomByBuilding(params) {
+    return API.get("/getalluserbybuilding", { params })
+}
+
