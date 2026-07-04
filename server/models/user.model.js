@@ -111,7 +111,6 @@ const userSchema = new mongoose.Schema(
             required: [true, "Room number is required"],
             trim: true,
             uppercase: true,
-            unique: true
         },
         building: {
             type: String,

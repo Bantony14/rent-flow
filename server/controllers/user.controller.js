@@ -99,10 +99,10 @@ export const userRegistration = async (req, res, next) => {
             buildingName: building,
             room: roomNumber
         })
-        console.log(roomAvailabilityUpdate)
 
         if (roomAvailabilityUpdate) {
             roomAvailabilityUpdate.Avaliablity = false
+            roomAvailabilityUpdate.tenantsId.push(user._id)
             await roomAvailabilityUpdate.save()
         }
 

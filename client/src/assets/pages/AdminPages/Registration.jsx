@@ -49,15 +49,16 @@ function Registration() {
             setBuildingOption(user.properties);
 
             if (!formData.building) {
+                setRoomOptions("")
                 return
             }
-
             try {
                 const res = await getRoomByBuilding(params);
                 const rooms = res.data.building.map((room) => room.room);
                 setRoomOptions(rooms);
 
             } catch (error) {
+                setRoomOptions("")
                 toast.error(error?.response?.data?.message);
             }
         };
