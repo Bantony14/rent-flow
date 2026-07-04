@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom"
+import { useAsyncError, useNavigate } from "react-router-dom"
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,6 +18,7 @@ function Login() {
     const strongEmail = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
     const [showPassword, setShowPassword] = useState(false)
     const [formData, setFormData] = useState(initialState)
+    const [loading, setLoading] = useState(false)
     const { setUser } = useContext(AuthContext)
 
     const validation = {
@@ -52,6 +53,7 @@ function Login() {
             return;
         }
         try {
+            setLoading(true)
             const response = await userLogin(formData);
             setUser(response.data.user)
             toast.success(response.data.message);
@@ -60,6 +62,8 @@ function Login() {
 
         } catch (error) {
             toast.error(error?.response?.data?.message)
+        } finally {
+            setLoading(false)
         }
 
 
@@ -167,34 +171,38 @@ function Login() {
                             hover:text-cyan-700
                             hover:underline
   "
-                                onClick={() => navigate("/forgotpassword")}
+                                onClick={() => navigate("/forgot-password")}
                             >
                                 Forgot Password?
                             </button>
 
                         </div>
 
-                        <input
+                        <button
                             type="submit"
-                            value="Login"
+                            disabled={loading}
                             className="
-          w-full
-          h-12
-          rounded-xl
-          font-semibold
-          text-white
-          bg-gradient-to-r
-          from-blue-600
-          to-cyan-500
-          cursor-pointer
-          transition-all
-          duration-200
-          hover:scale-[1.01]
-          active:scale-95
-          shadow-lg
-          shadow-cyan-200/50
-        "
-                        />
+    w-full
+    h-12
+    rounded-xl
+    font-semibold
+    text-white
+    bg-gradient-to-r
+    from-blue-600
+    to-cyan-500
+    transition-all
+    duration-200
+    hover:scale-[1.01]
+    active:scale-95
+    shadow-lg
+    shadow-cyan-200/50
+    disabled:opacity-70
+    disabled:cursor-not-allowed
+    disabled:hover:scale-100
+  "
+                        >
+                            {loading ? "Logging in..." : "Login"}
+                        </button>
 
                     </div>
 

@@ -29,12 +29,15 @@ function RentDueCard({ user }) {
     ];
 
     const date = new Date(user.joiningDate);
+    console.log(date)
 
     const joiningMonth = date.getMonth();
     const joiningYear = date.getFullYear();
 
-    let month = Number(user?.nextRentGeneratedMonth.split("-")[1]);
-    let year = Number(user?.nextRentGeneratedMonth.split("-")[0]);
+    console.log(joiningMonth, joiningYear)
+
+    let month = Number(user?.nextRentGeneratedMonth?.split("-")[1]);
+    let year = Number(user?.nextRentGeneratedMonth?.split("-")[0]);
 
     const handlePayNow = async () => {
         try {
@@ -131,15 +134,21 @@ function RentDueCard({ user }) {
                     <div>
                         <p className="text-sm text-slate-500">
                             {user.nextRentGeneratedMonth ? (`${monthNames[month - 2]} ${year} Rent`)
-                                : (`${monthNames[joiningMonth - 2]} ${joiningYear} Rent`)}
+                                : (`${monthNames[joiningMonth]} ${joiningYear} Rent`)}
                         </p>
 
-                        <h1
-                            className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
-                                }`}
-                        >
-                            ₹{user.lastRentAmount}
-                        </h1>
+                        {user.lastRentAmount ? (
+                            <h1
+                                className={`text-4xl font-bold mt-1 ${isPaid === "Paid" ? "text-green-700" : "text-red-700"
+                                    }`}
+                            >
+                                ₹{user.lastRentAmount.toLocaleString("en-IN")}
+                            </h1>
+                        ) : (
+                            <p className="mt-2 text-base font-bold text-slate-500">
+                                Rent has not been generated for your first month yet.
+                            </p>
+                        )}
                     </div>
 
                 </div>

@@ -1,5 +1,5 @@
 import express from "express";
-import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUserById, removeMember, resetPassword, updateMemberInfo, userDelete, userLogin, userLogout, userRegistration, userUpdate, getOneUser } from "../controllers/user.controller.js";
+import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUserById, removeMember, resetPassword, updateMemberInfo, userDelete, userLogin, userLogout, userRegistration, userUpdate, getOneUser, verifyOtp } from "../controllers/user.controller.js";
 import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 import { uploadImages } from "../middlewares/upload.middleware.js";
 
@@ -17,6 +17,7 @@ route.post("/getoneuser", isLoggedIn, isAuthorized("ADMIN"), getOneUser);
 route.get("/getalluser", isLoggedIn, isAuthorized("ADMIN"), getAllUser);
 route.get("/getalluserbybuilding", isLoggedIn, isAuthorized("ADMIN"), getAllUserByBuilding);
 route.post("/forgotpassword", forgotPassword);
+route.post("/verifyotp", verifyOtp);
 route.post("/resetpassword", resetPassword);
 route.put("/addmember/:id", isLoggedIn, isAuthorized("ADMIN"), uploadImages, addMember);
 route.put("/removemember/:id/:memberid", isLoggedIn, isAuthorized("ADMIN"), removeMember);

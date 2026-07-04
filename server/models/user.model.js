@@ -134,7 +134,7 @@ const userSchema = new mongoose.Schema(
         },
         dueAmount: {
             type: Number,
-            default: null
+            default: 0
         },
 
         nextRentGeneratedMonth: {

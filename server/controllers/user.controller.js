@@ -9,6 +9,7 @@ import fs from "fs/promises"
 import otpTemplate from "../utils/optTemplate.js";
 import Room from "../models/room.model.js";
 
+
 export const userRegistration = async (req, res, next) => {
 
     console.log(req.headers["content-type"]);
@@ -433,6 +434,7 @@ export const userLogout = async (req, res, next) => {
 // This work only for sending otp to email with all thing to do about otp
 export const forgotPassword = async (req, res, next) => {
     const { email } = req.body
+    console.log(req.body)
     const otp = otpGenerator();
 
     try {
@@ -462,8 +464,39 @@ export const forgotPassword = async (req, res, next) => {
     }
 }
 
+export const verifyOtp = async (req, res, next) => {
+    try {
+
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return next(new ErrorHandler("Email and OTP are required", 400));
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        if (user.otp !== otp || user.otpExpiry < Date.now()) {
+            return next(new ErrorHandler("Invalid or expired OTP", 400));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "OTP verified successfully"
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const resetPassword = async (req, res, next) => {
     const { email, otp, newPassword, confirmPassword } = req.body;
+
+    console.log(req.body)
 
     if (!email || !otp || !newPassword || !confirmPassword) {
         return next(new ErrorHandler("all filed required", 400));
@@ -475,6 +508,10 @@ export const resetPassword = async (req, res, next) => {
 
     try {
         const user = await User.findOne({ email }).select("+password")
+
+        if (!user.comparePassword(newPassword)) {
+            return next(new ErrorHandler("please do'nt enter previous password", 400));
+        }
 
         if (user.otp !== otp || user.otpExpiry < Date.now()) {
             return next(new ErrorHandler("invalid or expired otp", 400))

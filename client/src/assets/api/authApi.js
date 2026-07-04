@@ -45,3 +45,14 @@ export function getRoomByBuilding(params) {
     return API.get("/getalluserbybuilding", { params })
 }
 
+export function forgotPassword(email) {
+    return API.post("/forgotpassword", { email })
+}
+
+export function verifyEmailOtp(email, otp) {
+    return API.post("/verifyotp", { email, otp })
+}
+
+export function resetPassword(email, otp, newPassword, confirmPassword) {
+    return API.post("/resetpassword", { email, otp, newPassword, confirmPassword })
+}

@@ -14,6 +14,7 @@ import UserInfoCard from "./assets/pages/AdminPages/UserInfo"
 import PaymentSuccess from "./assets/components/paymentPage/PaymentSuccess.jsx"
 import PaymentFailed from "./assets/components/paymentPage/PaymentFailed"
 import TenantProfile from "./assets/pages/TenantPages/TenantProfile.jsx"
+import Forgotpassword from "./assets/pages/ForgotPassword.jsx"
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/payment-failed" element={<PaymentFailed />} />
           <Route path="/tenant/profile" element={<TenantProfile />} />
+          <Route path="/forgot-password" element={<Forgotpassword />} />
         </Route>
       </Routes>
     </>
