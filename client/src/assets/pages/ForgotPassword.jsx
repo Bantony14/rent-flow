@@ -180,10 +180,14 @@ function Forgotpassword() {
                             <button
                                 type="button"
                                 disabled={loading2}
-                                onClick={() => verifyOtp()}
-                                className="w-full h-12 mt-8 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-200 hover:scale-[1.01] active:scale-95 shadow-lg shadow-cyan-200/50"
+                                onClick={verifyOtp}
+                                className={`w-full h-12 mt-8 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg
+                                     ${loading2
+                                        ? "bg-slate-400 cursor-not-allowed shadow-none"
+                                        : "bg-gradient-to-r from-blue-600 to-cyan-500 hover:scale-[1.01] active:scale-95 shadow-cyan-200/50"
+                                    }`}
                             >
-                                Verify OTP
+                                {loading2 ? "Verifying..." : "Verify OTP"}
                             </button>
 
                             <p className="text-center text-sm text-slate-500 mt-5">

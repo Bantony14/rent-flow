@@ -3,12 +3,28 @@ import NotificationsCard from "../../components/tenantDashboard/PaymentHistoryCa
 import ProfileCard from "../../components/tenantDashboard/ProfileCard";
 import RentHistoryCard from "../../components/tenantDashboard/RentHistoryCard";
 import QuickActionsCard from "../../components/tenantDashboard/QuickActionCard";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import PaymentHistoryCard from "../../components/tenantDashboard/PaymentHistoryCard";
+import { paymentCheck } from "../../api/paymentApi";
 
 export default function TenantDashboard() {
-    const { user } = useContext(AuthContext)
+    const { user, setUser } = useContext(AuthContext)
+
+    useEffect(() => {
+        const checkPayment = async () => {
+            try {
+                const res = await paymentCheck();
+                setUser(res.data.tenant)
+                console.log(res.data.message);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        checkPayment();
+    }, []);
+
     console.log(user)
     return (
 
@@ -38,7 +54,7 @@ export default function TenantDashboard() {
                     {/* Notifications */}
 
                     {/* rent History */}
-                    <RentHistoryCard userRentHistory={user.rentHistory} />
+                    <RentHistoryCard userRentHistory={user.rentHistory.reverse()} />
 
                 </div>
 

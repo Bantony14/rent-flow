@@ -155,8 +155,16 @@ function RentDueCard({ user }) {
 
                 <p className="text-sm text-slate-600 mb-4">
                     {isPaid === "Paid"
-                        ? `Rent for ${monthNames[month - 2]} ${year} has been paid successfully.`
-                        : `Rent payment for ${monthNames[month - 2]} ${year} is pending.`}
+
+                        ? `Rent for ${user?.nextRentGeneratedMonth
+                            ? (`${monthNames[month - 2]} ${year}`)
+                            : (`${monthNames[joiningMonth]} ${joiningYear}`)}
+                            has been paid successfully.`
+
+                        : `Rent payment for ${user?.nextRentGeneratedMonth
+                            ? (`${monthNames[month - 2]} ${year}`)
+                            : (`${monthNames[joiningMonth]} ${joiningYear}`)}
+                             is pending.`}
                 </p>
 
                 <div className="flex items-center justify-between bg-white rounded-xl p-4 border">
@@ -177,11 +185,13 @@ function RentDueCard({ user }) {
                 <span>
                     {isPaid === "Paid" ? (
                         <span>
-                            Next Rent Due: {monthNames[month - 1]} {year}
+                            Next Rent Due: {user.nextRentGeneratedMonth ? (`${monthNames[month - 1]} 
+                                ${year}`) : (`${monthNames[joiningMonth]} ${joiningYear}`)}
                         </span>
                     ) : (
                         <span>
-                            Pending Rent: {monthNames[month - 2]} {year}
+                            Pending Rent: {user.nextRentGeneratedMonth ? (`${monthNames[month - 2]} 
+                                ${year}`) : (`${monthNames[joiningMonth]} ${joiningYear}`)}
                         </span>
                     )}
                 </span>

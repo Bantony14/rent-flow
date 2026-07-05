@@ -1,23 +1,39 @@
 import { CheckCircle2 } from "lucide-react";
+import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 function PaymentSuccess() {
-    const navigate = useNavigate();
     const location = useLocation();
 
     const paymentId = location.state?.paymentId;
     const orderId = location.state?.orderId;
     const amount = location.state?.amount;
+    const [countDown, setCountDown] = useState(5)
+
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setCountDown((prev) => {
+
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    return 0;
+                }
+
+                return prev - 1
+            })
+        }, 1000)
+    }, [])
 
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigate("/tenant/dashboard");
+            window.location.href = "/tenant/dashboard";
         }, 5000);
 
         return () => clearTimeout(timer);
-    }, [navigate]);
+    }, []);
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
@@ -61,19 +77,19 @@ function PaymentSuccess() {
                 </div>
 
                 <p className="text-sm text-slate-500">
-                    Redirecting to dashboard in 5 seconds...
+                    Redirecting to dashboard in {countDown} seconds...
                 </p>
 
                 <button
                     onClick={() =>
-                        navigate("/tenant/dashboard")
+                        window.location.href = "/tenant/dashboard"
                     }
                     className="w-full mt-4 bg-green-600 text-white py-3 rounded-xl font-semibold"
                 >
                     Go To Dashboard
                 </button>
             </div>
-        </div>
+        </div >
     );
 }
 

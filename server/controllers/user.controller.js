@@ -509,7 +509,7 @@ export const resetPassword = async (req, res, next) => {
     try {
         const user = await User.findOne({ email }).select("+password")
 
-        if (!user.comparePassword(newPassword)) {
+        if (await user.comparePassword(newPassword)) {
             return next(new ErrorHandler("please do'nt enter previous password", 400));
         }
 
