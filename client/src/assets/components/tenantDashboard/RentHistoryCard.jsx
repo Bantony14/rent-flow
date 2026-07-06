@@ -1,4 +1,4 @@
-import { History } from "lucide-react";
+import { History, Receipt } from "lucide-react";
 
 const statusStyles = {
   Paid: "bg-green-100 text-green-700",
@@ -8,22 +8,28 @@ const statusStyles = {
 
 function RentHistoryCard({ userRentHistory }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm p-5">
-      <div className="flex items-center gap-2 mb-5">
-        <div className="p-2 rounded-lg bg-blue-100">
-          <History size={18} className="text-blue-600" />
+    <div className="bg-white rounded-2xl shadow-sm p-5 max-h-[80vh] overflow-y-auto">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-blue-100">
+            <History size={18} className="text-blue-600" />
+          </div>
+
+          <div>
+            <h2 className="text-base font-semibold text-slate-800">
+              Rent History
+            </h2>
+            <p className="text-xs text-slate-500">
+              Previous rent payment records
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h2 className="text-base font-semibold text-slate-800">
-            Rent History
-          </h2>
-          <p className="text-xs text-slate-500">
-            Previous rent payment records
-          </p>
-        </div>
+        <button className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
+          <Receipt size={15} />
+          Receipt
+        </button>
       </div>
-
       {userRentHistory.length === 0 ? (
         <div className="py-10 text-center">
           <History size={35} className="mx-auto text-slate-300 mb-3" />

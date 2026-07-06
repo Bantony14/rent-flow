@@ -1,184 +1,327 @@
-import {
-    User, Mail, Phone, Building2, Home,
-    CreditCard, Calendar, IndianRupee, BadgeCheck,
-    Users, CheckCircle, XCircle
-} from "lucide-react";
-import { AuthContext } from "../../context/authContext";
+import { CalendarDays, Building2, IndianRupee, Phone, Mail, ShieldCheck, User2, Home } from "lucide-react";
 import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
+import { useState } from "react";
+import LoadingScreen from "../../components/LoadingScreen";
 
-function TenantProfile() {
-    const { user } = useContext(AuthContext);
+const TenantProfile = () => {
 
-    const formatDate = (date) =>
-        new Date(date).toLocaleDateString("en-IN", {
-            day: "numeric", month: "long", year: "numeric",
-        });
-
-    // Generate initials from a name
-    const getInitials = (name = "") =>
-        name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-
-    // Cycle avatar colors for members
-    const avatarColors = [
-        "bg-blue-100 text-blue-700",
-        "bg-green-100 text-green-700",
-        "bg-amber-100 text-amber-700",
-        "bg-purple-100 text-purple-700",
-        "bg-pink-100 text-pink-700",
-    ];
-
-    const Info = ({ icon, title, value, danger = false }) => (
-        <div className="flex items-center gap-3 py-3 border-b border-slate-100 last:border-0 last:pb-0">
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                {icon}
-            </div>
-            <div className="min-w-0">
-                <p className="text-xs text-slate-400">{title}</p>
-                <p className={`text-sm font-medium break-all ${danger ? "text-red-500" : "text-slate-800"}`}>
-                    {value}
-                </p>
-            </div>
-        </div>
-    );
-
-    const MetricCard = ({ title, value, danger = false }) => (
-        <div className="bg-slate-50 rounded-2xl p-4">
-            <p className="text-xs text-slate-400 mb-1">{title}</p>
-            <p className={`text-xl font-semibold ${danger ? "text-red-500" : "text-slate-800"}`}>
-                {value}
-            </p>
-        </div>
-    );
-
+    const tenant = useContext(AuthContext).user
+    const loading = useContext(AuthContext).loading
+    const [openDocuments, setOpenDocuments] = useState(false);
+    if (loading) {
+        return <LoadingScreen />
+    }
     return (
-        <div className="min-h-screen bg-slate-100 p-4 md:p-8">
-            <div className="max-w-5xl mx-auto space-y-4">
 
-                {/* ── Header Banner ── */}
-                <div className="bg-blue-600 rounded-3xl p-6 text-white">
-                    <div className="flex flex-col md:flex-row items-center gap-5">
-                        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-                            <img
-                                src={user?.profileImage?.secure_url}
-                                alt=""
-                                className="w-25 h-30 rounded-full object-cover"
+
+        <div className="min-h-screen bg-slate-100 p-6">
+            <div className="max-w-6xl mx-auto space-y-6">
+                <div className="relative overflow-hidden rounded-3xl bg-white shadow-lg">
+
+                    {/* Banner */}
+                    <div className="relative h-44 bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500">
+
+                        <div className="absolute inset-0 bg-black/10"></div>
+
+                        <div className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10"></div>
+                        <div className="absolute right-20 bottom-0 h-40 w-40 rounded-full bg-white/10"></div>
+
+                    </div>
+
+                    <div className="relative px-6 pb-8 md:px-10">
+
+                        <div className="-mt-20 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+
+                            {/* Left */}
+                            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-end">
+
+                                <div className="relative">
+
+                                    <img
+                                        src={tenant.profileImage?.secure_url}
+                                        alt={tenant.fullName}
+                                        className="h-36 w-36 rounded-full border-4 border-white object-cover shadow-2xl"
+                                    />
+
+                                    <div
+                                        className={`absolute bottom-2 right-2 h-5 w-5 rounded-full border-4 border-white ${tenant.paymentStatus === "Paid"
+                                            ? "bg-green-500"
+                                            : "bg-red-500"
+                                            }`}
+                                    />
+
+                                </div>
+
+                                <div className="text-center sm:text-left">
+
+                                    <h1 className="text-3xl font-bold text-slate-800">
+                                        {tenant.fullName}
+                                    </h1>
+
+                                    <p className="mt-1 text-slate-500">
+                                        {tenant.email}
+                                    </p>
+
+                                    <div className="mt-4 flex flex-wrap justify-center gap-3 sm:justify-start">
+
+                                        <span className="rounded-full bg-slate-100 px-4 py-1.5 text-sm font-semibold text-slate-700">
+                                            {tenant.role}
+                                        </span>
+
+                                        <span
+                                            className={`rounded-full px-4 py-1.5 text-sm font-semibold ${tenant.paymentStatus === "Paid"
+                                                ? "bg-green-100 text-green-700"
+                                                : "bg-red-100 text-red-700"
+                                                }`}
+                                        >
+                                            {tenant.paymentStatus}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {/* Right */}
+                            <div className="w-full max-w-xs rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+
+                                <p className="text-sm font-medium text-slate-500">
+                                    Monthly Rent
+                                </p>
+
+                                <h2 className="mt-2 text-4xl font-bold text-blue-600">
+                                    ₹{tenant?.rentPrice?.toLocaleString("en-IN")}
+                                </h2>
+
+                                <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-200">
+
+                                    <div
+                                        className={`h-full rounded-full ${tenant.paymentStatus === "Paid"
+                                            ? "bg-green-500"
+                                            : "bg-red-500"
+                                            }`}
+                                        style={{
+                                            width:
+                                                tenant.paymentStatus === "Paid"
+                                                    ? "100%"
+                                                    : "35%",
+                                        }}
+                                    />
+
+                                </div>
+
+                                <p className="mt-3 text-sm text-slate-500">
+                                    Payment Status :
+                                    <span
+                                        className={`ml-2 font-semibold ${tenant.paymentStatus === "Paid"
+                                            ? "text-green-600"
+                                            : "text-red-600"
+                                            }`}
+                                    >
+                                        {tenant.paymentStatus}
+                                    </span>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {/*  Details*/}
+                <div className="grid lg:grid-cols-2 gap-6">
+                    {/* Personal */}
+                    <div className="bg-white rounded-2xl shadow p-6">
+                        <h2 className="text-xl font-bold text-slate-800 mb-6">
+                            Personal Information
+                        </h2>
+
+                        <div className="space-y-5">
+                            <Info
+                                icon={<User2 size={18} />}
+                                label="Full Name"
+                                value={tenant.fullName}
+                            />
+
+                            <Info
+                                icon={<Mail size={18} />}
+                                label="Email"
+                                value={tenant.email}
+                            />
+
+                            <Info
+                                icon={<Phone size={18} />}
+                                label="Mobile"
+                                value={tenant.mobileNumber}
+                            />
+
+                            <Info
+                                icon={<CalendarDays size={18} />}
+                                label="Date of Birth"
+                                value={new Date(tenant.dob)?.toLocaleDateString("en-IN")}
+                            />
+
+                            <Info
+                                icon={<CalendarDays size={18} />}
+                                label="Joining Date"
+                                value={new Date(tenant.joiningDate)?.toLocaleDateString("en-IN")}
                             />
                         </div>
-                        <div className="text-center md:text-left flex-1">
-                            <h1 className="text-2xl font-bold">{user.fullName}</h1>
-                            <p className="text-blue-200 text-sm mt-0.5">{user.email}</p>
-                            <div className="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
-                                <span className="bg-white/20 text-blue-100 px-3 py-1 rounded-full text-xs font-medium">
-                                    {user.role}
-                                </span>
-                                <span
-                                    className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${user.paymentStatus === "Paid"
-                                        ? "bg-green-100 text-green-700"
-                                        : "bg-red-100 text-red-600"
-                                        }`}
-                                >
-                                    {user.paymentStatus === "Paid"
-                                        ? <CheckCircle size={12} />
-                                        : <XCircle size={12} />}
-                                    {user.paymentStatus}
-                                </span>
+                    </div>
+
+                    {/* Property */}
+                    <div className="bg-white rounded-2xl shadow p-6">
+                        <h2 className="text-xl font-bold text-slate-800 mb-6">
+                            Property Details
+                        </h2>
+
+                        <div className="space-y-5">
+                            <Info
+                                icon={<Building2 size={18} />}
+                                label="Building"
+                                value={tenant.building}
+                            />
+
+                            <Info
+                                icon={<Home size={18} />}
+                                label="Room Number"
+                                value={tenant.roomNumber}
+                            />
+
+                            <Info
+                                icon={<IndianRupee size={18} />}
+                                label="Monthly Rent"
+                                value={`₹${tenant?.rentPrice?.toLocaleString("en-IN")}`}
+                            />
+
+                            <Info
+                                icon={<IndianRupee size={18} />}
+                                label="Due Amount"
+                                value={`₹${tenant?.dueAmount?.toLocaleString("en-IN")}`}
+                            />
+
+                            <Info
+                                icon={<ShieldCheck size={18} />}
+                                label="Payment Status"
+                                value={tenant.paymentStatus}
+                            />
+
+                            <Info
+                                icon={<CalendarDays size={18} />}
+                                label="Next Rent Month"
+                                value={tenant.nextRentGeneratedMonth}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Aadhaar  */}
+                <div className="bg-white rounded-2xl shadow p-6">
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-xl font-bold text-slate-800">
+                            Identity Documents
+                        </h2>
+
+                        <button
+                            onClick={() => setOpenDocuments(!openDocuments)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold text-sm shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-600 transition-all cursor-pointer"
+                        >
+                            {openDocuments ? "Hide Documents" : "View Documents"}
+                            <svg
+                                className={`w-4 h-4 transition-transform duration-300 ${openDocuments ? "rotate-180" : ""}`}
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* Dropdown panel */}
+                    <div
+                        className={`grid transition-all duration-300 ease-in-out ${openDocuments ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
+                            }`}
+                    >
+                        <div className="overflow-hidden">
+                            <div className="pt-4 border-t border-slate-100">
+                                <p className="text-sm text-slate-500 mb-3">
+                                    Aadhaar Card — Front & Back
+                                </p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md sm:max-w-full">
+                                    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 h-50">
+                                        <img
+                                            src={tenant.aadhaarFront?.secure_url}
+                                            alt="Aadhaar Front"
+                                            className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        <span className="absolute bottom-0 left-0 right-0 bg-slate-900/70 text-white text-[10px] font-medium text-center py-1">
+                                            Front Side
+                                        </span>
+                                    </div>
+
+                                    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 h-50">
+                                        <img
+                                            src={tenant.aadhaarBack?.secure_url}
+                                            alt="Aadhaar Back"
+                                            className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        <span className="absolute bottom-0 left-0 right-0 bg-slate-900/70 text-white text-[10px] font-medium text-center py-1">
+                                            Back Side
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ── Personal + Property Info ── */}
-                <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white rounded-3xl p-5 shadow-sm">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                            Personal Information
-                        </p>
-                        <Info icon={<Mail size={16} />} title="Email" value={user.email} />
-                        <Info icon={<Phone size={16} />} title="Mobile Number" value={user.mobileNumber} />
-                        <Info icon={<CreditCard size={16} />} title="Aadhaar Number" value={user.aadhaarNumber} />
-                        <Info icon={<Calendar size={16} />} title="Date of Birth" value={formatDate(user.dob)} />
-                        <Info icon={<Calendar size={16} />} title="Joining Date" value={formatDate(user.joiningDate)} />
-                    </div>
+                {/* Members */}
+                <div className="bg-white rounded-2xl shadow p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-6">
+                        Family Members
+                    </h2>
 
-                    <div className="bg-white rounded-3xl p-5 shadow-sm">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                            Property Information
-                        </p>
-                        <Info icon={<Building2 size={16} />} title="Building" value={user.building} />
-                        <Info icon={<Home size={16} />} title="Room Number" value={user.roomNumber} />
-                        <Info icon={<IndianRupee size={16} />} title="Monthly Rent" value={`₹${user.rentPrice}`} />
-                        <Info
-                            icon={<IndianRupee size={16} />}
-                            title="Due Amount"
-                            value={`₹${user.dueAmount}`}
-                            danger={user.dueAmount > 0}
-                        />
-                        <Info icon={<BadgeCheck size={16} />} title="Last Rent Paid" value={`₹${user.lastRentAmount}`} />
-                        <Info icon={<Calendar size={16} />} title="Next Rent Month" value={user.nextRentGeneratedMonth} />
-                    </div>
-                </div>
-
-                {/* ── Rent Summary ── */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">
-                        Rent Summary
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <MetricCard title="Current Rent" value={`₹${user.rentPrice}`} />
-                        <MetricCard title="Due Amount" value={`₹${user.dueAmount}`} danger={user.dueAmount > 0} />
-                        <MetricCard title="Payment Status" value={user.paymentStatus} />
-                    </div>
-                </div>
-
-                {/* ── Members ── */}
-                <div className="bg-white rounded-3xl p-5 shadow-sm">
-                    <div className="flex items-center gap-2 mb-4">
-                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                            Members
-                        </p>
-                        <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                            {user.member?.length ?? 0}
-                        </span>
-                    </div>
-
-                    {user.member && user.member.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                            {user.member.map((member, index) => (
+                    {tenant.member?.length ? (
+                        <div className="grid md:grid-cols-2 gap-4">
+                            {tenant.member.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl"
+                                    className="border rounded-xl p-4 bg-slate-50"
                                 >
-                                    <div
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold flex-shrink-0 ${avatarColors[index % avatarColors.length]
-                                            }`}
-                                    >
-                                        {getInitials(member.name)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-slate-800 truncate">
-                                            {member.name}
-                                        </p>
-                                        <p className="text-xs text-slate-400">{member.relation}</p>
-                                    </div>
-                                    {member.age && (
-                                        <span className="text-xs text-slate-400 flex-shrink-0">
-                                            {member.age} yrs
-                                        </span>
-                                    )}
+                                    <p className="font-semibold">{item.name}</p>
+                                    <p className="text-sm text-slate-500">{item.relation}</p>
+                                    <p className="text-sm text-slate-500">{item.mobile}</p>
                                 </div>
                             ))}
                         </div>
                     ) : (
-                        <div className="flex items-center justify-center gap-2 py-8 text-slate-400 bg-slate-50 rounded-2xl">
-                            <Users size={18} />
-                            <p className="text-sm">No members added</p>
+                        <div className="text-center py-10 text-slate-500">
+                            No Family Members Added
                         </div>
                     )}
                 </div>
-
             </div>
         </div>
     );
-}
+};
+
+const Info = ({ icon, label, value }) => {
+    return (
+        <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center">
+                {icon}
+            </div>
+
+            <div>
+                <p className="text-sm text-slate-500">{label}</p>
+                <p className="font-semibold text-slate-800">{value}</p>
+            </div>
+        </div>
+    );
+};
 
 export default TenantProfile;

@@ -7,8 +7,10 @@ import {
     Calendar,
     IndianRupee,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 function ProfileCard({ tenant }) {
+    const navigate = useNavigate()
     const initials = tenant?.fullName
         ?.split(" ")
         .map((word) => word[0])
@@ -52,13 +54,21 @@ function ProfileCard({ tenant }) {
                     <User size={18} className="text-blue-600" />
                 </div>
 
-                <div>
-                    <h2 className="text-base font-semibold text-slate-800">
-                        Tenant Profile
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                        Personal information
-                    </p>
+                <div className="flex items-center justify-between w-full">
+                    <div>
+                        <h2 className="text-base font-semibold text-slate-800">
+                            Tenant Profile
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                            Personal information
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => navigate("/tenant/profile")}
+                        className="text-blue-600 cursor-pointer">
+                        View Details
+                    </button>
                 </div>
             </div>
 

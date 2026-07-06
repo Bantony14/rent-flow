@@ -3,8 +3,11 @@ import { paymentOrderCreate } from "../../api/paymentApi";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 function RentDueCard({ user }) {
+
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate();
     const totalRent = user?.rentPrice;
     const isPaid = user?.paymentStatus
@@ -56,6 +59,7 @@ function RentDueCard({ user }) {
 
                 handler: async (response) => {
                     try {
+                        setLoading(true)
                         const { data } = await axios.post(
                             "http://localhost:5000/api/v1/payment/verify-payment",
                             {
@@ -89,6 +93,8 @@ function RentDueCard({ user }) {
                         navigate("/payment-failed");
 
 
+                    } finally {
+                        setLoading(false)
                     }
 
                 },
@@ -102,7 +108,28 @@ function RentDueCard({ user }) {
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex min-h-[480px] flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white">
+
+                <div className="rounded-full bg-blue-100 p-6">
+                    <div className="h-10 w-10 rounded-full border-4 border-blue-300 border-t-blue-600 animate-spin"></div>
+                </div>
+
+                <h2 className="mt-5 text-xl font-bold text-slate-800">
+                    Initializing Payment...
+                </h2>
+
+                <p className="mt-2 text-center text-sm text-slate-500">
+                    Please wait while we prepare your payment. This may take a few seconds.
+                </p>
+
+            </div>
+        );
+    }
+
     return (
+
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">

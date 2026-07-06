@@ -11,8 +11,6 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
 
-
-
     useEffect(() => {
         async function getCurrentUser() {
 
