@@ -1,5 +1,5 @@
 import express from "express";
-import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUserById, removeMember, resetPassword, updateMemberInfo, userDelete, userLogin, userLogout, userRegistration, userUpdate, getOneUser, verifyOtp } from "../controllers/user.controller.js";
+import { addMember, forgotPassword, getAllUser, getAllUserByBuilding, getMe, getUserById, removeMember, resetPassword, updateMemberInfo, userDelete, userLogin, userLogout, userRegistration, userUpdate, getOneUser, verifyOtp, getReceiptById, getAadhaarImage } from "../controllers/user.controller.js";
 import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 import { uploadImages } from "../middlewares/upload.middleware.js";
 
@@ -22,6 +22,7 @@ route.post("/resetpassword", resetPassword);
 route.put("/addmember/:id", isLoggedIn, isAuthorized("ADMIN"), uploadImages, addMember);
 route.put("/removemember/:id/:memberid", isLoggedIn, isAuthorized("ADMIN"), removeMember);
 route.put("/updatemember/:id/:memberid", isLoggedIn, isAuthorized("ADMIN"), uploadImages, updateMemberInfo);
-
+route.get("/getreceipt", isLoggedIn, getReceiptById);
+route.post("/aaddharimage", isLoggedIn, getAadhaarImage)
 
 export default route;

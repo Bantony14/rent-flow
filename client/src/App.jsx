@@ -15,6 +15,8 @@ import PaymentSuccess from "./assets/components/paymentPage/PaymentSuccess.jsx"
 import PaymentFailed from "./assets/components/paymentPage/PaymentFailed"
 import TenantProfile from "./assets/pages/TenantPages/TenantProfile.jsx"
 import Forgotpassword from "./assets/pages/ForgotPassword.jsx"
+import { Receipt } from "lucide-react"
+import ReceiptHistory from "./assets/pages/TenantPages/Receipt.jsx"
 
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
           <Route path="/payment-failed" element={<PaymentFailed />} />
           <Route path="/tenant/profile" element={<TenantProfile />} />
           <Route path="/forgot-password" element={<Forgotpassword />} />
+          <Route path="/receipt" element={<ReceiptHistory />} />
         </Route>
       </Routes>
     </>

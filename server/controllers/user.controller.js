@@ -8,6 +8,7 @@ import otpGenerator from "../utils/otpGenerator.js";
 import fs from "fs/promises"
 import otpTemplate from "../utils/optTemplate.js";
 import Room from "../models/room.model.js";
+import ReceiptHistory from "../models/receiptHistory.model.js";
 
 
 export const userRegistration = async (req, res, next) => {
@@ -78,12 +79,15 @@ export const userRegistration = async (req, res, next) => {
                 profileImage: {
                     public_id: profileResult.public_id,
                     secure_url: profileResult.secure_url,
+                    imageFormat: profileResult.format
                 },
                 aadhaarFront: {
-                    public_id: aadhaarFrontResult.public_id
+                    public_id: aadhaarFrontResult.public_id,
+                    imageFormat: aadhaarFrontResult.format
                 },
                 aadhaarBack: {
-                    public_id: aadhaarBackResult.public_id
+                    public_id: aadhaarBackResult.public_id,
+                    imageFormat: aadhaarBackResult.format
                 }
 
             }
@@ -595,19 +599,22 @@ export const addMember = async (req, res, next) => {
                     if (profileResult) {
                         members[i].profileImage = {
                             public_id: profileResult.public_id,
-                            secure_url: profileResult.secure_url
+                            secure_url: profileResult.secure_url,
+                            imageFomat: profileResult.format
                         }
                     }
 
                     if (aadhaarFrontResult) {
                         members[i].aadhaarFront = {
                             public_id: aadhaarFrontResult.public_id,
+                            imageFomat: aadhaarFrontResult.format
                         }
                     }
 
                     if (aadhaarBackResult) {
                         members[i].aadhaarBack = {
                             public_id: aadhaarBackResult.public_id,
+                            imageFomat: aadhaarBackResult.format
                         }
                     }
                 }
@@ -801,4 +808,77 @@ export const getMe = async (req, res, next) => {
         return next(new ErrorHandler(error.message, 400))
     }
 }
+
+
+export const getReceiptById = async (req, res, next) => {
+    try {
+        const { id } = req.user
+
+        const receipt = await ReceiptHistory.find({ tenantId: id });
+
+        if (!receipt) {
+            return next(new ErrorHandler("Receipt not found", 404));
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "get all receipts",
+            receipt,
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+};
+
+export const getAadhaarImage = async (req, res, next) => {
+    try {
+        const { id } = req.body;
+
+        const user = await User.findById(id);
+
+        if (!user) {
+            return next(new ErrorHandler("User not found", 404));
+        }
+
+        const aadhaarFront = await cloudinary.api.resource(
+            user.aadhaarFront.public_id,
+            {
+                resource_type: "image",
+                type: "private",
+            }
+        );
+
+        const aadhaarBack = await cloudinary.api.resource(
+            user.aadhaarBack.public_id,
+            {
+                resource_type: "image",
+                type: "private",
+            }
+        );
+
+        const aadhaarFrontUrl = cloudinary.utils.private_download_url(
+            user.aadhaarFront.public_id,
+            aadhaarFront.format,
+            {
+                resource_type: "image",
+            }
+        );
+
+        const aadhaarBackUrl = cloudinary.utils.private_download_url(
+            user.aadhaarBack.public_id,
+            aadhaarBack.format,
+            {
+                resource_type: "image",
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            aadhaarFrontUrl,
+            aadhaarBackUrl,
+        });
+    } catch (error) {
+        return next(new ErrorHandler(error.message, 500));
+    }
+};
 

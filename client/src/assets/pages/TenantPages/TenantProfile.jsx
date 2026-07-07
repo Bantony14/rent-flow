@@ -3,12 +3,33 @@ import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
 import { useState } from "react";
 import LoadingScreen from "../../components/LoadingScreen";
+import { fetchImage } from "../../api/authApi";
 
 const TenantProfile = () => {
 
     const tenant = useContext(AuthContext).user
     const loading = useContext(AuthContext).loading
     const [openDocuments, setOpenDocuments] = useState(false);
+    const [trigger, setTrigger] = useState("")
+    const [loadingImage, setLoadingImage] = useState(false)
+
+    async function fetchAaddharImage() {
+        if (!tenant.aadhaarFront.secure_url && !tenant.aadhaarBack.secure_url)
+            try {
+                setLoadingImage(true)
+                const res = await fetchImage(tenant._id);
+                tenant.aadhaarFront.secure_url = res.data.aadhaarFrontUrl;
+                tenant.aadhaarBack.secure_url = res.data.aadhaarBackUrl;
+                setTrigger(null)
+
+
+            } catch (error) {
+                toast.error(error?.response?.data?.message);
+            } finally {
+                setLoadingImage(false)
+            }
+    }
+
     if (loading) {
         return <LoadingScreen />
     }
@@ -227,54 +248,86 @@ const TenantProfile = () => {
                         </h2>
 
                         <button
-                            onClick={() => setOpenDocuments(!openDocuments)}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold text-sm shadow-md hover:shadow-lg hover:from-blue-700 hover:to-cyan-600 transition-all cursor-pointer"
+                            onClick={() => {
+                                if (!openDocuments) {
+                                    fetchAaddharImage();
+                                }
+                                setOpenDocuments((prev) => !prev);
+                            }}
+                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
                         >
                             {openDocuments ? "Hide Documents" : "View Documents"}
+
                             <svg
-                                className={`w-4 h-4 transition-transform duration-300 ${openDocuments ? "rotate-180" : ""}`}
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                className={`h-4 w-4 transition-transform ${openDocuments ? "rotate-180" : ""
+                                    }`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
                             >
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M19 9l-7 7-7-7"
+                                />
                             </svg>
                         </button>
                     </div>
 
                     {/* Dropdown panel */}
                     <div
-                        className={`grid transition-all duration-300 ease-in-out ${openDocuments ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0"
+                        className={`overflow-hidden transition-all duration-300 ${openDocuments ? "max-h-[700px] opacity-100 mt-5" : "max-h-0 opacity-0"
                             }`}
                     >
-                        <div className="overflow-hidden">
-                            <div className="pt-4 border-t border-slate-100">
-                                <p className="text-sm text-slate-500 mb-3">
-                                    Aadhaar Card — Front & Back
-                                </p>
+                        <div className="border-t border-slate-200 pt-5">
+                            <p className="mb-4 text-sm font-medium text-slate-600">
+                                Aadhaar Card
+                            </p>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md sm:max-w-full">
-                                    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 h-50">
-                                        <img
-                                            src={tenant.aadhaarFront?.secure_url}
-                                            alt="Aadhaar Front"
-                                            className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                        <span className="absolute bottom-0 left-0 right-0 bg-slate-900/70 text-white text-[10px] font-medium text-center py-1">
-                                            Front Side
-                                        </span>
+                            {loadingImage ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-pulse">
+                                    <div>
+                                        <div className="w-full h-56 rounded-2xl bg-stone-200"></div>
+                                        <div className="mt-3 h-4 w-24 mx-auto rounded bg-slate-200"></div>
                                     </div>
 
-                                    <div className="group relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 h-50">
-                                        <img
-                                            src={tenant.aadhaarBack?.secure_url}
-                                            alt="Aadhaar Back"
-                                            className="w-full h-28 object-cover transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                        <span className="absolute bottom-0 left-0 right-0 bg-slate-900/70 text-white text-[10px] font-medium text-center py-1">
-                                            Back Side
-                                        </span>
+                                    <div>
+                                        <div className="w-full h-56 rounded-2xl bg-stone-200"></div>
+                                        <div className="mt-3 h-4 w-24 mx-auto rounded bg-slate-200"></div>
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                    <div>
+                                        <img
+                                            onClick={() =>
+                                                window.open(tenant?.aadhaarFront?.secure_url, "_blank")
+                                            }
+                                            src={tenant?.aadhaarFront?.secure_url}
+                                            alt="Aadhaar Front"
+                                            className="w-full h-56 rounded-2xl border border-slate-200 object-contain bg-white p-3 shadow-sm transition duration-300 hover:shadow-lg hover:scale-[1.02]"
+                                        />
+                                        <p className="mt-2 text-center text-sm font-medium text-slate-600">
+                                            Front Side
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <img
+                                            onClick={() =>
+                                                window.open(tenant?.aadhaarBack?.secure_url, "_blank")
+                                            }
+                                            src={tenant?.aadhaarBack?.secure_url}
+                                            alt="Aadhaar Back"
+                                            className="w-full h-56 rounded-2xl border border-slate-200 object-contain bg-white p-3 shadow-sm transition duration-300 hover:shadow-lg hover:scale-[1.02]"
+                                        />
+                                        <p className="mt-2 text-center text-sm font-medium text-slate-600">
+                                            Back Side
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

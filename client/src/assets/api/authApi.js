@@ -56,3 +56,11 @@ export function verifyEmailOtp(email, otp) {
 export function resetPassword(email, otp, newPassword, confirmPassword) {
     return API.post("/resetpassword", { email, otp, newPassword, confirmPassword })
 }
+
+export function userReceipt() {
+    return API.get("/getreceipt")
+}
+
+export function fetchImage(id) {
+    return API.post("/aaddharimage", { id })
+}

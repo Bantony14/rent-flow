@@ -88,6 +88,9 @@ const userSchema = new mongoose.Schema(
                     type: String,
                     default: null,
                 },
+                imageFormat: {
+                    type: String
+                }
             },
 
             aadhaarFront: {
@@ -95,6 +98,9 @@ const userSchema = new mongoose.Schema(
                     type: String,
                     default: null,
                 },
+                imageFormat: {
+                    type: String
+                }
             },
 
             aadhaarBack: {
@@ -102,6 +108,9 @@ const userSchema = new mongoose.Schema(
                     type: String,
                     default: null,
                 },
+                imageFormat: {
+                    type: String
+                }
             },
 
         }]
@@ -160,6 +169,9 @@ const userSchema = new mongoose.Schema(
                 type: String,
                 // required: true,
             },
+            imageFormat: {
+                type: String
+            }
         },
 
 
@@ -168,6 +180,9 @@ const userSchema = new mongoose.Schema(
                 type: String,
                 // required: true,
             },
+            imageFormat: {
+                type: String
+            }
         },
 
         aadhaarBack: {
@@ -175,6 +190,9 @@ const userSchema = new mongoose.Schema(
                 type: String,
                 // required: true,
             },
+            imageFormat: {
+                type: String
+            }
         },
 
 
