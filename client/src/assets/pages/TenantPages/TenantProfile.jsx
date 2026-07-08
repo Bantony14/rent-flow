@@ -179,6 +179,11 @@ const TenantProfile = () => {
                                 label="Mobile"
                                 value={tenant.mobileNumber}
                             />
+                            <Info
+                                icon={<Phone size={18} />}
+                                label="Aadhaar Number"
+                                value={tenant.aadhaarNumber.match(/.{1,4}/g).join("-")}
+                            />
 
                             <Info
                                 icon={<CalendarDays size={18} />}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
     Search,
     Users,
@@ -18,8 +18,12 @@ import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
 import { useNavigate } from "react-router-dom";
 import AllTenantsHeader from "../../components/allTenantsdetails/Header";
 import NumberOfUsers from "../../components/allTenantsdetails/NumberOfUser";
+import { AuthContext } from "../../context/authContext";
+
 
 export default function AllTenants() {
+
+    const { user } = useContext(AuthContext)
     const [alltenantDetails, setAlltenantDetails] = useState([]);
     const [formData, setFormData] = useState([])
     const [searchQuery, setSearchQuery] = useState("");
@@ -39,11 +43,11 @@ export default function AllTenants() {
         params.paymentStatus = paymentStatus
     }
 
-    console.log("params>>", params)
 
     useEffect(() => {
         const func = async () => {
             try {
+                setLoading(true)
                 const res = await getAllUser(params);
                 setAlltenantDetails(res.data.user);
                 toast.success(res.data.message)
@@ -135,8 +139,6 @@ export default function AllTenants() {
     }
 
 
-
-
     const filtered = formData.filter((u) =>
         [u.fullName, u.email, u.mobileNumber, u.building, u.roomNumber]
             .join(" ")
@@ -195,8 +197,12 @@ export default function AllTenants() {
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                         >
                             <option value="">All Buildings</option>
-                            <option value="Shivam Residency">Shivam Residency</option>
-                            <option value="Krishna Tower">Krishna Tower</option>
+                            {user.properties.map((building) => {
+                                return (
+                                    <option value={building}> {building}</option>
+                                )
+                            })}
+
                         </select>
                     </div>
 
@@ -293,13 +299,11 @@ export default function AllTenants() {
                                                         name="building"
                                                         onChange={(e) => handleChange(e, value._id)}
                                                     >
-                                                        <option>
-                                                            {value.building}
-                                                        </option>
-
-                                                        <option>
-                                                            {value.building === "Shivam Residency" ? "Krishna Tower" : "Shivam Residency"}
-                                                        </option>
+                                                        {user.properties.map((building) => {
+                                                            return (
+                                                                <option value={building}> {building}</option>
+                                                            )
+                                                        })}
                                                     </select>
                                                 </td>
 
