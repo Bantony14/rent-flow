@@ -11,7 +11,7 @@ import {
     Check,
     X,
 } from "lucide-react";
-import { deleteUser, getAllUser, updateUser } from "../../api/authApi";
+import { deleteUser, getAllUser, getRoomByBuilding, updateUser } from "../../api/authApi";
 import toast from "react-hot-toast";
 import LoadingScreen from "../../components/LoadingScreen";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
@@ -30,6 +30,7 @@ export default function AllTenants() {
     const [editId, setEditId] = useState("")
     const [editData, setEditData] = useState({})
     const [loading, setLoading] = useState(true)
+    const [loading2, setLoading2] = useState(true)
     const [deleteTenant, setDeleteTenant] = useState("")
     const [building, setBuilding] = useState("");
     const [paymentStatus, setPaymentStatus] = useState("")
@@ -88,6 +89,35 @@ export default function AllTenants() {
         }))
 
     }
+
+    const fetchRoom = async (id) => {
+        try {
+            console.log("start")
+            const { building } = formData.find((buildingName) => buildingName._id === id);
+            console.log("building>>", building)
+            const res = await getRoomByBuilding({ building });
+            console.log("end")
+            console.log(res?.data?.building)
+            const allRoom = res?.data?.building?.map((rooms) => rooms.room);
+            console.log("allRoom>>", allRoom)
+            setFormData((prev) => {
+                return (
+                    prev.map((value) => (
+                        value._id === id
+                            ? { ...value, roomNumber: allRoom }
+                            : value
+                    )
+                    )
+                )
+            })
+
+        } catch (error) {
+            console.log(error.message)
+        } finally {
+            setLoading2(false)
+        }
+    }
+    console.log("formData>>", formData)
 
     const handleCancel = () => {
         setFormData(structuredClone(alltenantDetails))
@@ -149,7 +179,7 @@ export default function AllTenants() {
     const totalUsers = formData.length;
     const admins = formData.filter((u) => u.role === "ADMIN").length;
     const tenants = formData.filter((u) => u.role === "USER").length;
-
+    console.log(loading)
     return (
         <>
 
@@ -197,7 +227,7 @@ export default function AllTenants() {
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                         >
                             <option value="">All Buildings</option>
-                            {user.properties.map((building) => {
+                            {user?.properties?.map((building) => {
                                 return (
                                     <option value={building}> {building}</option>
                                 )
@@ -308,13 +338,19 @@ export default function AllTenants() {
                                                 </td>
 
                                                 <td className="px-4 py-4">
-                                                    <input
+                                                    <select
                                                         type="text"
                                                         name="roomNumber"
                                                         value={value.roomNumber}
                                                         className="w-full min-w-[80px] rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                                                         onChange={(e) => handleChange(e, value._id)}
-                                                    />
+                                                    >
+                                                        {loading2
+                                                            ? "Fetching..."
+                                                            : value.roomNumber.map((room) => (
+                                                                <option key={room}>{room}</option>
+                                                            ))}
+                                                    </select>
                                                 </td>
 
                                                 <td className="px-4 py-4">
@@ -398,7 +434,10 @@ export default function AllTenants() {
                                                         </button>
 
                                                         <button
-                                                            onClick={() => setEditId(value._id)}
+                                                            onClick={() => {
+                                                                setEditId(value._id)
+                                                                fetchRoom(value._id)
+                                                            }}
                                                             className="rounded-lg bg-amber-100 p-2 text-amber-600 hover:bg-amber-200"
                                                         >
                                                             <Pencil size={18} />
