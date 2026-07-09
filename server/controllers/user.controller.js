@@ -790,9 +790,15 @@ export const getMe = async (req, res, next) => {
 
         const user = await User.findById(id);
 
+        const user2 = await User.updateMany({}, {
+            $set: { isActive: true }
+        })
+
+
         if (!user) {
             return next(new ErrorHandler("user Not Found", 400))
         }
+
         const encryptedValue = decrypt(user.aadhaarNumber)
         user.aadhaarNumber = encryptedValue
 

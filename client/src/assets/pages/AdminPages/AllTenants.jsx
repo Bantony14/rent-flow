@@ -34,6 +34,7 @@ export default function AllTenants() {
     const [deleteTenant, setDeleteTenant] = useState("")
     const [building, setBuilding] = useState("");
     const [paymentStatus, setPaymentStatus] = useState("")
+    const [room, setRoom] = useState([])
     const params = {}
     const navigate = useNavigate();
 
@@ -92,29 +93,14 @@ export default function AllTenants() {
 
     const fetchRoom = async (id) => {
         try {
-            console.log("start")
+            setRoom([])
             const { building } = formData.find((buildingName) => buildingName._id === id);
-            console.log("building>>", building)
             const res = await getRoomByBuilding({ building });
-            console.log("end")
-            console.log(res?.data?.building)
             const allRoom = res?.data?.building?.map((rooms) => rooms.room);
-            console.log("allRoom>>", allRoom)
-            setFormData((prev) => {
-                return (
-                    prev.map((value) => (
-                        value._id === id
-                            ? { ...value, roomNumber: allRoom }
-                            : value
-                    )
-                    )
-                )
-            })
+            setRoom(allRoom)
 
         } catch (error) {
             console.log(error.message)
-        } finally {
-            setLoading2(false)
         }
     }
     console.log("formData>>", formData)
@@ -345,11 +331,14 @@ export default function AllTenants() {
                                                         className="w-full min-w-[80px] rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                                                         onChange={(e) => handleChange(e, value._id)}
                                                     >
-                                                        {loading2
-                                                            ? "Fetching..."
-                                                            : value.roomNumber.map((room) => (
-                                                                <option key={room}>{room}</option>
-                                                            ))}
+                                                        {room.length > 0 ? room.map((room) => {
+                                                            return (
+                                                                <option value={room}>{room}</option>
+                                                            )
+                                                        }) : <>
+                                                            <option disabled>{value.roomNumber}</option>
+                                                            <option disabled>No Room is Avaiable</option>
+                                                        </>}
                                                     </select>
                                                 </td>
 
