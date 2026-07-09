@@ -91,19 +91,42 @@ export default function AllTenants() {
 
     }
 
-    const fetchRoom = async (id) => {
+    const fetchRoom = async (building, id) => {
         try {
-            setRoom([])
-            const { building } = formData.find((buildingName) => buildingName._id === id);
-            const res = await getRoomByBuilding({ building });
-            const allRoom = res?.data?.building?.map((rooms) => rooms.room);
-            setRoom(allRoom)
+            setLoading2(true);
+            setRoom([]);
 
+
+            if (id) {
+
+                const { building } = formData.find((buildingName) => buildingName._id === id)
+                const res = await getRoomByBuilding({ building });
+
+                const allRoom =
+                    res?.data?.building?.flatMap((item) => item.room) ?? [];
+
+                setRoom(allRoom);
+                setLoading2(false);
+                return;
+            }
+
+            const res = await getRoomByBuilding({ building });
+
+            const allRoom =
+                res?.data?.building?.flatMap((item) => item.room) ?? [];
+
+            setRoom(allRoom);
         } catch (error) {
-            console.log(error.message)
+            console.log(error.message);
+        } finally {
+            setLoading2(false);
         }
-    }
-    console.log("formData>>", formData)
+    };
+
+    console.log("loading2>>", loading2)
+    console.log("rom>>>>", room)
+
+
 
     const handleCancel = () => {
         setFormData(structuredClone(alltenantDetails))
@@ -311,34 +334,46 @@ export default function AllTenants() {
                                                 <td className="px-4 py-4">
                                                     <select
                                                         value={value.building}
-                                                        className="w-full min-w-[130px] rounded-lg border border-slate-300 px-3 py-2"
                                                         name="building"
-                                                        onChange={(e) => handleChange(e, value._id)}
+                                                        className="w-full min-w-[130px] rounded-lg border border-slate-300 px-3 py-2"
+                                                        onChange={(e) => {
+                                                            handleChange(e, value._id);
+                                                            fetchRoom(e.target.value);
+                                                        }}
                                                     >
-                                                        {user.properties.map((building) => {
-                                                            return (
-                                                                <option value={building}> {building}</option>
-                                                            )
-                                                        })}
+                                                        {user.properties.map((building) => (
+                                                            <option key={building} value={building}>
+                                                                {building}
+                                                            </option>
+                                                        ))}
                                                     </select>
                                                 </td>
 
                                                 <td className="px-4 py-4">
                                                     <select
-                                                        type="text"
                                                         name="roomNumber"
                                                         value={value.roomNumber}
                                                         className="w-full min-w-[80px] rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                                                         onChange={(e) => handleChange(e, value._id)}
                                                     >
-                                                        {room.length > 0 ? room.map((room) => {
-                                                            return (
-                                                                <option value={room}>{room}</option>
-                                                            )
-                                                        }) : <>
-                                                            <option disabled>{value.roomNumber}</option>
-                                                            <option disabled>No Room is Avaiable</option>
-                                                        </>}
+                                                        {loading2 ? (
+                                                            <option value="loading..." disabled>Loading...</option>
+                                                        ) : room.length > 0 ? (
+                                                            room.map((room) => (
+                                                                <option key={room} value={room}>
+                                                                    {room}
+                                                                </option>
+                                                            ))
+                                                        ) : (
+                                                            <>
+                                                                <option value={value.roomNumber} disabled>
+                                                                    {value.roomNumber}
+                                                                </option>
+                                                                <option value="" disabled>
+                                                                    No Room Available
+                                                                </option>
+                                                            </>
+                                                        )}
                                                     </select>
                                                 </td>
 
@@ -413,6 +448,7 @@ export default function AllTenants() {
                                                     </span>
                                                 </td>
 
+
                                                 <td className="px-4 py-4">
                                                     <div className="flex items-center gap-2">
                                                         <button
@@ -425,7 +461,8 @@ export default function AllTenants() {
                                                         <button
                                                             onClick={() => {
                                                                 setEditId(value._id)
-                                                                fetchRoom(value._id)
+                                                                fetchRoom("", value._id)
+
                                                             }}
                                                             className="rounded-lg bg-amber-100 p-2 text-amber-600 hover:bg-amber-200"
                                                         >

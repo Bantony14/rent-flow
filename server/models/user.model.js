@@ -51,6 +51,8 @@ const userSchema = new mongoose.Schema(
             trim: true,
         },
 
+        isActive: Boolean,
+
         member: [{
             name: {
                 type: String,
