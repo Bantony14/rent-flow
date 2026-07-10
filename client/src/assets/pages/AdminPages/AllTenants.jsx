@@ -37,7 +37,7 @@ export default function AllTenants() {
     const [paymentStatus, setPaymentStatus] = useState("")
     const [room, setRoom] = useState([])
     const roomRef = useRef({});
-    const params = {}
+    const params = {} // using for params which convert data in query for backend api
     const navigate = useNavigate();
 
     if (building) {
@@ -47,7 +47,7 @@ export default function AllTenants() {
         params.paymentStatus = paymentStatus
     }
 
-
+//  this is for fetching all tanants data 
     useEffect(() => {
         const func = async () => {
             try {
@@ -72,6 +72,7 @@ export default function AllTenants() {
         setFormData(structuredClone(alltenantDetails))
     }, [alltenantDetails])
 
+    // this update data real time in formdata
 
     const handleChange = (e, id) => {
 
@@ -93,6 +94,8 @@ export default function AllTenants() {
 
     }
 
+
+    // finding available room to show on page 
     const fetchRoom = async (building, id) => {
         try {
             setLoading2(true);
@@ -124,17 +127,13 @@ export default function AllTenants() {
         }
     };
 
-    console.log("loading2>>", loading2)
-    console.log("rom>>>>", room)
-
-
-
+//  if dont want to update then cancel after real time data updated
     const handleCancel = () => {
         setFormData(structuredClone(alltenantDetails))
         setEditData({})
     }
 
-    // This Api is for updating the data
+    // This Api is for updating the data in database
     const sendApi = async (id) => {
         try {
 
@@ -153,8 +152,7 @@ export default function AllTenants() {
 
     }
 
-    console.log("editData>>>", editData)
-
+// this updte the room availbilty in true or false and update tenantId in room
     const handleRoomUpdate = async (id) => {
         console.log(id)
 
@@ -170,13 +168,9 @@ export default function AllTenants() {
             id : id
         };
 
-        console.log("roomdata>>>>", roomData)
-
         if (editData.building && editData.roomNumber) {
             roomData.newBuilding = editData.building;
             roomData.newRoom = editData.roomNumber;
-
-            console.log("roomdata2>>>", roomData)
 
             try {
                 const res = await updateRoomAvailability(roomData)
@@ -214,7 +208,7 @@ export default function AllTenants() {
         }
     }
 
-
+//  this filter is using for search by direct just type this filtered is using for showing user 
     const filtered = formData.filter((u) =>
         [u.fullName, u.email, u.mobileNumber, u.building, u.roomNumber]
             .join(" ")
@@ -369,6 +363,7 @@ export default function AllTenants() {
                                                 </td>
 
                                                 <td className="px-4 py-4">
+                                                    {/* building changing by select */}
                                                     <select
                                                         value={value.building}
                                                         name="building"
@@ -376,7 +371,7 @@ export default function AllTenants() {
                                                         onChange={(e) => {
                                                             handleChange(e, value._id);
                                                             fetchRoom(e.target.value);
-                                                            handleRoomUpdate()
+                                                           
                                                         }}
                                                     >
                                                         {user.properties.map((building) => (
@@ -388,13 +383,15 @@ export default function AllTenants() {
                                                 </td>
 
                                                 <td className="px-4 py-4">
+
+                                                    {/* roomNumber changing by select */}
                                                     <select
                                                         name="roomNumber"
                                                         value={value.roomNumber}
                                                         className="w-full min-w-[80px] rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
                                                         onChange={(e) => {
                                                             handleChange(e, value._id)
-                                                            handleRoomUpdate()
+                                                            
                                                         }}
                                                     >
                                                         {loading2 ? (
