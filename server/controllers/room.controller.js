@@ -247,6 +247,8 @@ export const addRoomImage = async (req, res, next) => {
 }
 
 export const updateRoomAvailability = async (req, res) => {
+
+    console.log("helo")
     try {
         const {
             oldBuilding,
@@ -255,22 +257,28 @@ export const updateRoomAvailability = async (req, res) => {
             newRoom,
         } = req.body;
 
+        console.log(req.body)
+
         // Purana room available kar do
         const oldRoomData = await Room.findOne({
-            building: oldBuilding,
-            roomNumber: oldRoom,
+            buildingName: oldBuilding,
+            room: oldRoom,
         });
 
+       
+
         if (oldRoomData) {
-            oldRoomData.isAvailable = true;
+            oldRoomData.Avaliablity = true;
             await oldRoomData.save();
         }
 
-        // Naya room unavailable kar do
+       
         const newRoomData = await Room.findOne({
-            building: newBuilding,
-            roomNumber: newRoom,
+            buildingName: newBuilding,
+            room: newRoom,
         });
+
+        console.log("newRoomData>>>>",newRoomData)
 
         if (!newRoomData) {
             return res.status(404).json({
@@ -279,7 +287,7 @@ export const updateRoomAvailability = async (req, res) => {
             });
         }
 
-        newRoomData.isAvailable = false;
+        newRoomData.Avaliablity = false;
         await newRoomData.save();
 
         return res.status(200).json({

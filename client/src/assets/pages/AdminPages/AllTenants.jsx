@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import AllTenantsHeader from "../../components/allTenantsdetails/Header";
 import NumberOfUsers from "../../components/allTenantsdetails/NumberOfUser";
 import { AuthContext } from "../../context/authContext";
+import { updateRoomAvailability } from "../../api/roomApi";
 
 
 export default function AllTenants() {

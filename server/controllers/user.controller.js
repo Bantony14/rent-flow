@@ -359,7 +359,7 @@ export const getUserById = async (req, res, next) => {
 
 export const getAllUserByBuilding = async (req, res, next) => {
 
-    console.log(req.params.building)
+    
 
     const { building, roomNumber } = req.query;
     const filter = {}
@@ -376,7 +376,7 @@ export const getAllUserByBuilding = async (req, res, next) => {
     }
     try {
         const building = await Room.find(filter);
-        console.log(building)
+
         if (building.length === 0) {
             return next(new ErrorHandler("building not found", 400))
         }
