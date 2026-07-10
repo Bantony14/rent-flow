@@ -1,6 +1,6 @@
 import express from "express"
 import { uploadRoomImage } from "../middlewares/upload.middleware.js";
-import { addRoomImage, roomCreate, roomDelete, roomDetailUpdate, roomImageRemove, roomImageUpdate } from "../controllers/room.controller.js";
+import { addRoomImage, roomCreate, roomDelete, roomDetailUpdate, roomImageRemove, roomImageUpdate, updateRoomAvailability } from "../controllers/room.controller.js";
 import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 
 const route = express.Router();
@@ -11,6 +11,7 @@ route.post("/roomdetailupdate/:id", isLoggedIn, isAuthorized("ADMIN"), roomDetai
 route.delete("/roomdelete/:id", isLoggedIn, isAuthorized("ADMIN"), roomDelete)
 route.patch("/roomimageremove/:id/:imageid", isLoggedIn, isAuthorized("ADMIN"), roomImageRemove)
 route.put("/addroomimage/:id", isLoggedIn, isAuthorized("ADMIN"), uploadRoomImage, addRoomImage)
+route.patch("/update-room-availability", updateRoomAvailability)
 
 
 export default route;

@@ -20,13 +20,6 @@ function TenantActions() {
                     All Tenant
                 </button>
 
-
-
-
-
-
-
-
             </div>
 
         </div>

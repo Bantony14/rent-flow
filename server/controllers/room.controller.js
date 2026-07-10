@@ -246,5 +246,53 @@ export const addRoomImage = async (req, res, next) => {
 
 }
 
+export const updateRoomAvailability = async (req, res) => {
+    try {
+        const {
+            oldBuilding,
+            oldRoom,
+            newBuilding,
+            newRoom,
+        } = req.body;
+
+        // Purana room available kar do
+        const oldRoomData = await Room.findOne({
+            building: oldBuilding,
+            roomNumber: oldRoom,
+        });
+
+        if (oldRoomData) {
+            oldRoomData.isAvailable = true;
+            await oldRoomData.save();
+        }
+
+        // Naya room unavailable kar do
+        const newRoomData = await Room.findOne({
+            building: newBuilding,
+            roomNumber: newRoom,
+        });
+
+        if (!newRoomData) {
+            return res.status(404).json({
+                success: false,
+                message: "New room not found",
+            });
+        }
+
+        newRoomData.isAvailable = false;
+        await newRoomData.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Room availability updated successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+};
+
 
 

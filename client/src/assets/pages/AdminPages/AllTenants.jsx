@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
     Search,
     Users,
@@ -35,6 +35,7 @@ export default function AllTenants() {
     const [building, setBuilding] = useState("");
     const [paymentStatus, setPaymentStatus] = useState("")
     const [room, setRoom] = useState([])
+    const roomRef = useRef({});
     const params = {}
     const navigate = useNavigate();
 
@@ -96,7 +97,6 @@ export default function AllTenants() {
             setLoading2(true);
             setRoom([]);
 
-
             if (id) {
 
                 const { building } = formData.find((buildingName) => buildingName._id === id)
@@ -136,6 +136,8 @@ export default function AllTenants() {
     // This Api is for updating the data
     const sendApi = async (id) => {
         try {
+
+
             const res = await updateUser(id, editData);
             setAlltenantDetails(structuredClone(formData))
             setEditData({})
@@ -149,6 +151,39 @@ export default function AllTenants() {
         }
 
     }
+
+    console.log("editData>>>", editData)
+
+    const handleRoomUpdate = async (id) => {
+        console.log(id)
+
+        if (id) {
+            roomRef.current = formData.find((value) => value._id === id);
+            console.log("roomRef.current>>>", roomRef.current)
+        }
+        const { building, roomNumber } = roomRef.current
+
+        const roomData = {
+            oldBuilding: building,
+            oldRoom: roomNumber,
+        };
+
+        console.log("roomdata>>>>", roomData)
+
+        if (editData.building && editData.roomNumber) {
+            roomData.newBuilding = editData.building;
+            roomData.newRoom = editData.roomNumber;
+
+            console.log("roomdata2>>>", roomData)
+
+            try {
+                const res = await updateRoomAvailability(roomData)
+                toast.success(res.data.message)
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    };
 
     // updating deleteTenants details
     const updateDeleteTenants = (id) => {
@@ -339,6 +374,7 @@ export default function AllTenants() {
                                                         onChange={(e) => {
                                                             handleChange(e, value._id);
                                                             fetchRoom(e.target.value);
+                                                            handleRoomUpdate()
                                                         }}
                                                     >
                                                         {user.properties.map((building) => (
@@ -354,7 +390,10 @@ export default function AllTenants() {
                                                         name="roomNumber"
                                                         value={value.roomNumber}
                                                         className="w-full min-w-[80px] rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-                                                        onChange={(e) => handleChange(e, value._id)}
+                                                        onChange={(e) => {
+                                                            handleChange(e, value._id)
+                                                            handleRoomUpdate()
+                                                        }}
                                                     >
                                                         {loading2 ? (
                                                             <option value="loading..." disabled>Loading...</option>
@@ -397,7 +436,10 @@ export default function AllTenants() {
                                                 <td className="px-4 py-4">
                                                     <div className="flex gap-2">
                                                         <button className="rounded-lg bg-green-600 px-3 py-2 text-xs sm:text-sm text-white hover:bg-green-700 whitespace-nowrap"
-                                                            onClick={() => sendApi(value._id)}>
+                                                            onClick={() => {
+                                                                sendApi(value._id)
+                                                                handleRoomUpdate()
+                                                            }}>
                                                             Save
                                                         </button>
 
@@ -462,6 +504,7 @@ export default function AllTenants() {
                                                             onClick={() => {
                                                                 setEditId(value._id)
                                                                 fetchRoom("", value._id)
+                                                                handleRoomUpdate(value._id)
 
                                                             }}
                                                             className="rounded-lg bg-amber-100 p-2 text-amber-600 hover:bg-amber-200"
