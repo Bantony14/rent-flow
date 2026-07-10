@@ -167,6 +167,7 @@ export default function AllTenants() {
         const roomData = {
             oldBuilding: building,
             oldRoom: roomNumber,
+            id : id
         };
 
         console.log("roomdata>>>>", roomData)

@@ -248,13 +248,13 @@ export const addRoomImage = async (req, res, next) => {
 
 export const updateRoomAvailability = async (req, res) => {
 
-    console.log("helo")
     try {
         const {
             oldBuilding,
             oldRoom,
             newBuilding,
             newRoom,
+            id
         } = req.body;
 
         console.log(req.body)
@@ -272,13 +272,11 @@ export const updateRoomAvailability = async (req, res) => {
             await oldRoomData.save();
         }
 
-       
         const newRoomData = await Room.findOne({
             buildingName: newBuilding,
             room: newRoom,
         });
 
-        console.log("newRoomData>>>>",newRoomData)
 
         if (!newRoomData) {
             return res.status(404).json({
@@ -286,7 +284,7 @@ export const updateRoomAvailability = async (req, res) => {
                 message: "New room not found",
             });
         }
-
+        newRoomData.tenantsId.push(id)
         newRoomData.Avaliablity = false;
         await newRoomData.save();
 
