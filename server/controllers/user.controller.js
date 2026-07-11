@@ -1,886 +1,884 @@
 import { memo } from "react";
 import cloudinary from "../config/cloudinary.connect.js";
-import User from "../models/user.model.js"
+import User from "../models/user.model.js";
 import decrypt from "../utils/decrypt.js";
 import sendEmail from "../utils/emailSender.js";
 import ErrorHandler from "../utils/error.js";
 import otpGenerator from "../utils/otpGenerator.js";
-import fs from "fs/promises"
+import fs from "fs/promises";
 import otpTemplate from "../utils/optTemplate.js";
 import Room from "../models/room.model.js";
 import ReceiptHistory from "../models/receiptHistory.model.js";
 
-
 export const userRegistration = async (req, res, next) => {
+  console.log(req.headers["content-type"]);
+  console.log("req.body>>>", req.body);
+  console.log("req.files>>>", req.files);
+  const {
+    fullName,
+    aadhaarNumber,
+    mobileNumber,
+    dob,
+    password,
+    roomNumber,
+    building,
+    email,
+    rentPrice,
+    joiningDate,
+  } = req.body;
+  const { profileImage, aadhaarFront, aadhaarBack } = req.files;
 
-    console.log(req.headers["content-type"]);
-    console.log("req.body>>>", req.body)
-    console.log("req.files>>>", req.files)
-    const { fullName, aadhaarNumber, mobileNumber, dob, password, roomNumber, building, email, rentPrice, joiningDate } = req.body;
-    const { profileImage, aadhaarFront, aadhaarBack } = req.files
+  if (req.body.role) {
+    return next(new ErrorHandler("cannot enter role field", 400));
+  }
+  if (
+    !fullName ||
+    !email ||
+    !aadhaarNumber ||
+    !mobileNumber ||
+    !dob ||
+    !password ||
+    !roomNumber ||
+    !building ||
+    !rentPrice ||
+    !joiningDate ||
+    !profileImage ||
+    !aadhaarFront ||
+    !aadhaarBack
+  ) {
+    return next(new ErrorHandler("all filed is required", 400));
+  }
 
+  let profileResult;
+  let aadhaarFrontResult;
+  let aadhaarBackResult;
 
-    if (req.body.role) {
-        return next(new ErrorHandler("cannot enter role field", 400))
-    }
-    if (!fullName || !email || !aadhaarNumber || !mobileNumber || !dob || !password || !roomNumber || !building || !rentPrice || !joiningDate || !profileImage || !aadhaarFront || !aadhaarBack) {
-        return next(new ErrorHandler("all filed is required", 400))
-    }
-
-
-
-
-    let profileResult;
-    let aadhaarFrontResult;
-    let aadhaarBackResult;
-
-    if (req.files) {
-
-        try {
-            [profileResult, aadhaarFrontResult, aadhaarBackResult] =
-                await Promise.all([
-                    cloudinary.uploader.upload(req.files.profileImage[0].path, {
-                        folder: "rentflow/profile",
-                    }),
-                    cloudinary.uploader.upload(req.files.aadhaarFront[0].path, {
-                        folder: "rentflow/aadhaar",
-                        type: "private",
-                    }),
-                    cloudinary.uploader.upload(req.files.aadhaarBack[0].path, {
-                        folder: "rentflow/aadhaar",
-                        type: "private",
-                    }),
-                ]);
-
-            await fs.unlink(req.files.profileImage[0].path);
-            await fs.unlink(req.files.aadhaarFront[0].path);
-            await fs.unlink(req.files.aadhaarBack[0].path);
-
-        } catch (err) {
-            console.log("Cloudinary Error:", err);
-        }
-
-    }
-
-
+  if (req.files) {
     try {
-        const user = await User.create(
-            {
-                fullName,
-                aadhaarNumber,
-                mobileNumber,
-                dob,
-                password,
-                roomNumber,
-                building,
-                email,
-                rentPrice,
-                joiningDate,
-                profileImage: {
-                    public_id: profileResult.public_id,
-                    secure_url: profileResult.secure_url,
-                    imageFormat: profileResult.format
-                },
-                aadhaarFront: {
-                    public_id: aadhaarFrontResult.public_id,
-                    imageFormat: aadhaarFrontResult.format
-                },
-                aadhaarBack: {
-                    public_id: aadhaarBackResult.public_id,
-                    imageFormat: aadhaarBackResult.format
-                }
+      [profileResult, aadhaarFrontResult, aadhaarBackResult] =
+        await Promise.all([
+          cloudinary.uploader.upload(req.files.profileImage[0].path, {
+            folder: "rentflow/profile",
+          }),
+          cloudinary.uploader.upload(req.files.aadhaarFront[0].path, {
+            folder: "rentflow/aadhaar",
+            type: "private",
+          }),
+          cloudinary.uploader.upload(req.files.aadhaarBack[0].path, {
+            folder: "rentflow/aadhaar",
+            type: "private",
+          }),
+        ]);
 
-            }
-        )
-
-
-
-        if (!user) {
-            return next(new ErrorHandler("Account not created please try again", 400))
-        }
-        user.password = undefined;
-
-        const roomAvailabilityUpdate = await Room.findOne({
-            buildingName: building,
-            room: roomNumber
-        })
-
-        if (roomAvailabilityUpdate) {
-            roomAvailabilityUpdate.Avaliablity = false
-            roomAvailabilityUpdate.tenantsId.push(user._id)
-            await roomAvailabilityUpdate.save()
-        }
-
-
-        res.status(200).json({
-            success: true,
-            message: "User Registered successfully",
-            user,
-        })
-    } catch (error) {
-
-        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
-
-        if (error.code === 11000) {
-            let field = Object.keys(error.keyValue)[0];
-            if (field === "hashAadhaar") {
-                field = "Aadhaar"
-            }
-            return next(
-                new ErrorHandler(`${field} already exists`, 400)
-            );
-        }
-        console.log(error.message)
-        return next(
-            new ErrorHandler(error.message, 500)
-
-        );
+      await fs.unlink(req.files.profileImage[0].path);
+      await fs.unlink(req.files.aadhaarFront[0].path);
+      await fs.unlink(req.files.aadhaarBack[0].path);
+    } catch (err) {
+      console.log("Cloudinary Error:", err);
     }
+  }
+
+  try {
+    const user = await User.create({
+      fullName,
+      aadhaarNumber,
+      mobileNumber,
+      dob,
+      password,
+      roomNumber,
+      building,
+      email,
+      rentPrice,
+      joiningDate,
+      profileImage: {
+        public_id: profileResult.public_id,
+        secure_url: profileResult.secure_url,
+        imageFormat: profileResult.format,
+      },
+      aadhaarFront: {
+        public_id: aadhaarFrontResult.public_id,
+        imageFormat: aadhaarFrontResult.format,
+      },
+      aadhaarBack: {
+        public_id: aadhaarBackResult.public_id,
+        imageFormat: aadhaarBackResult.format,
+      },
+    });
+
+    if (!user) {
+      return next(
+        new ErrorHandler("Account not created please try again", 400),
+      );
+    }
+    user.password = undefined;
+
+    const roomAvailabilityUpdate = await Room.findOne({
+      buildingName: building,
+      room: roomNumber,
+    });
+
+    if (roomAvailabilityUpdate) {
+      roomAvailabilityUpdate.Avaliablity = false;
+      roomAvailabilityUpdate.tenantsId.push(user._id);
+      await roomAvailabilityUpdate.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User Registered successfully",
+      user,
+    });
+  } catch (error) {
+    await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => {});
+
+    if (error.code === 11000) {
+      let field = Object.keys(error.keyValue)[0];
+      if (field === "hashAadhaar") {
+        field = "Aadhaar";
+      }
+      return next(new ErrorHandler(`${field} already exists`, 400));
+    }
+    console.log(error.message);
+    return next(new ErrorHandler(error.message, 500));
+  }
 };
 
 export const userUpdate = async (req, res, next) => {
-    const allowedFiled = ["fullName", "aadhaarNumber", "mobileNumber", "dob", "password", "roomNumber", "building", "email", "paymentStatus", "dueAmount", "joiningDate", "rentPrice", "nextRentMonthGenerated"]
+  const allowedFiled = [
+    "fullName",
+    "aadhaarNumber",
+    "mobileNumber",
+    "dob",
+    "password",
+    "roomNumber",
+    "building",
+    "email",
+    "paymentStatus",
+    "dueAmount",
+    "joiningDate",
+    "rentPrice",
+    "nextRentMonthGenerated",
+  ];
 
-    const { id } = req.params
+  const { id } = req.params;
 
-    const validation = Object.keys(req.body);
+  const validation = Object.keys(req.body);
 
-    const notAllowedFiled = validation.filter((value) => !allowedFiled.includes(value));
+  const notAllowedFiled = validation.filter(
+    (value) => !allowedFiled.includes(value),
+  );
 
-    if (notAllowedFiled.length > 0) {
-        return next(new ErrorHandler(`You cannot changes this filed ${notAllowedFiled.join(" and ")}`))
+  if (notAllowedFiled.length > 0) {
+    return next(
+      new ErrorHandler(
+        `You cannot changes this filed ${notAllowedFiled.join(" and ")}`,
+      ),
+    );
+  }
+
+  const filter = {};
+
+  allowedFiled.map((value) => {
+    if (req.body[value]) {
+      filter[value] = req.body[value];
+    }
+  });
+
+  const forNoChanges = Object.keys(req.body).length === 0;
+
+  if (forNoChanges) {
+    return next(new ErrorHandler("There is no changes in your data"));
+  }
+
+  const filterValueForMessage = Object.keys(filter).join(" and ");
+
+  try {
+    const user = await User.findByIdAndUpdate(id, req.body, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+
+    if (!user) {
+      return next(new ErrorHandler("user Not found", 400));
     }
 
-    const filter = {};
-
-    allowedFiled.map((value) => {
-        if (req.body[value]) {
-            filter[value] = req.body[value]
-        }
-    })
-
-    const forNoChanges = Object.keys(req.body).length === 0
-
-    if (forNoChanges) {
-        return next(new ErrorHandler("There is no changes in your data"))
+    if (req.body.properties) {
+      user.properties.push(req.body.properties);
     }
 
+    if (req.files && Object.keys(req.files).length > 0) {
+      try {
+        if (req.files?.profileImage) {
+          await cloudinary.uploader.destroy(user.profileImage.public_id);
+          const profileImageResult = await cloudinary.uploader.upload(
+            req.files.profileImage[0].path,
+          );
 
-    const filterValueForMessage = Object.keys(filter).join(" and ",)
-
-
-    try {
-        const user = await User.findByIdAndUpdate(id,
-            req.body,
-            {
-                returnDocument: "after",
-                runValidators: true
-            }
-        )
-
-        if (!user) {
-            return next(new ErrorHandler("user Not found", 400))
+          if (profileImageResult) {
+            user.profileImage.public_id = profileImageResult.public_id;
+            user.profileImage.secure_url = profileImageResult.secure_url;
+          }
+          await fs.unlink(req.files.profileImage[0].path);
         }
+        if (req.files?.aadhaarFront) {
+          await cloudinary.uploader.destroy(user.aadhaarFront.public_id);
+          const aadhaarFrontResult = await cloudinary.uploader.upload(
+            req.files.aadhaarFront[0].path,
+          );
 
-        if (req.body.properties) {
-            user.properties.push(req.body.properties)
+          if (aadhaarFrontResult) {
+            user.aadhaarFront.public_id = aadhaarFrontResult.public_id;
+          }
+          await fs.unlink(req.files.aadhaarFront[0].path);
         }
+        if (req.files?.aadhaarBack) {
+          await cloudinary.uploader.destroy(user.aadhaarBack.public_id);
+          const aadhaarBackResult = await cloudinary.uploader.upload(
+            req.files.aadhaarBack[0].path,
+          );
 
-        if (req.files && Object.keys(req.files).length > 0) {
-            try {
-                if (req.files?.profileImage) {
-                    await cloudinary.uploader.destroy(user.profileImage.public_id)
-                    const profileImageResult = await cloudinary.uploader.upload(req.files.profileImage[0].path)
-
-                    if (profileImageResult) {
-                        user.profileImage.public_id = profileImageResult.public_id;
-                        user.profileImage.secure_url = profileImageResult.secure_url;
-                    }
-                    await fs.unlink(req.files.profileImage[0].path);
-
-                }
-                if (req.files?.aadhaarFront) {
-                    await cloudinary.uploader.destroy(user.aadhaarFront.public_id)
-                    const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[0].path)
-
-                    if (aadhaarFrontResult) {
-                        user.aadhaarFront.public_id = aadhaarFrontResult.public_id;
-                    }
-                    await fs.unlink(req.files.aadhaarFront[0].path);
-                }
-                if (req.files?.aadhaarBack) {
-                    await cloudinary.uploader.destroy(user.aadhaarBack.public_id)
-                    const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[0].path)
-
-                    if (aadhaarBackResult) {
-                        user.aadhaarBack.public_id = aadhaarBackResult.public_id;
-                    }
-                    await fs.unlink(req.files.aadhaarBack[0].path);
-                }
-
-            } catch (err) {
-                console.log("Cloudinary Error:", err);
-            }
+          if (aadhaarBackResult) {
+            user.aadhaarBack.public_id = aadhaarBackResult.public_id;
+          }
+          await fs.unlink(req.files.aadhaarBack[0].path);
         }
-
-        await user.save()
-
-        res.status(200).json({
-            success: true,
-            message: `User ${filterValueForMessage} updated successfully `,
-            user,
-        })
-    } catch (error) {
-        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
-
-        if (error.code === 11000) {
-            let field = Object.keys(error.keyValue)[0];
-            if (field === "hashAadhaar") {
-                field = "Aadhaar"
-            }
-            return next(
-                new ErrorHandler(`${field} already exists`, 400)
-            );
-        }
-        return next(new ErrorHandler(error.message, 500))
+      } catch (err) {
+        console.log("Cloudinary Error:", err);
+      }
     }
 
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `User ${filterValueForMessage} updated successfully `,
+      user,
+    });
+  } catch (error) {
+    await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => {});
+
+    if (error.code === 11000) {
+      let field = Object.keys(error.keyValue)[0];
+      if (field === "hashAadhaar") {
+        field = "Aadhaar";
+      }
+      return next(new ErrorHandler(`${field} already exists`, 400));
+    }
+    return next(new ErrorHandler(error.message, 500));
+  }
 };
 
 export const userDelete = async (req, res, next) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
+  try {
+    const user = await User.findByIdAndDelete(id);
 
-    try {
-        const user = await User.findByIdAndDelete(id)
-
-        if (!user) {
-            return next(new ErrorHandler("User not found", 404));
-        }
-        res.status(200).json({
-            success: true,
-            message: `User Delete SuccessFully`
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500))
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
     }
-}
+    res.status(200).json({
+      success: true,
+      message: `User Delete SuccessFully`,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
 
 export const getAllUser = async (req, res, next) => {
-    const filter = {}
+  const filter = {};
 
-    if (req.query.building) {
-        filter.building = req.query.building
-    }
-    if (req.query.paymentStatus) {
-        filter.paymentStatus = req.query.paymentStatus
-    }
-    try {
-
-
-        const user = await User.find(filter);
-        res.status(200).json({
-            success: true,
-            message: `Here your all data by ${!Object.keys(filter).join("") ? " tenants" : Object.keys(filter).join(" and ")}`,
-            user,
-        })
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
-    }
+  if (req.query.building) {
+    filter.building = req.query.building;
+  }
+  if (req.query.paymentStatus) {
+    filter.paymentStatus = req.query.paymentStatus;
+  }
+  try {
+    const user = await User.find(filter);
+    res.status(200).json({
+      success: true,
+      message: `Here your all data by ${!Object.keys(filter).join("") ? " tenants" : Object.keys(filter).join(" and ")}`,
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
 };
 
 export const getOneUser = async (req, res, next) => {
+  try {
+    const field = Object.keys(req.body).join("");
 
-    try {
-        const field = Object.keys(req.body).join("")
+    let user;
 
-        let user;
-
-        if (field === "_id") {
-            user = await User.findById(req.body._id)
-        }
-        else {
-            user = await User.findOne({
-                [field]: { $regex: req.body[field], $options: "i" }
-            });
-        }
-
-        if (!user) {
-            return next(
-                new ErrorHandler(
-                    `No tenant found with ${field}: ${req.body[field]}`,
-                    404
-                )
-            );
-        }
-
-        const encryptedValue = decrypt(user.aadhaarNumber)
-        user.aadhaarNumber = encryptedValue
-
-        res.status(200).json({
-            success: true,
-            message: `Matching tenant records found for ${field}.`,
-            user,
-        })
-
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+    if (field === "_id") {
+      user = await User.findById(req.body._id);
+    } else {
+      user = await User.findOne({
+        [field]: { $regex: req.body[field], $options: "i" },
+      });
     }
+
+    if (!user) {
+      return next(
+        new ErrorHandler(
+          `No tenant found with ${field}: ${req.body[field]}`,
+          404,
+        ),
+      );
+    }
+
+    const encryptedValue = decrypt(user.aadhaarNumber);
+    user.aadhaarNumber = encryptedValue;
+
+    res.status(200).json({
+      success: true,
+      message: `Matching tenant records found for ${field}.`,
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
 };
 
 export const getUserById = async (req, res, next) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findById(id);
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
 
-        if (!user) {
-            return next(new ErrorHandler("user not found", 500))
-        }
-
-        const encryptedValue = decrypt(user.aadhaarNumber)
-        user.aadhaarNumber = encryptedValue
-        res.status(200).json({
-            success: true,
-            message: "here is your user data",
-            user,
-        })
-
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+    if (!user) {
+      return next(new ErrorHandler("user not found", 500));
     }
+
+    const encryptedValue = decrypt(user.aadhaarNumber);
+    user.aadhaarNumber = encryptedValue;
+    res.status(200).json({
+      success: true,
+      message: "here is your user data",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
 };
 
 export const getAllUserByBuilding = async (req, res, next) => {
+  const { building, roomNumber } = req.query;
+  const filter = {};
+  if (building) {
+    ((filter.buildingName = building), (filter.Avaliablity = true));
+  }
+  if (roomNumber) {
+    filter.room = roomNumber;
+  }
 
-    
+  if (Object.keys(filter).length < 1) {
+    return next(new ErrorHandler("room not found", 400));
+  }
+  try {
+    const building = await Room.find(filter);
 
-    const { building, roomNumber } = req.query;
-    const filter = {}
-    if (building) {
-        filter.buildingName = building,
-            filter.Avaliablity = true
+    if (building.length === 0) {
+      return next(new ErrorHandler("building not found", 400));
     }
-    if (roomNumber) {
-        filter.room = roomNumber
-    }
-
-    if (Object.keys(filter).length < 1) {
-        return next(new ErrorHandler("room not found", 400))
-    }
-    try {
-        const building = await Room.find(filter);
-
-        if (building.length === 0) {
-            return next(new ErrorHandler("building not found", 400))
-        }
-        res.status(200).json({
-            success: true,
-            message: "here your rooms",
-            building
-        })
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
-    }
-}
+    res.status(200).json({
+      success: true,
+      message: "here your rooms",
+      building,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const userLogin = async (req, res, next) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return next(new ErrorHandler("all filed is required", 400))
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new ErrorHandler("all filed is required", 400));
+  }
+  try {
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return next(new ErrorHandler("user not found", 400));
     }
-    try {
-        const user = await User.findOne({ email }).select("+password");
-        if (!user) {
-            return next(new ErrorHandler("user not found", 400))
-        }
-        if (!await user.comparePassword(password)) {
-            return next(new ErrorHandler("user password not match please try again", 400))
-        }
-        const token = user.jwtToken();
-        res.cookie("token", token, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        })
-        user.password = undefined;
-        res.status(200).json({
-            success: true,
-            message: "user login successfully",
-            user
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+    if (!(await user.comparePassword(password))) {
+      return next(
+        new ErrorHandler("user password not match please try again", 400),
+      );
     }
-}
+    const token = user.jwtToken();
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    user.password = undefined;
+    res.status(200).json({
+      success: true,
+      message: "user login successfully",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const userLogout = async (req, res, next) => {
-    try {
-        res.clearCookie("token", "", {
-            httpOnly: true,
-            expires: new Date(0)
-        })
-        res.status(200).json({
-            success: true,
-            message: "user logout successfully",
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
-    }
-}
+  try {
+    res.clearCookie("token", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+    res.status(200).json({
+      success: true,
+      message: "user logout successfully",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 // This work only for sending otp to email with all thing to do about otp
 export const forgotPassword = async (req, res, next) => {
-    const { email } = req.body
-    console.log(req.body)
-    const otp = otpGenerator();
+  const { email } = req.body;
+  console.log(req.body);
+  const otp = otpGenerator();
 
-    try {
-        const user = await User.findOne({ email });
-        console.log(user)
-        if (!user) {
-            return next(new ErrorHandler("user not found please enter different email", 400))
-        }
-        user.otp = otp;
-        user.otpExpiry = Date.now() + 10 * 60 * 1000;
-        const subject = "THIS IS FOR RESET YOUR PASSWORD"
-        const message = otpTemplate(otp);
-        console.log(otp);
-
-
-        await user.save();
-        sendEmail({ email, subject, message })
-        res.status(200).json({
-            success: true,
-            message: "otp send to your registered email address",
-            user,
-        })
-
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+  try {
+    const user = await User.findOne({ email });
+    console.log(user);
+    if (!user) {
+      return next(
+        new ErrorHandler("user not found please enter different email", 400),
+      );
     }
-}
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    const subject = "THIS IS FOR RESET YOUR PASSWORD";
+    const message = otpTemplate(otp);
+    console.log(otp);
+
+    await user.save();
+    sendEmail({ email, subject, message });
+    res.status(200).json({
+      success: true,
+      message: "otp send to your registered email address",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const verifyOtp = async (req, res, next) => {
-    try {
+  try {
+    const { email, otp } = req.body;
 
-        const { email, otp } = req.body;
-
-        if (!email || !otp) {
-            return next(new ErrorHandler("Email and OTP are required", 400));
-        }
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return next(new ErrorHandler("User not found", 404));
-        }
-
-        if (user.otp !== otp || user.otpExpiry < Date.now()) {
-            return next(new ErrorHandler("Invalid or expired OTP", 400));
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "OTP verified successfully"
-        });
-
-    } catch (error) {
-        next(error);
+    if (!email || !otp) {
+      return next(new ErrorHandler("Email and OTP are required", 400));
     }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    if (user.otp !== otp || user.otpExpiry < Date.now()) {
+      return next(new ErrorHandler("Invalid or expired OTP", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const resetPassword = async (req, res, next) => {
-    const { email, otp, newPassword, confirmPassword } = req.body;
+  const { email, otp, newPassword, confirmPassword } = req.body;
 
-    console.log(req.body)
+  console.log(req.body);
 
-    if (!email || !otp || !newPassword || !confirmPassword) {
-        return next(new ErrorHandler("all filed required", 400));
+  if (!email || !otp || !newPassword || !confirmPassword) {
+    return next(new ErrorHandler("all filed required", 400));
+  }
+
+  if (newPassword !== confirmPassword) {
+    return next(
+      new ErrorHandler(
+        "newPassword and confirmPassword not match please check it",
+        400,
+      ),
+    );
+  }
+
+  try {
+    const user = await User.findOne({ email }).select("+password");
+
+    if (await user.comparePassword(newPassword)) {
+      return next(
+        new ErrorHandler("please do'nt enter previous password", 400),
+      );
     }
 
-    if (newPassword !== confirmPassword) {
-        return next(new ErrorHandler("newPassword and confirmPassword not match please check it", 400));
+    if (user.otp !== otp || user.otpExpiry < Date.now()) {
+      return next(new ErrorHandler("invalid or expired otp", 400));
     }
 
-    try {
-        const user = await User.findOne({ email }).select("+password")
+    user.password = newPassword;
+    await user.save();
 
-        if (await user.comparePassword(newPassword)) {
-            return next(new ErrorHandler("please do'nt enter previous password", 400));
-        }
+    user.password = undefined;
 
-        if (user.otp !== otp || user.otpExpiry < Date.now()) {
-            return next(new ErrorHandler("invalid or expired otp", 400))
-        }
-
-        user.password = newPassword;
-        await user.save();
-
-        user.password = undefined;
-
-        res.status(200).json({
-            success: true,
-            message: "your password has been updated successfully please login with the new password",
-            user,
-        })
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
-    }
-
-}
+    res.status(200).json({
+      success: true,
+      message:
+        "your password has been updated successfully please login with the new password",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const addMember = async (req, res, next) => {
+  const { id } = req.params;
+  const members = JSON.parse(req.body.members);
 
-    const { id } = req.params;
-    const members = JSON.parse(req.body.members)
+  // find all tenants for checking member aadhaar
+  const allTenants = await User.find({});
 
-    // find all tenants for checking member aadhaar
-    const allTenants = await User.find({})
-
-    //  checking existing addhar in member info
-    for (let details of allTenants) {
-        for (let member of details.member || []) {
-            console.log(member)
-            for (let i = 0; i < members.length; i++) {
-                if (members[i].aadhaarNumber === decrypt(member.aadhaarNumber)) {
-                    return next(new ErrorHandler("aadhaarNumber already Exist"))
-                }
-            }
+  //  checking existing addhar in member info
+  for (let details of allTenants) {
+    for (let member of details.member || []) {
+      console.log(member);
+      for (let i = 0; i < members.length; i++) {
+        if (members[i].aadhaarNumber === decrypt(member.aadhaarNumber)) {
+          return next(new ErrorHandler("aadhaarNumber already Exist"));
         }
+      }
+    }
+  }
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+    if (members.length !== req.files.profileImage.length) {
+      return next(new ErrorHandler("Members and images count mismatch"));
     }
 
     try {
-
-        const user = await User.findById(id);
-
-        if (!user) {
-            return next(new ErrorHandler("User not found", 404));
-        }
-        if (members.length !== req.files.profileImage.length) {
-            return next(new ErrorHandler("Members and images count mismatch"));
-        }
-
-        try {
-            if (req.files) {
-
-                if (!req.files.profileImage || !req.files.aadhaarFront || !req.files.aadhaarBack) {
-                    return next(new ErrorHandler("all image required", 400))
-                }
-
-                for (let i = 0; i < members.length; i++) {
-                    const [profileResult, aadhaarFrontResult, aadhaarBackResult] = await Promise.all(
-                        [
-                            cloudinary.uploader.upload(req.files.profileImage[i].path, {
-                                folder: "rent/member/profile",
-                            }),
-
-                            cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
-                                folder: "rent/member/profile",
-                            }),
-
-                            cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
-                                folder: "rent/member/profile",
-                            })
-                        ]
-                    )
-                    await fs.unlink(req.files.profileImage[i].path);
-                    await fs.unlink(req.files.aadhaarFront[i].path);
-                    await fs.unlink(req.files.aadhaarBack[i].path);
-
-                    if (profileResult) {
-                        members[i].profileImage = {
-                            public_id: profileResult.public_id,
-                            secure_url: profileResult.secure_url,
-                            imageFomat: profileResult.format
-                        }
-                    }
-
-                    if (aadhaarFrontResult) {
-                        members[i].aadhaarFront = {
-                            public_id: aadhaarFrontResult.public_id,
-                            imageFomat: aadhaarFrontResult.format
-                        }
-                    }
-
-                    if (aadhaarBackResult) {
-                        members[i].aadhaarBack = {
-                            public_id: aadhaarBackResult.public_id,
-                            imageFomat: aadhaarBackResult.format
-                        }
-                    }
-                }
-            }
-
-        } catch (error) {
-            return next(new ErrorHandler(error.message, 500))
+      if (req.files) {
+        if (
+          !req.files.profileImage ||
+          !req.files.aadhaarFront ||
+          !req.files.aadhaarBack
+        ) {
+          return next(new ErrorHandler("all image required", 400));
         }
 
-        await user.member.push(...members);
-
-
-        await user.save();
-
-        res.status(200).json({
-            success: true,
-            message: "Member added successfully",
-            member: user.member
-        });
-    } catch (error) {
         for (let i = 0; i < members.length; i++) {
-            if (req.files.profileImage?.[i]?.path) {
-                await fs.unlink(req.files.profileImage[i].path).catch(() => { });
-            }
+          const [profileResult, aadhaarFrontResult, aadhaarBackResult] =
+            await Promise.all([
+              cloudinary.uploader.upload(req.files.profileImage[i].path, {
+                folder: "rent/member/profile",
+              }),
 
-            if (req.files.aadhaarFront?.[i]?.path) {
-                await fs.unlink(req.files.aadhaarFront[i].path).catch(() => { });
-            }
+              cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
+                folder: "rent/member/profile",
+              }),
 
-            if (req.files.aadhaarBack?.[i]?.path) {
-                await fs.unlink(req.files.aadhaarBack[i].path).catch(() => { });
-            }
+              cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
+                folder: "rent/member/profile",
+              }),
+            ]);
+          await fs.unlink(req.files.profileImage[i].path);
+          await fs.unlink(req.files.aadhaarFront[i].path);
+          await fs.unlink(req.files.aadhaarBack[i].path);
+
+          if (profileResult) {
+            members[i].profileImage = {
+              public_id: profileResult.public_id,
+              secure_url: profileResult.secure_url,
+              imageFomat: profileResult.format,
+            };
+          }
+
+          if (aadhaarFrontResult) {
+            members[i].aadhaarFront = {
+              public_id: aadhaarFrontResult.public_id,
+              imageFomat: aadhaarFrontResult.format,
+            };
+          }
+
+          if (aadhaarBackResult) {
+            members[i].aadhaarBack = {
+              public_id: aadhaarBackResult.public_id,
+              imageFomat: aadhaarBackResult.format,
+            };
+          }
         }
-        console.log(error.message)
-        return next(new ErrorHandler(error.message, 500))
+      }
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
     }
 
-}
+    await user.member.push(...members);
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Member added successfully",
+      member: user.member,
+    });
+  } catch (error) {
+    for (let i = 0; i < members.length; i++) {
+      if (req.files.profileImage?.[i]?.path) {
+        await fs.unlink(req.files.profileImage[i].path).catch(() => {});
+      }
+
+      if (req.files.aadhaarFront?.[i]?.path) {
+        await fs.unlink(req.files.aadhaarFront[i].path).catch(() => {});
+      }
+
+      if (req.files.aadhaarBack?.[i]?.path) {
+        await fs.unlink(req.files.aadhaarBack[i].path).catch(() => {});
+      }
+    }
+    console.log(error.message);
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
 
 export const removeMember = async (req, res, next) => {
-    const id = req.params.id
-    const memberId = req.params.memberid
-    try {
+  const id = req.params.id;
+  const memberId = req.params.memberid;
+  try {
+    const user = await User.findById(id);
+    const removedUserInfo = user.member.find(
+      (member) => member._id.toString() === memberId,
+    );
 
-        const user = await User.findById(id)
-        const removedUserInfo = user.member.find((member) =>
-            member._id.toString() === memberId
-        )
-
-        if (!removedUserInfo) {
-            return next(new ErrorHandler("member not found", 400))
-        }
-
-        if (removedUserInfo) {
-            removedUserInfo.isActive = false
-        }
-
-        await user.save()
-        res.status(200).json({
-            success: true,
-            message: "member remove succesfully",
-            removedUserInfo,
-        })
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+    if (!removedUserInfo) {
+      return next(new ErrorHandler("member not found", 400));
     }
-}
+
+    if (removedUserInfo) {
+      removedUserInfo.isActive = false;
+    }
+
+    await user.save();
+    res.status(200).json({
+      success: true,
+      message: "member remove succesfully",
+      removedUserInfo,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const updateMemberInfo = async (req, res, next) => {
-    const { name, aadhaarNumber, dob } = req.body
-    const id = req.params.id;
-    const memberId = req.params.memberid;
+  const { name, aadhaarNumber, dob } = req.body;
+  const id = req.params.id;
+  const memberId = req.params.memberid;
 
-    try {
-        const user = await User.findById(id);
-        console.log(user)
+  try {
+    const user = await User.findById(id);
+    console.log(user);
 
-        const findMember = user.member.find((member) =>
-            member._id.toString() === memberId
-        )
+    const findMember = user.member.find(
+      (member) => member._id.toString() === memberId,
+    );
 
-        if (!findMember) {
-            return next(new ErrorHandler("member not found", 400))
-        }
-
-        if (name) {
-            findMember.name = name;
-        }
-
-        if (dob) {
-            findMember.dob = dob;
-        }
-
-        // find all tenants for checking member aadhaar
-        const allTenants = await User.find({})
-        if (aadhaarNumber) {
-            //  checking existing addhar in member info
-            for (let details of allTenants) {
-                for (let member of details.member || []) {
-                    if (aadhaarNumber === decrypt(member.aadhaarNumber)) {
-                        return next(new ErrorHandler("aadhaarNumber already Exist"))
-                    }
-
-                }
-            }
-            findMember.aadhaarNumber = aadhaarNumber;
-            findMember.hashAadhaar = undefined
-        }
-
-        // image update process
-
-        if (req.files && Object.keys(req.files).length > 0) {
-            try {
-                if (req.files?.profileImage) {
-                    await cloudinary.uploader.destroy(findMember.profileImage.public_id)
-                    const profileImageResult = await cloudinary.uploader.upload(req.files.profileImage[0].path)
-
-                    if (profileImageResult) {
-                        findMember.profileImage.public_id = profileImageResult.public_id;
-                        findMember.profileImage.secure_url = profileImageResult.secure_url;
-                    }
-                    await fs.unlink(req.files.profileImage[0].path);
-
-                }
-                if (req.files?.aadhaarFront) {
-                    await cloudinary.uploader.destroy(findMember.aadhaarFront.public_id)
-                    const aadhaarFrontResult = await cloudinary.uploader.upload(req.files.aadhaarFront[0].path)
-
-                    if (aadhaarFrontResult) {
-                        findMember.aadhaarFront.public_id = aadhaarFrontResult.public_id;
-                    }
-                    await fs.unlink(req.files.aadhaarFront[0].path);
-                }
-                if (req.files?.aadhaarBack) {
-                    await cloudinary.uploader.destroy(findMember.aadhaarBack.public_id)
-                    const aadhaarBackResult = await cloudinary.uploader.upload(req.files.aadhaarBack[0].path)
-
-                    if (aadhaarBackResult) {
-                        findMember.aadhaarBack.public_id = aadhaarBackResult.public_id;
-                    }
-                    await fs.unlink(req.files.aadhaarBack[0].path);
-                }
-
-            } catch (err) {
-                console.log("Cloudinary Error:", err);
-            }
-        }
-
-        await user.save();
-
-
-        res.status(200).json({
-
-            success: true,
-            message: "member info updated",
-            findMember,
-        })
-
-
-    } catch (error) {
-        await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => { });
-        await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => { });
-        return next(new ErrorHandler(error.message, 400))
+    if (!findMember) {
+      return next(new ErrorHandler("member not found", 400));
     }
 
-}
+    if (name) {
+      findMember.name = name;
+    }
+
+    if (dob) {
+      findMember.dob = dob;
+    }
+
+    // find all tenants for checking member aadhaar
+    const allTenants = await User.find({});
+    if (aadhaarNumber) {
+      //  checking existing addhar in member info
+      for (let details of allTenants) {
+        for (let member of details.member || []) {
+          if (aadhaarNumber === decrypt(member.aadhaarNumber)) {
+            return next(new ErrorHandler("aadhaarNumber already Exist"));
+          }
+        }
+      }
+      findMember.aadhaarNumber = aadhaarNumber;
+      findMember.hashAadhaar = undefined;
+    }
+
+    // image update process
+
+    if (req.files && Object.keys(req.files).length > 0) {
+      try {
+        if (req.files?.profileImage) {
+          await cloudinary.uploader.destroy(findMember.profileImage.public_id);
+          const profileImageResult = await cloudinary.uploader.upload(
+            req.files.profileImage[0].path,
+          );
+
+          if (profileImageResult) {
+            findMember.profileImage.public_id = profileImageResult.public_id;
+            findMember.profileImage.secure_url = profileImageResult.secure_url;
+          }
+          await fs.unlink(req.files.profileImage[0].path);
+        }
+        if (req.files?.aadhaarFront) {
+          await cloudinary.uploader.destroy(findMember.aadhaarFront.public_id);
+          const aadhaarFrontResult = await cloudinary.uploader.upload(
+            req.files.aadhaarFront[0].path,
+          );
+
+          if (aadhaarFrontResult) {
+            findMember.aadhaarFront.public_id = aadhaarFrontResult.public_id;
+          }
+          await fs.unlink(req.files.aadhaarFront[0].path);
+        }
+        if (req.files?.aadhaarBack) {
+          await cloudinary.uploader.destroy(findMember.aadhaarBack.public_id);
+          const aadhaarBackResult = await cloudinary.uploader.upload(
+            req.files.aadhaarBack[0].path,
+          );
+
+          if (aadhaarBackResult) {
+            findMember.aadhaarBack.public_id = aadhaarBackResult.public_id;
+          }
+          await fs.unlink(req.files.aadhaarBack[0].path);
+        }
+      } catch (err) {
+        console.log("Cloudinary Error:", err);
+      }
+    }
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "member info updated",
+      findMember,
+    });
+  } catch (error) {
+    await fs.unlink(req?.files?.profileImage?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarFront?.[0]?.path).catch(() => {});
+    await fs.unlink(req?.files?.aadhaarBack?.[0]?.path).catch(() => {});
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const getMe = async (req, res, next) => {
-    const { id } = req.user;
+  const { id } = req.user;
 
-    try {
+  try {
+    const user = await User.findById(id);
 
-        const user = await User.findById(id);
-
-
-        if (!user) {
-            return next(new ErrorHandler("user Not Found", 400))
-        }
-
-        const encryptedValue = decrypt(user.aadhaarNumber)
-        user.aadhaarNumber = encryptedValue
-
-        res.status(200).json({
-            success: true,
-            message: "Here your information",
-            user,
-        })
-
-
-
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 400))
+    if (!user) {
+      return next(new ErrorHandler("user Not Found", 400));
     }
-}
 
+    const encryptedValue = decrypt(user.aadhaarNumber);
+    user.aadhaarNumber = encryptedValue;
+
+    res.status(200).json({
+      success: true,
+      message: "Here your information",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+};
 
 export const getReceiptById = async (req, res, next) => {
-    try {
-        const { id } = req.user
+  try {
+    const { id } = req.user;
 
-        const receipt = await ReceiptHistory.find({ tenantId: id });
+    const receipt = await ReceiptHistory.find({ tenantId: id });
 
-        if (!receipt) {
-            return next(new ErrorHandler("Receipt not found", 404));
-        }
-
-        return res.status(200).json({
-            success: true,
-            message: "get all receipts",
-            receipt,
-        });
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+    if (!receipt) {
+      return next(new ErrorHandler("Receipt not found", 404));
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "get all receipts",
+      receipt,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
 };
 
 export const getAadhaarImage = async (req, res, next) => {
-    try {
-        const { id } = req.body;
+  try {
+    const { id } = req.body;
 
-        const user = await User.findById(id);
+    const user = await User.findById(id);
 
-        if (!user) {
-            return next(new ErrorHandler("User not found", 404));
-        }
-
-        const aadhaarFront = await cloudinary.api.resource(
-            user.aadhaarFront.public_id,
-            {
-                resource_type: "image",
-                type: "private",
-            }
-        );
-
-        const aadhaarBack = await cloudinary.api.resource(
-            user.aadhaarBack.public_id,
-            {
-                resource_type: "image",
-                type: "private",
-            }
-        );
-
-        const aadhaarFrontUrl = cloudinary.utils.private_download_url(
-            user.aadhaarFront.public_id,
-            aadhaarFront.format,
-            {
-                resource_type: "image",
-            }
-        );
-
-        const aadhaarBackUrl = cloudinary.utils.private_download_url(
-            user.aadhaarBack.public_id,
-            aadhaarBack.format,
-            {
-                resource_type: "image",
-            }
-        );
-
-        return res.status(200).json({
-            success: true,
-            aadhaarFrontUrl,
-            aadhaarBackUrl,
-        });
-    } catch (error) {
-        return next(new ErrorHandler(error.message, 500));
+    if (!user) {
+      return next(new ErrorHandler("User not found", 404));
     }
-};
 
+    const aadhaarFront = await cloudinary.api.resource(
+      user.aadhaarFront.public_id,
+      {
+        resource_type: "image",
+        type: "private",
+      },
+    );
+
+    const aadhaarBack = await cloudinary.api.resource(
+      user.aadhaarBack.public_id,
+      {
+        resource_type: "image",
+        type: "private",
+      },
+    );
+
+    const aadhaarFrontUrl = cloudinary.utils.private_download_url(
+      user.aadhaarFront.public_id,
+      aadhaarFront.format,
+      {
+        resource_type: "image",
+      },
+    );
+
+    const aadhaarBackUrl = cloudinary.utils.private_download_url(
+      user.aadhaarBack.public_id,
+      aadhaarBack.format,
+      {
+        resource_type: "image",
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      aadhaarFrontUrl,
+      aadhaarBackUrl,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
