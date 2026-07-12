@@ -77,7 +77,7 @@ export function fetchImage(id) {
 // ---------- Add Member ----------
 // FormData bhejni hoti hai (members JSON string + profileImage + aadhaarFront + aadhaarBack)
 export function addMember(id, formData) {
-  return API.post(`/member/${id}`, formData);
+  return API.put(`/addmember/${id}`, formData);
 }
 
 // ---------- Update Member ----------

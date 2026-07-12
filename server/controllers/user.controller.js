@@ -551,7 +551,9 @@ export const resetPassword = async (req, res, next) => {
 
 export const addMember = async (req, res, next) => {
   const { id } = req.params;
-  const members = JSON.parse(req.body.members);
+  const members = [req.body];
+  console.log(req.body);
+  console.log(members);
 
   // find all tenants for checking member aadhaar
   const allTenants = await User.find({});
@@ -559,7 +561,6 @@ export const addMember = async (req, res, next) => {
   //  checking existing addhar in member info
   for (let details of allTenants) {
     for (let member of details.member || []) {
-      console.log(member);
       for (let i = 0; i < members.length; i++) {
         if (members[i].aadhaarNumber === decrypt(member.aadhaarNumber)) {
           return next(new ErrorHandler("aadhaarNumber already Exist"));

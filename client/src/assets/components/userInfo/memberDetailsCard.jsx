@@ -1,92 +1,57 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/authContext";
+import MemberForm from "./memberForm";
+import toast from "react-hot-toast";
+import { addMember } from "../../api/authApi";
 
 function MemberDetailCard() {
-  //   const { user } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
   const [showDocuments, setShowDocuments] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [sendDataLoading, setSendDataLoading] = useState(null);
+  const [member, setMember] = useState({
+    name: "",
+    dob: "",
+    aadhaarNumber: "",
+    profileImage: null,
+    aadhaarFront: null,
+    aadhaarBack: null,
+  });
 
-  const user = {
-    member: [
-      {
-        _id: "1",
-        name: "Rahul Sharma",
-        dob: "12/08/2002",
-        aadhaarNumber: "XXXX XXXX 1234",
+  function handleChange(e) {
+    setMember((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
 
-        profileImage: {
-          secure_url: "https://picsum.photos/200?random=1",
-        },
+  async function createMember(e) {
+    e.preventDefault();
+    const check = Object.values(member).every((value) => Boolean(value));
+    if (!check) return;
 
-        aadhaarFront: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Front",
-        },
+    const memberDetail = new FormData();
+    Object.keys(member).forEach((key) => {
+      memberDetail.set(key, member[key]);
+    });
 
-        aadhaarBack: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Back",
-        },
-      },
-      {
-        _id: "1",
-        name: "Rahul Sharma",
-        dob: "12/08/2002",
-        aadhaarNumber: "XXXX XXXX 1234",
-
-        profileImage: {
-          secure_url: "https://picsum.photos/200?random=1",
-        },
-
-        aadhaarFront: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Front",
-        },
-
-        aadhaarBack: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Back",
-        },
-      },
-
-      {
-        _id: "2",
-        name: "Aman Verma",
-        dob: "18/03/2001",
-        aadhaarNumber: "XXXX XXXX 5678",
-
-        profileImage: {
-          secure_url: "https://picsum.photos/200?random=2",
-        },
-
-        aadhaarFront: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Front",
-        },
-
-        aadhaarBack: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Back",
-        },
-      },
-
-      {
-        _id: "3",
-        name: "Rohit Kumar",
-        dob: "25/11/2000",
-        aadhaarNumber: "XXXX XXXX 9876",
-
-        profileImage: {
-          secure_url: "https://picsum.photos/200?random=3",
-        },
-
-        aadhaarFront: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Front",
-        },
-
-        aadhaarBack: {
-          secure_url: "https://placehold.co/600x380?text=Aadhaar+Back",
-        },
-      },
-    ],
-  };
+    try {
+      setSendDataLoading(true);
+      const res = await addMember(user._id, memberDetail);
+      toast.success(res?.data?.message);
+    } catch (error) {
+      toast.error(error?.response?.data?.message);
+    } finally {
+      setSendDataLoading(false);
+    }
+  }
 
   return (
     <>
+      <MemberForm
+        member={member}
+        setMember={setMember}
+        handleChange={handleChange}
+        loading={sendDataLoading}
+        onSubmit={createMember}
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-slate-800">Family Members</h1>
