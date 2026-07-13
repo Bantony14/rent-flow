@@ -1,0 +1,10 @@
+* [33m3d13cff[m[33m ([m[1;31morigin/main[m[33m)[m fix update member
+* [33m49f26b2[m add member in progress
+* [33mbce05ff[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m memberdetails card has been done
+* [33mdb3c45b[m adding comment for clearity
+* [33m974c5b5[m added tenantId in room after update rooms
+* [33mf4ae153[m fix bugs
+* [33mc3c6db2[m fix room availbility
+* [33m582ab39[m fix bug
+* [33mb754332[m fix bugs in all tenantsdetails
+* [33m32c65d6[m fecth room by building in ALLtenantsDetails

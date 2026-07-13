@@ -83,13 +83,13 @@ export function addMember(id, formData) {
 // ---------- Update Member ----------
 // Text fields aur images dono optional hoti hai, Multipart FormData jaati hai
 export function updateMember(id, memberId, formData) {
-  return API.put(`/member/${id}/${memberId}`, formData);
+  return API.put(`/updatemember/${id}/${memberId}`, formData);
 }
 
 // ---------- Remove Member ----------
 // Backend actual delete nahi karta, sirf isActive = false karta hai
 export function removeMember(id, memberId) {
-  return API.delete(`/member/${id}/${memberId}`);
+  return API.put(`/removemember/${id}/${memberId}`);
 }
 
 // ---------- Get Aadhaar Image ----------

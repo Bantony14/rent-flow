@@ -1,6 +1,20 @@
-function MemberForm({ member, setMember, handleChange, onSubmit, loading }) {
+function MemberForm({
+  member,
+  setMember,
+  handleChange,
+  onSubmit,
+  loading,
+  onClose,
+}) {
   return (
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden relative">
+      <button
+        type="button"
+        onClick={onClose}
+        className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-900 text-white flex items-center justify-center transition"
+      >
+        ✕
+      </button>
       <div className="grid grid-cols-1 md:grid-cols-2">
         {/* ================= Left Section ================= */}
         <div className="bg-gradient-to-br from-blue-600 to-blue-700 px-6 py-8 sm:px-8 sm:py-10 flex flex-col justify-center items-center text-white gap-6">
@@ -160,6 +174,7 @@ function MemberForm({ member, setMember, handleChange, onSubmit, loading }) {
               placeholder="XXXX XXXX XXXX"
               className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
               required
+              maxLength={12}
             />
           </div>
 

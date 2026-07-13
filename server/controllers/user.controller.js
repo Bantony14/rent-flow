@@ -552,8 +552,6 @@ export const resetPassword = async (req, res, next) => {
 export const addMember = async (req, res, next) => {
   const { id } = req.params;
   const members = [req.body];
-  console.log(req.body);
-  console.log(members);
 
   // find all tenants for checking member aadhaar
   const allTenants = await User.find({});
