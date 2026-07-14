@@ -146,6 +146,7 @@ export const userRegistration = async (req, res, next) => {
 };
 
 export const userUpdate = async (req, res, next) => {
+  console.log("start>>>");
   const allowedFiled = [
     "fullName",
     "aadhaarNumber",
@@ -160,9 +161,13 @@ export const userUpdate = async (req, res, next) => {
     "joiningDate",
     "rentPrice",
     "nextRentMonthGenerated",
+    "aadhaarFront",
+    "aadhaarBack",
   ];
 
   const { id } = req.params;
+  console.log("req.body>>>", req.body);
+  console.log("req.files>>>", req.files);
 
   const validation = Object.keys(req.body);
 
@@ -188,7 +193,7 @@ export const userUpdate = async (req, res, next) => {
 
   const forNoChanges = Object.keys(req.body).length === 0;
 
-  if (forNoChanges) {
+  if (forNoChanges && Object.keys(req.files).length === 0) {
     return next(new ErrorHandler("There is no changes in your data"));
   }
 
@@ -214,6 +219,9 @@ export const userUpdate = async (req, res, next) => {
           await cloudinary.uploader.destroy(user.profileImage.public_id);
           const profileImageResult = await cloudinary.uploader.upload(
             req.files.profileImage[0].path,
+            {
+              folder: "rentflow/aadhaar",
+            },
           );
 
           if (profileImageResult) {
@@ -226,6 +234,10 @@ export const userUpdate = async (req, res, next) => {
           await cloudinary.uploader.destroy(user.aadhaarFront.public_id);
           const aadhaarFrontResult = await cloudinary.uploader.upload(
             req.files.aadhaarFront[0].path,
+            {
+              folder: "rentflow/aadhaar",
+              type: "private",
+            },
           );
 
           if (aadhaarFrontResult) {
@@ -237,6 +249,10 @@ export const userUpdate = async (req, res, next) => {
           await cloudinary.uploader.destroy(user.aadhaarBack.public_id);
           const aadhaarBackResult = await cloudinary.uploader.upload(
             req.files.aadhaarBack[0].path,
+            {
+              folder: "rentflow/aadhaar",
+              type: "private",
+            },
           );
 
           if (aadhaarBackResult) {
@@ -833,8 +849,11 @@ export const getReceiptById = async (req, res, next) => {
 export const getAadhaarImage = async (req, res, next) => {
   try {
     const { id } = req.body;
+    console.log(id);
 
     const user = await User.findById(id);
+
+    console.log("user>>", user);
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
@@ -848,6 +867,8 @@ export const getAadhaarImage = async (req, res, next) => {
       },
     );
 
+    console.log("aadhaarFront>>>", aadhaarFront);
+
     const aadhaarBack = await cloudinary.api.resource(
       user.aadhaarBack.public_id,
       {
@@ -855,6 +876,8 @@ export const getAadhaarImage = async (req, res, next) => {
         type: "private",
       },
     );
+
+    console.log("aadhaarBack>>>", aadhaarBack);
 
     const aadhaarFrontUrl = cloudinary.utils.private_download_url(
       user.aadhaarFront.public_id,

@@ -1,3 +1,5 @@
+import { Loader2 } from "lucide-react";
+
 function ProfileCard({
   user,
   edit,
@@ -6,6 +8,7 @@ function ProfileCard({
   onCancel,
   onDelete,
   handleChange,
+  uploadDataloading,
 }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-6 md:p-8 text-white shadow-xl">
@@ -14,12 +17,15 @@ function ProfileCard({
         {edit ? (
           <>
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm font-semibold transition"
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-400 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold transition"
               onClick={onSave}
+              disabled={uploadDataloading}
             >
-              Save
+              {uploadDataloading && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {uploadDataloading ? "Sending..." : "Send"}
             </button>
-
             <button
               className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl text-sm font-semibold text-white hover:bg-white/30 transition"
               onClick={() => {

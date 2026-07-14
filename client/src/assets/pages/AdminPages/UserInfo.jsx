@@ -14,6 +14,7 @@ import ProfileCard from "../../components/userInfo/ProfileCard";
 import { useNavigate } from "react-router-dom";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
 import MemberDetailCard from "../../components/userInfo/memberDetailsCard";
+import ShowAadhaar from "../../components/userInfo/ShowAadhaar";
 
 function UserInfoPage() {
   const { tenantid } = useParams();
@@ -24,6 +25,7 @@ function UserInfoPage() {
   const [deleteTenant, setDeleteTenant] = useState("");
   const [openDocuments, setOpenDocuments] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
+  const [uploadDataloading, setUploadDataLoading] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,24 +44,28 @@ function UserInfoPage() {
     get();
   }, []);
 
+  console.log("editData>>>", editdata);
+
   useEffect(() => {
     setFormData(structuredClone(tenantDetail));
   }, [tenantDetail]);
 
   async function fetchAaddharImage() {
     console.log("start");
-
     if (
-      tenantDetail.aadhaarFront.secure_url &&
-      tenantDetail.aadhaarBack.secure_url
+      typeof tenantDetail.aadhaarFront.secure_url === "string" &&
+      typeof tenantDetail.aadhaarBack.secure_url === "string"
     ) {
       return;
     }
+
+    console.log("end");
 
     try {
       setLoadingImage(true);
 
       const res = await fetchImage(tenantDetail._id);
+      console.log("response>>>", res.data.aadhaarFrontUrl);
 
       setTenantDetail((prev) => ({
         ...prev,
@@ -88,8 +94,8 @@ function UserInfoPage() {
 
     if (
       name === "profileImage" ||
-      name === "adhhaarFront" ||
-      name === "adhhaarBack"
+      name === "aadhaarFront" ||
+      name === "aadhaarBack"
     ) {
       setFormData((prev) => {
         return {
@@ -112,21 +118,32 @@ function UserInfoPage() {
     setEditData((prev) => {
       return {
         ...prev,
-        [e.target.name]: e.target.value ? e.target.value : e.target.files[0],
+        [e.target.name]: e.target.files ? e.target.files[0] : e.target.value,
       };
     });
   }
 
+  console.log("formdata>>>", formdata);
+
   // sending api for updating the value of user
   async function sendApiForUpdate(id) {
+    const updatedData = new FormData();
+    Object.keys(editdata).forEach((value) => {
+      updatedData.set([value], editdata[value]);
+    });
+
     try {
-      const res = await updateUser(id, editdata);
+      setUploadDataLoading(true);
+      const res = await updateUser(id, updatedData);
       toast.success(res.data.message);
       setTenantDetail(structuredClone(formdata));
       setEditData({});
+      setOpenDocuments(false);
       editOn(false);
     } catch (error) {
       toast.error(error?.response?.data?.message);
+    } finally {
+      setUploadDataLoading(false);
     }
   }
 
@@ -151,7 +168,7 @@ function UserInfoPage() {
       setDeleteTenant("");
       toast.success(res.data.message);
       console.log(res.data.message);
-      navigate("/alltenants");
+      navigate("/all-tenants");
     } catch (error) {
       toast.error(error?.response?.data?.message);
     }
@@ -181,6 +198,7 @@ function UserInfoPage() {
             onSave={() => sendApiForUpdate(formdata._id)}
             onCancel={cancelUpdate}
             onDelete={updateDeleteTenants}
+            uploadDataloading={uploadDataloading}
           />
 
           {/* ==================== INFORMATION CARDS ==================== */}
@@ -217,106 +235,16 @@ function UserInfoPage() {
           </div>
 
           {/* ====================  Aadhaar  CARD ==================== */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-slate-800">
-                Identity Documents
-              </h2>
-
-              <button
-                onClick={() => {
-                  if (!openDocuments) {
-                    fetchAaddharImage();
-                  }
-                  setOpenDocuments((prev) => !prev);
-                }}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
-              >
-                {openDocuments ? "Hide Documents" : "View Documents"}
-
-                <svg
-                  className={`h-4 w-4 transition-transform ${
-                    openDocuments ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Dropdown panel */}
-            <div
-              className={`overflow-hidden transition-all duration-300 ${
-                openDocuments
-                  ? "max-h-[700px] opacity-100 mt-5"
-                  : "max-h-0 opacity-0"
-              }`}
-            >
-              <div className="border-t border-slate-200 pt-5">
-                <p className="mb-4 text-sm font-medium text-slate-600">
-                  Aadhaar Card
-                </p>
-
-                {loadingImage ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 animate-pulse">
-                    <div>
-                      <div className="w-full h-56 rounded-2xl bg-stone-200"></div>
-                      <div className="mt-3 h-4 w-24 mx-auto rounded bg-slate-200"></div>
-                    </div>
-
-                    <div>
-                      <div className="w-full h-56 rounded-2xl bg-stone-200"></div>
-                      <div className="mt-3 h-4 w-24 mx-auto rounded bg-slate-200"></div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <img
-                        onClick={() =>
-                          window.open(
-                            tenantDetail?.aadhaarFront?.secure_url,
-                            "_blank",
-                          )
-                        }
-                        src={tenantDetail?.aadhaarFront?.secure_url}
-                        alt="Aadhaar Front"
-                        className="w-full h-56 rounded-2xl border border-slate-200 object-contain bg-white p-3 shadow-sm transition duration-300 hover:shadow-lg hover:scale-[1.02]"
-                      />
-                      <p className="mt-2 text-center text-sm font-medium text-slate-600">
-                        Front Side
-                      </p>
-                    </div>
-
-                    <div>
-                      <img
-                        onClick={() =>
-                          window.open(
-                            tenantDetail?.aadhaarBack?.secure_url,
-                            "_blank",
-                          )
-                        }
-                        src={tenantDetail?.aadhaarBack?.secure_url}
-                        alt="Aadhaar Back"
-                        className="w-full h-56 rounded-2xl border border-slate-200 object-contain bg-white p-3 shadow-sm transition duration-300 hover:shadow-lg hover:scale-[1.02]"
-                      />
-                      <p className="mt-2 text-center text-sm font-medium text-slate-600">
-                        Back Side
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <ShowAadhaar
+            openDocuments={openDocuments}
+            setOpenDocuments={setOpenDocuments}
+            fetchAaddharImage={fetchAaddharImage}
+            loadingImage={loadingImage}
+            tenantDetail={tenantDetail}
+            isEdit={isEdit}
+            handleChange={handleChange}
+            formdata={formdata}
+          />
 
           {/* ==================== FAMILY MEMBERS CARD ==================== */}
           <MemberDetailCard tenantDetails={tenantDetail} />
