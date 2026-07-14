@@ -47,7 +47,6 @@ export default function TenantDashboard() {
           {/* Rent Due */}
 
           <RentDueCard user={user} />
-          {/* Notifications */}
 
           {/* rent History */}
           <RentHistoryCard userRentHistory={user.rentHistory.reverse()} />

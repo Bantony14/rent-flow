@@ -1,12 +1,12 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import MemberForm from "./memberForm";
 import toast from "react-hot-toast";
 import { addMember, removeMember, updateMember } from "../../api/authApi";
 import { X, Trash2, Pencil, Camera } from "lucide-react";
 
-function MemberDetailCard() {
-  const { user, setUser } = useContext(AuthContext);
+function MemberDetailCard({ tenantDetails }) {
+  const [user, setUser] = useState(tenantDetails);
   const [showDocuments, setShowDocuments] = useState(null);
   const [loading, setLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -22,6 +22,12 @@ function MemberDetailCard() {
     aadhaarFront: null,
     aadhaarBack: null,
   });
+
+  useEffect(() => {
+    if (tenantDetails) {
+      setUser({ ...tenantDetails });
+    }
+  }, [tenantDetails]);
 
   // this is for form submit which is create new member
   function handleChange(e) {

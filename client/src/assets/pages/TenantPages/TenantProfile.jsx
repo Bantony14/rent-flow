@@ -19,8 +19,9 @@ const TenantProfile = () => {
   const tenant = useContext(AuthContext).user;
   const loading = useContext(AuthContext).loading;
   const [openDocuments, setOpenDocuments] = useState(false);
-  const [trigger, setTrigger] = useState("");
   const [loadingImage, setLoadingImage] = useState(false);
+
+  console.log("tenant>>", tenant);
 
   async function fetchAaddharImage() {
     if (!tenant.aadhaarFront.secure_url && !tenant.aadhaarBack.secure_url)
@@ -29,7 +30,6 @@ const TenantProfile = () => {
         const res = await fetchImage(tenant._id);
         tenant.aadhaarFront.secure_url = res.data.aadhaarFrontUrl;
         tenant.aadhaarBack.secure_url = res.data.aadhaarBackUrl;
-        setTrigger(null);
       } catch (error) {
         toast.error(error?.response?.data?.message);
       } finally {
