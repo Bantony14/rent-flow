@@ -10,12 +10,8 @@ function ShowAadhaar({
   isEdit,
   handleChange,
   formdata,
+  setFetchRoomLoading,
 }) {
-  console.log("isEdit>>>", isEdit);
-  console.log(
-    "tenantDetail?.aadhaarBack?.secure_url>>>",
-    tenantDetail?.aadhaarBack?.secure_url,
-  );
   return !isEdit ? (
     <div className="bg-white rounded-2xl shadow p-6">
       <div className="flex items-center justify-between mb-2">

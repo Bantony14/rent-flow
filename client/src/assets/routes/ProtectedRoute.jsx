@@ -4,17 +4,16 @@ import { AuthContext } from "../context/authContext";
 import LoadingScreen from "../components/LoadingScreen";
 
 function ProtectedRoute({ children }) {
-    const { user, loading } = useContext(AuthContext);
-    console.log("user>", user)
+  const { user, loading } = useContext(AuthContext);
 
-    if (loading) {
-        return <LoadingScreen />
-    }
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
-    if (!user) {
-        return <Navigate to="/login" replace />
-    }
-    return children;
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
 }
 
 export default ProtectedRoute;

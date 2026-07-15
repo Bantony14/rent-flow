@@ -9,6 +9,7 @@ function ProfileCard({
   onDelete,
   handleChange,
   uploadDataloading,
+  fetchRoom,
 }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-6 md:p-8 text-white shadow-xl">
@@ -38,7 +39,10 @@ function ProfileCard({
           </>
         ) : (
           <button
-            onClick={onEditToggle}
+            onClick={() => {
+              onEditToggle();
+              fetchRoom();
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm border border-white/40 rounded-xl text-sm font-semibold hover:bg-white/30 transition"
           >
             Edit
@@ -62,15 +66,22 @@ function ProfileCard({
               className="group relative block w-full h-full cursor-pointer"
             >
               <div className="w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl bg-white">
-                <img
-                  src={
-                    typeof user.profileImage.secure_url === "string"
-                      ? user.profileImage.secure_url
-                      : URL.createObjectURL(user.profileImage.secure_url)
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
+                {user?.profileImage?.secure_url ? (
+                  <img
+                    src={
+                      typeof user?.profileImage?.secure_url === "string"
+                        ? user?.profileImage?.secure_url
+                        : URL.createObjectURL(user?.profileImage?.secure_url)
+                    }
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 text-slate-400">
+                    <div className="rounded-full bg-white p-3 shadow-sm"></div>
+                    <p className="text-xs font-medium">No Photo</p>
+                  </div>
+                )}
               </div>
 
               {/* Overlay */}

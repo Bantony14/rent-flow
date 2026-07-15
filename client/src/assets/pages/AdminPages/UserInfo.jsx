@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { AuthContext } from "../../context/authContext";
-import { useContext } from "react";
 import TenantProfileHeader from "../../components/userInfo/ProfileCard";
 import PersonalDetails from "../../components/userInfo/PersonalDetailCard";
 import PropertyDetails from "../../components/userInfo/PropertyDetailCard";
@@ -9,14 +7,23 @@ import UserAccountDetailCard from "../../components/userInfo/UserAccountDetailCa
 import RentInfoCard from "../../components/userInfo/RentInfoCard";
 import { useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { deleteUser, fetchImage, getUser, updateUser } from "../../api/authApi";
+import {
+  deleteUser,
+  fetchImage,
+  getRoomByBuilding,
+  getUser,
+  updateUser,
+} from "../../api/authApi";
 import ProfileCard from "../../components/userInfo/ProfileCard";
 import { useNavigate } from "react-router-dom";
 import DeleteCard from "../../components/allTenantsdetails/DeleteCard";
 import MemberDetailCard from "../../components/userInfo/memberDetailsCard";
 import ShowAadhaar from "../../components/userInfo/ShowAadhaar";
+import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
 
 function UserInfoPage() {
+  const { user } = useContext(AuthContext);
   const { tenantid } = useParams();
   const [tenantDetail, setTenantDetail] = useState(null);
   const [isEdit, setIsEdit] = useState(false);
@@ -26,7 +33,16 @@ function UserInfoPage() {
   const [openDocuments, setOpenDocuments] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
   const [uploadDataloading, setUploadDataLoading] = useState(null);
+  const [fetchRoomLoading, setFetchRoomLoading] = useState(null);
+  const [buildingName, setBuildingName] = useState();
+  const [room, setRoom] = useState([]);
   const navigate = useNavigate();
+
+  console.log("buildingName>>>>", buildingName);
+
+  useEffect(() => {
+    setBuildingName(user.properties);
+  }, [user]);
 
   useEffect(() => {
     async function get() {
@@ -35,7 +51,7 @@ function UserInfoPage() {
         console.log(res);
         setTenantDetail(res.data.user);
         console.log(res.data.user);
-        toast.success(res.data.message);
+        toast.success(res?.data?.message);
       } catch (error) {
         console.log(error.message);
         toast.error(error?.response?.data?.message);
@@ -51,15 +67,12 @@ function UserInfoPage() {
   }, [tenantDetail]);
 
   async function fetchAaddharImage() {
-    console.log("start");
     if (
-      typeof tenantDetail.aadhaarFront.secure_url === "string" &&
-      typeof tenantDetail.aadhaarBack.secure_url === "string"
+      typeof tenantDetail?.aadhaarFront?.secure_url === "string" &&
+      typeof tenantDetail?.aadhaarBack?.secure_url === "string"
     ) {
       return;
     }
-
-    console.log("end");
 
     try {
       setLoadingImage(true);
@@ -89,6 +102,33 @@ function UserInfoPage() {
     setIsEdit(!isEdit);
   }
 
+  const fetchRoom = async (building) => {
+    try {
+      setFetchRoomLoading(true);
+      setRoom([]);
+      console.log("buliding>>>", building);
+
+      if (!building) {
+        const res = await getRoomByBuilding({ building: formdata.building });
+
+        const allRoom = res?.data?.building?.flatMap((item) => item.room) ?? [];
+        setRoom(allRoom);
+      }
+
+      const res = await getRoomByBuilding({ building });
+
+      const allRoom = res?.data?.building?.flatMap((item) => item.room) ?? [];
+
+      setRoom(allRoom);
+    } catch (error) {
+      console.log(error.message);
+    } finally {
+      setFetchRoomLoading(false);
+    }
+  };
+
+  console.log("formdata>>>", formdata);
+
   function handleChange(e) {
     const { name } = e.target;
 
@@ -101,7 +141,7 @@ function UserInfoPage() {
         return {
           ...prev,
           [name]: {
-            public_id: formdata[name].public_id,
+            public_id: formdata[name]?.public_id,
             secure_url: e.target.files[0],
           },
         };
@@ -122,8 +162,6 @@ function UserInfoPage() {
       };
     });
   }
-
-  console.log("formdata>>>", formdata);
 
   // sending api for updating the value of user
   async function sendApiForUpdate(id) {
@@ -199,6 +237,7 @@ function UserInfoPage() {
             onCancel={cancelUpdate}
             onDelete={updateDeleteTenants}
             uploadDataloading={uploadDataloading}
+            fetchRoom={fetchRoom}
           />
 
           {/* ==================== INFORMATION CARDS ==================== */}
@@ -217,6 +256,10 @@ function UserInfoPage() {
               user={formdata}
               edit={isEdit}
               onChange={handleChange}
+              buildingName={buildingName}
+              room={room}
+              fetchRoom={fetchRoom}
+              setFetchRoomLoading={setFetchRoomLoading}
             />
             {/* ==================== RENT INFORMATION CARD ==================== */}
             <RentInfoCard

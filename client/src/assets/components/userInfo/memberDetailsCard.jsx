@@ -179,7 +179,6 @@ function MemberDetailCard({ tenantDetails }) {
                       <button
                         onClick={() => {
                           deleteMember(member._id);
-                          console.log("eihfiuatgfiu");
                         }}
                         className="w-7 h-7 rounded-full bg-rose-500/80 backdrop-blur-md border border-rose-300/30 hover:bg-rose-500 transition-all duration-200 flex items-center justify-center shadow-lg"
                       >
