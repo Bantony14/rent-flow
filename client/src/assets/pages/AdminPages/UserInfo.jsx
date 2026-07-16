@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import TenantProfileHeader from "../../components/userInfo/ProfileCard";
 import PersonalDetails from "../../components/userInfo/PersonalDetailCard";
 import PropertyDetails from "../../components/userInfo/PropertyDetailCard";
@@ -21,6 +21,7 @@ import MemberDetailCard from "../../components/userInfo/memberDetailsCard";
 import ShowAadhaar from "../../components/userInfo/ShowAadhaar";
 import { useContext } from "react";
 import { AuthContext } from "../../context/authContext";
+import { updateRoomAvailability } from "../../api/roomApi";
 
 function UserInfoPage() {
   const { user } = useContext(AuthContext);
@@ -37,8 +38,34 @@ function UserInfoPage() {
   const [buildingName, setBuildingName] = useState();
   const [room, setRoom] = useState([]);
   const navigate = useNavigate();
+  const roomRef = useRef({});
 
-  console.log("buildingName>>>>", buildingName);
+  console.log("roomRef>>>", roomRef);
+
+  const handleRoomUpdate = async (id) => {
+    const { building, roomNumber } = roomRef.current;
+
+    console.log(building, roomNumber);
+
+    const roomData = {
+      oldBuilding: building,
+      oldRoom: roomNumber,
+      id: id,
+    };
+
+    if (editdata.building && editdata.roomNumber) {
+      roomData.newBuilding = editdata.building;
+      roomData.newRoom = editdata.roomNumber;
+      console.log(roomRef.current);
+      try {
+        const res = await updateRoomAvailability(roomData);
+        console.log();
+        toast.success(res?.data?.message);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
   useEffect(() => {
     setBuildingName(user.properties);
@@ -50,6 +77,7 @@ function UserInfoPage() {
         const res = await getUser(tenantid);
         console.log(res);
         setTenantDetail(res.data.user);
+        roomRef.current = res.data.user;
         console.log(res.data.user);
         toast.success(res?.data?.message);
       } catch (error) {
@@ -78,7 +106,6 @@ function UserInfoPage() {
       setLoadingImage(true);
 
       const res = await fetchImage(tenantDetail._id);
-      console.log("response>>>", res.data.aadhaarFrontUrl);
 
       setTenantDetail((prev) => ({
         ...prev,
@@ -126,8 +153,6 @@ function UserInfoPage() {
       setFetchRoomLoading(false);
     }
   };
-
-  console.log("formdata>>>", formdata);
 
   function handleChange(e) {
     const { name } = e.target;
@@ -238,6 +263,7 @@ function UserInfoPage() {
             onDelete={updateDeleteTenants}
             uploadDataloading={uploadDataloading}
             fetchRoom={fetchRoom}
+            handleRoomUpdate={handleRoomUpdate}
           />
 
           {/* ==================== INFORMATION CARDS ==================== */}

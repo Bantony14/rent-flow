@@ -10,6 +10,7 @@ function ProfileCard({
   handleChange,
   uploadDataloading,
   fetchRoom,
+  handleRoomUpdate,
 }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-3xl p-6 md:p-8 text-white shadow-xl">
@@ -19,7 +20,10 @@ function ProfileCard({
           <>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-400 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold transition"
-              onClick={onSave}
+              onClick={() => {
+                onSave();
+                handleRoomUpdate();
+              }}
               disabled={uploadDataloading}
             >
               {uploadDataloading && (
