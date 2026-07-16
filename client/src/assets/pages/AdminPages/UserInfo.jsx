@@ -40,12 +40,8 @@ function UserInfoPage() {
   const navigate = useNavigate();
   const roomRef = useRef({});
 
-  console.log("roomRef>>>", roomRef);
-
   const handleRoomUpdate = async (id) => {
     const { building, roomNumber } = roomRef.current;
-
-    console.log(building, roomNumber);
 
     const roomData = {
       oldBuilding: building,
@@ -56,10 +52,10 @@ function UserInfoPage() {
     if (editdata.building && editdata.roomNumber) {
       roomData.newBuilding = editdata.building;
       roomData.newRoom = editdata.roomNumber;
-      console.log(roomRef.current);
+
       try {
         const res = await updateRoomAvailability(roomData);
-        console.log();
+
         toast.success(res?.data?.message);
       } catch (error) {
         console.error(error);
@@ -75,20 +71,17 @@ function UserInfoPage() {
     async function get() {
       try {
         const res = await getUser(tenantid);
-        console.log(res);
+
         setTenantDetail(res.data.user);
         roomRef.current = res.data.user;
-        console.log(res.data.user);
+
         toast.success(res?.data?.message);
       } catch (error) {
-        console.log(error.message);
         toast.error(error?.response?.data?.message);
       }
     }
     get();
   }, []);
-
-  console.log("editData>>>", editdata);
 
   useEffect(() => {
     setFormData(structuredClone(tenantDetail));
@@ -133,7 +126,6 @@ function UserInfoPage() {
     try {
       setFetchRoomLoading(true);
       setRoom([]);
-      console.log("buliding>>>", building);
 
       if (!building) {
         const res = await getRoomByBuilding({ building: formdata.building });
@@ -148,7 +140,6 @@ function UserInfoPage() {
 
       setRoom(allRoom);
     } catch (error) {
-      console.log(error.message);
     } finally {
       setFetchRoomLoading(false);
     }
@@ -230,7 +221,7 @@ function UserInfoPage() {
       const res = await deleteUser(id);
       setDeleteTenant("");
       toast.success(res.data.message);
-      console.log(res.data.message);
+
       navigate("/all-tenants");
     } catch (error) {
       toast.error(error?.response?.data?.message);

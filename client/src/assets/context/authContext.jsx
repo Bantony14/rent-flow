@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createContext } from "react";
 import { getMe } from "../api/authApi";
 import { paymentCheck } from "../api/paymentApi";
+import toast from "react-hot-toast";
 
 export const AuthContext = createContext();
 
@@ -13,17 +14,15 @@ const AuthProvider = ({ children }) => {
     async function getCurrentUser() {
       try {
         const res = await paymentCheck();
-        console.log(res.data.message);
       } catch (error) {
-        console.log(error?.response?.data?.message);
+        toast.error(error?.response?.data?.message);
       }
 
       try {
         const res = await getMe();
-        setUser(res.data.user);
+        setUser(res?.data?.user);
       } catch (error) {
         setUser("");
-        console.log(error?.response?.data?.message);
       } finally {
         setLoading(false);
       }
@@ -32,7 +31,6 @@ const AuthProvider = ({ children }) => {
     getCurrentUser();
   }, []);
 
-  console.log("user>", user);
   return (
     <AuthContext.Provider value={{ user, setUser, loading }}>
       {children}

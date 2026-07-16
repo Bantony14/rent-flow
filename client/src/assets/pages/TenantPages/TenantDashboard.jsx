@@ -16,7 +16,6 @@ export default function TenantDashboard() {
       try {
         const res = await paymentCheck();
         setUser(res.data.tenant);
-        console.log(res.data.message);
       } catch (error) {
         console.error(error);
       }
@@ -25,7 +24,6 @@ export default function TenantDashboard() {
     checkPayment();
   }, []);
 
-  console.log(user);
   return (
     <div className="min-h-screen bg-slate-100 font-sans">
       {/* Hero */}
@@ -61,9 +59,6 @@ export default function TenantDashboard() {
 
           <PaymentHistoryCard />
         </div>
-
-        {/* Quick Actions */}
-        <QuickActionsCard />
       </div>
     </div>
   );

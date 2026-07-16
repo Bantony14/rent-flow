@@ -51,11 +51,6 @@ export default function AllTenants() {
     params.paymentStatus = paymentStatus;
   }
 
-  const obj = {
-    shafug: "smvjhsf",
-    jkagisgkhg: "dbdgfjh",
-  };
-
   //  this is for fetching all tanants data
   useEffect(() => {
     const func = async () => {
@@ -119,7 +114,6 @@ export default function AllTenants() {
 
       setRoom(allRoom);
     } catch (error) {
-      console.log(error.message);
     } finally {
       setLoading2(false);
     }
@@ -140,18 +134,14 @@ export default function AllTenants() {
       setEditId("");
       toast.success(res.data.message);
     } catch (error) {
-      console.log(error);
       toast.error(error.response.data.message);
     }
   };
 
   // this updte the room availbilty in true or false and update tenantId in room
   const handleRoomUpdate = async (id) => {
-    console.log(id);
-
     if (id) {
       roomRef.current = formData.find((value) => value._id === id);
-      console.log("roomRef.current>>>", roomRef.current);
     }
     const { building, roomNumber } = roomRef.current;
 
@@ -193,7 +183,6 @@ export default function AllTenants() {
       setAlltenantDetails(updated);
       setDeleteTenant("");
       toast.success(res.data.message);
-      console.log(res.data.message);
     } catch (error) {
       toast.error(error?.response?.data?.message);
     }
@@ -210,7 +199,7 @@ export default function AllTenants() {
   const totalUsers = formData.length;
   const admins = formData.filter((u) => u.role === "ADMIN").length;
   const tenants = formData.filter((u) => u.role === "USER").length;
-  console.log(loading);
+
   return (
     <>
       {deleteTenant ? (

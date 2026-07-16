@@ -1,15 +1,13 @@
-import { Outlet } from "react-router-dom"
-import Navbar from "../pages/Navbar"
+import { Outlet } from "react-router-dom";
+import Navbar from "../pages/Navbar";
 
 function LayoutWithNavAndOnly() {
-    return (
-        <>
-            <Navbar />
-            <Outlet />
-        </>
-
-
-    )
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
 }
 
 export default LayoutWithNavAndOnly;

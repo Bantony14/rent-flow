@@ -21,8 +21,6 @@ const TenantProfile = () => {
   const [openDocuments, setOpenDocuments] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
 
-  console.log("tenant>>", tenant);
-
   async function fetchAaddharImage() {
     if (!tenant.aadhaarFront.secure_url && !tenant.aadhaarBack.secure_url)
       try {

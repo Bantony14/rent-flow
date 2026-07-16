@@ -17,6 +17,8 @@ import TenantProfile from "./assets/pages/TenantPages/TenantProfile.jsx";
 import Forgotpassword from "./assets/pages/ForgotPassword.jsx";
 import { Receipt } from "lucide-react";
 import ReceiptHistory from "./assets/pages/TenantPages/Receipt.jsx";
+import AdminProtection from "./assets/routes/AdminProtection.jsx";
+import LoginProtection from "./assets/routes/LoginProtection.jsx";
 
 function App() {
   return (
@@ -24,14 +26,85 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* this route with navbar and footer */}
-        <Route path="/" element={<LayoutWithNavAndFooter />}>
+        <Route element={<LayoutWithNavAndFooter />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
         </Route>
+
         {/* this route with navbar only */}
         <Route element={<LayoutWithNavOnly />}>
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/login" element={<Login />} />
+          {/* this is a only route user and admin both cannot access after login  */}
+
+          <Route
+            path="/login"
+            element={
+              <LoginProtection>
+                <Login />
+              </LoginProtection>
+            }
+          />
+
+          {/* ========================PROTECTED ROUTE FOR ADMIN================================ */}
+
+          {/* this all route below only for admin user cannot access this route  */}
+          <Route
+            path="/registration"
+            element={
+              <AdminProtection>
+                <Registration />
+              </AdminProtection>
+            }
+          />
+
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminProtection>
+                <AdminDashboard />
+              </AdminProtection>
+            }
+          />
+          <Route
+            path="/all-tenants"
+            element={
+              <AdminProtection>
+                <AllTenants />
+              </AdminProtection>
+            }
+          />
+          <Route
+            path="/view-tenant-detail/:tenantid"
+            element={
+              <AdminProtection>
+                <UserInfoCard />
+              </AdminProtection>
+            }
+          />
+
+          {/* THIS ROUTE FOR FORGOT PASSWORD WITHOUT ANY PROTECTION */}
+          <Route path="/forgot-password" element={<Forgotpassword />} />
+
+          {/* ========================PROTECTED ROUTE FOR USER================================ */}
+          {/* this below all route is for user or tenant */}
+
+          <Route
+            path="/payment-success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payment-failed"
+            element={
+              <ProtectedRoute>
+                <PaymentFailed />
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/tenant/dashboard"
             element={
@@ -40,17 +113,24 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/all-tenants" element={<AllTenants />} />
+
           <Route
-            path="/view-tenant-detail/:tenantid"
-            element={<UserInfoCard />}
+            path="/tenant/profile"
+            element={
+              <ProtectedRoute>
+                <TenantProfile />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/payment-failed" element={<PaymentFailed />} />
-          <Route path="/tenant/profile" element={<TenantProfile />} />
-          <Route path="/forgot-password" element={<Forgotpassword />} />
-          <Route path="/receipt" element={<ReceiptHistory />} />
+
+          <Route
+            path="/receipt"
+            element={
+              <ProtectedRoute>
+                <ReceiptHistory />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </>
