@@ -11,9 +11,6 @@ import Room from "../models/room.model.js";
 import ReceiptHistory from "../models/receiptHistory.model.js";
 
 export const userRegistration = async (req, res, next) => {
-  console.log(req.headers["content-type"]);
-  console.log("req.body>>>", req.body);
-  console.log("req.files>>>", req.files);
   const {
     fullName,
     aadhaarNumber,
@@ -27,6 +24,17 @@ export const userRegistration = async (req, res, next) => {
     joiningDate,
   } = req.body;
   const { profileImage, aadhaarFront, aadhaarBack } = req.files;
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_+\-=[\]{};':"\\|,.<>/?`~])[A-Za-z\d@$!%*?&^#()_+\-=[\]{};':"\\|,.<>/?`~]{8,}$/;
+
+  if (!passwordRegex.test(password)) {
+    return next(
+      new ErrorHandler(
+        "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        400,
+      ),
+    );
+  }
 
   if (req.body.role) {
     return next(new ErrorHandler("cannot enter role field", 400));
@@ -73,9 +81,7 @@ export const userRegistration = async (req, res, next) => {
       await fs.unlink(req.files.profileImage[0].path);
       await fs.unlink(req.files.aadhaarFront[0].path);
       await fs.unlink(req.files.aadhaarBack[0].path);
-    } catch (err) {
-      console.log("Cloudinary Error:", err);
-    }
+    } catch (err) {}
   }
 
   try {
@@ -140,13 +146,12 @@ export const userRegistration = async (req, res, next) => {
       }
       return next(new ErrorHandler(`${field} already exists`, 400));
     }
-    console.log(error.message);
+
     return next(new ErrorHandler(error.message, 500));
   }
 };
 
 export const userUpdate = async (req, res, next) => {
-  console.log("start>>>");
   const allowedFiled = [
     "fullName",
     "aadhaarNumber",
@@ -166,8 +171,6 @@ export const userUpdate = async (req, res, next) => {
   ];
 
   const { id } = req.params;
-  console.log("req.body>>>", req.body);
-  console.log("req.files>>>", req.files);
 
   const validation = Object.keys(req.body);
 
@@ -260,9 +263,7 @@ export const userUpdate = async (req, res, next) => {
           }
           await fs.unlink(req.files.aadhaarBack[0].path);
         }
-      } catch (err) {
-        console.log("Cloudinary Error:", err);
-      }
+      } catch (err) {}
     }
 
     await user.save();
@@ -462,12 +463,12 @@ export const userLogout = async (req, res, next) => {
 // This work only for sending otp to email with all thing to do about otp
 export const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
-  console.log(req.body);
+
   const otp = otpGenerator();
 
   try {
     const user = await User.findOne({ email });
-    console.log(user);
+
     if (!user) {
       return next(
         new ErrorHandler("user not found please enter different email", 400),
@@ -477,7 +478,6 @@ export const forgotPassword = async (req, res, next) => {
     user.otpExpiry = Date.now() + 10 * 60 * 1000;
     const subject = "THIS IS FOR RESET YOUR PASSWORD";
     const message = otpTemplate(otp);
-    console.log(otp);
 
     await user.save();
     sendEmail({ email, subject, message });
@@ -520,8 +520,6 @@ export const verifyOtp = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
   const { email, otp, newPassword, confirmPassword } = req.body;
-
-  console.log(req.body);
 
   if (!email || !otp || !newPassword || !confirmPassword) {
     return next(new ErrorHandler("all filed required", 400));
@@ -672,7 +670,7 @@ export const addMember = async (req, res, next) => {
         await fs.unlink(req.files.aadhaarBack[i].path).catch(() => {});
       }
     }
-    console.log(error.message);
+
     return next(new ErrorHandler(error.message, 500));
   }
 };
@@ -712,7 +710,6 @@ export const updateMemberInfo = async (req, res, next) => {
 
   try {
     const user = await User.findById(id);
-    console.log(user);
 
     const findMember = user.member.find(
       (member) => member._id.toString() === memberId,
@@ -783,9 +780,7 @@ export const updateMemberInfo = async (req, res, next) => {
           }
           await fs.unlink(req.files.aadhaarBack[0].path);
         }
-      } catch (err) {
-        console.log("Cloudinary Error:", err);
-      }
+      } catch (err) {}
     }
 
     await user.save();
@@ -849,11 +844,8 @@ export const getReceiptById = async (req, res, next) => {
 export const getAadhaarImage = async (req, res, next) => {
   try {
     const { id } = req.body;
-    console.log(id);
 
     const user = await User.findById(id);
-
-    console.log("user>>", user);
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
@@ -867,8 +859,6 @@ export const getAadhaarImage = async (req, res, next) => {
       },
     );
 
-    console.log("aadhaarFront>>>", aadhaarFront);
-
     const aadhaarBack = await cloudinary.api.resource(
       user.aadhaarBack.public_id,
       {
@@ -876,8 +866,6 @@ export const getAadhaarImage = async (req, res, next) => {
         type: "private",
       },
     );
-
-    console.log("aadhaarBack>>>", aadhaarBack);
 
     const aadhaarFrontUrl = cloudinary.utils.private_download_url(
       user.aadhaarFront.public_id,

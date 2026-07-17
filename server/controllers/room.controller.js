@@ -101,18 +101,16 @@ export const roomImageUpdate = async (req, res, next) => {
 
     try {
       if (req.files && imageId) {
-        console.log(room.roomImage);
         const updateImage = room.roomImage.find(
           (room) => room._id.toString() === imageId,
         );
-        console.log(updateImage);
+
         // delete Cloudinary image
         await cloudinary.uploader.destroy(updateImage.public_id);
         // upload new image on cloudinary
         const result = await cloudinary.uploader.upload(req.files[0].path, {
           folder: "roomImage",
         });
-        console.log(result);
 
         // update new image
         updateImage.public_id = result.public_id;
@@ -145,8 +143,6 @@ export const roomDetailUpdate = async (req, res, next) => {
       new: true,
       runValidation: true,
     });
-
-    console.log(room);
 
     res.status(200).json({
       success: true,
@@ -203,8 +199,6 @@ export const addRoomImage = async (req, res, next) => {
   try {
     const room = await Room.findById(id);
 
-    console.log(req.files);
-
     try {
       if (req.files) {
         for (let i = 0; i < req.files.length; i++) {
@@ -235,13 +229,8 @@ export const addRoomImage = async (req, res, next) => {
 };
 
 export const updateRoomAvailability = async (req, res) => {
-  console.log("this is for room update");
-  console.log(req.body);
-
   try {
     const { oldBuilding, oldRoom, newBuilding, newRoom, id } = req.body;
-
-    console.log(req.body);
 
     // Purana room available kar do
     const oldRoomData = await Room.findOne({
