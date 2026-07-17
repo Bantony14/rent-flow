@@ -610,10 +610,12 @@ export const addMember = async (req, res, next) => {
 
               cloudinary.uploader.upload(req.files.aadhaarFront[i].path, {
                 folder: "rent/member/profile",
+                type: "private",
               }),
 
               cloudinary.uploader.upload(req.files.aadhaarBack[i].path, {
                 folder: "rent/member/profile",
+                type: "private",
               }),
             ]);
           await fs.unlink(req.files.profileImage[i].path);
@@ -624,21 +626,21 @@ export const addMember = async (req, res, next) => {
             members[i].profileImage = {
               public_id: profileResult.public_id,
               secure_url: profileResult.secure_url,
-              imageFomat: profileResult.format,
+              imageFormat: profileResult.format,
             };
           }
 
           if (aadhaarFrontResult) {
             members[i].aadhaarFront = {
               public_id: aadhaarFrontResult.public_id,
-              imageFomat: aadhaarFrontResult.format,
+              imageFormat: aadhaarFrontResult.format,
             };
           }
 
           if (aadhaarBackResult) {
             members[i].aadhaarBack = {
               public_id: aadhaarBackResult.public_id,
-              imageFomat: aadhaarBackResult.format,
+              imageFormat: aadhaarBackResult.format,
             };
           }
         }
@@ -750,11 +752,15 @@ export const updateMemberInfo = async (req, res, next) => {
           await cloudinary.uploader.destroy(findMember.profileImage.public_id);
           const profileImageResult = await cloudinary.uploader.upload(
             req.files.profileImage[0].path,
+            {
+              folder: "rent/member/profile",
+            },
           );
 
           if (profileImageResult) {
             findMember.profileImage.public_id = profileImageResult.public_id;
             findMember.profileImage.secure_url = profileImageResult.secure_url;
+            findMember.profileImage.imageFormat = profileImageResult.format;
           }
           await fs.unlink(req.files.profileImage[0].path);
         }
@@ -762,10 +768,15 @@ export const updateMemberInfo = async (req, res, next) => {
           await cloudinary.uploader.destroy(findMember.aadhaarFront.public_id);
           const aadhaarFrontResult = await cloudinary.uploader.upload(
             req.files.aadhaarFront[0].path,
+            {
+              folder: "rent/member/profile",
+              type: "private",
+            },
           );
 
           if (aadhaarFrontResult) {
             findMember.aadhaarFront.public_id = aadhaarFrontResult.public_id;
+            findMember.aadhaarFront.imageFormat = aadhaarFrontResult.format;
           }
           await fs.unlink(req.files.aadhaarFront[0].path);
         }
@@ -773,10 +784,15 @@ export const updateMemberInfo = async (req, res, next) => {
           await cloudinary.uploader.destroy(findMember.aadhaarBack.public_id);
           const aadhaarBackResult = await cloudinary.uploader.upload(
             req.files.aadhaarBack[0].path,
+            {
+              folder: "rent/member/profile",
+              type: "private",
+            },
           );
 
           if (aadhaarBackResult) {
             findMember.aadhaarBack.public_id = aadhaarBackResult.public_id;
+            findMember.imageFormat = aadhaarBackResult.format;
           }
           await fs.unlink(req.files.aadhaarBack[0].path);
         }
@@ -851,25 +867,9 @@ export const getAadhaarImage = async (req, res, next) => {
       return next(new ErrorHandler("User not found", 404));
     }
 
-    const aadhaarFront = await cloudinary.api.resource(
-      user.aadhaarFront.public_id,
-      {
-        resource_type: "image",
-        type: "private",
-      },
-    );
-
-    const aadhaarBack = await cloudinary.api.resource(
-      user.aadhaarBack.public_id,
-      {
-        resource_type: "image",
-        type: "private",
-      },
-    );
-
     const aadhaarFrontUrl = cloudinary.utils.private_download_url(
       user.aadhaarFront.public_id,
-      aadhaarFront.format,
+      user.aadhaarFront.format,
       {
         resource_type: "image",
       },
@@ -877,7 +877,7 @@ export const getAadhaarImage = async (req, res, next) => {
 
     const aadhaarBackUrl = cloudinary.utils.private_download_url(
       user.aadhaarBack.public_id,
-      aadhaarBack.format,
+      user.aadhaarBack.format,
       {
         resource_type: "image",
       },

@@ -139,7 +139,7 @@ function Navbar() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden border-t border-cyan-500/10 bg-zinc-950/95 backdrop-blur-xl transition duration-500 ">
+        <div className="md:hidden border-t border-cyan-500/10 bg-zinc-950/95 backdrop-blur-xl">
           <div className="px-6 py-6 flex flex-col gap-6 ">
             {/* Nav Links */}
             <ul className="flex flex-col gap-5 text-sm font-medium">
