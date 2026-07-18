@@ -94,6 +94,6 @@ export function removeMember(id, memberId) {
 
 // ---------- Get Aadhaar Image ----------
 // Sirf public_id ke basis par secure image url fetch karne ke liye
-export function getAadhaarImage(id) {
-  return API.post("/getAadhaarImage", { id });
+export function getAadhaarImage(memberId, userId) {
+  return API.post("/get-member-aadhaar-image", { memberId, userId });
 }

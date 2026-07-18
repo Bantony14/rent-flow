@@ -18,6 +18,7 @@ import {
   verifyOtp,
   getReceiptById,
   getAadhaarImage,
+  getAadhaarImageForMember,
 } from "../controllers/user.controller.js";
 import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 import { uploadImages } from "../middlewares/upload.middleware.js";
@@ -70,5 +71,6 @@ route.put(
 );
 route.get("/getreceipt", isLoggedIn, getReceiptById);
 route.post("/aaddharimage", isLoggedIn, getAadhaarImage);
+route.post("/get-member-aadhaar-image", isLoggedIn, getAadhaarImageForMember);
 
 export default route;

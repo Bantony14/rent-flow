@@ -892,3 +892,42 @@ export const getAadhaarImage = async (req, res, next) => {
     return next(new ErrorHandler(error.message, 500));
   }
 };
+
+export const getAadhaarImageForMember = async (req, res, next) => {
+  try {
+    const { UserId, memberId } = req.body;
+
+    console.log("req.body>>>", req.body);
+
+    const user = await User.findById(UserId);
+    const findMember = user.member.find((member) => member._id === memberId);
+
+    if (!findMember) {
+      return next(new ErrorHandler("User not found", 404));
+    }
+
+    const aadhaarFrontUrl = cloudinary.utils.private_download_url(
+      findMember.aadhaarFront.public_id,
+      findMember.aadhaarFront.format,
+      {
+        resource_type: "image",
+      },
+    );
+
+    const aadhaarBackUrl = cloudinary.utils.private_download_url(
+      findMember.aadhaarBack.public_id,
+      findMember.aadhaarBack.format,
+      {
+        resource_type: "image",
+      },
+    );
+
+    return res.status(200).json({
+      success: true,
+      aadhaarFrontUrl,
+      aadhaarBackUrl,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};

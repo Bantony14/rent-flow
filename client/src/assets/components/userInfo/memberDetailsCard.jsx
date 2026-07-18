@@ -2,7 +2,12 @@ import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import MemberForm from "./memberForm";
 import toast from "react-hot-toast";
-import { addMember, removeMember, updateMember } from "../../api/authApi";
+import {
+  addMember,
+  removeMember,
+  updateMember,
+  getAadhaarImage,
+} from "../../api/authApi";
 import { X, Trash2, Pencil, Camera } from "lucide-react";
 
 function MemberDetailCard({ tenantDetails }) {
@@ -22,6 +27,41 @@ function MemberDetailCard({ tenantDetails }) {
     aadhaarFront: null,
     aadhaarBack: null,
   });
+
+  console.log("user>>", user);
+
+  async function getAadhaar(memberId) {
+    setLoading(true);
+
+    try {
+      const res = await getAadhaarImage(memberId, user._id);
+
+      const updatedMembers = user.member.map((member) => {
+        if (member._id !== memberId) return member;
+
+        return {
+          ...member,
+          aadhaarFront: {
+            private_url: member.aadhaarFront.public_id,
+            secure_url: res.data.aadhaarFrontUrl,
+          },
+          aadhaarBack: {
+            private_url: member.aadhaarBack.public_id,
+            secure_url: res.data.aadhaarBackUrl,
+          },
+        };
+      });
+
+      setUser({
+        ...user,
+        member: updatedMembers,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (tenantDetails) {
@@ -228,11 +268,12 @@ function MemberDetailCard({ tenantDetails }) {
                     </div>
 
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        getAadhaar(member._id);
                         setShowDocuments(
                           showDocuments === member._id ? null : member._id,
-                        )
-                      }
+                        );
+                      }}
                       className="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-medium py-2 rounded-lg shadow-sm transition-all duration-200"
                     >
                       {showDocuments === member._id
