@@ -28,9 +28,11 @@ function MemberDetailCard({ tenantDetails }) {
     aadhaarBack: null,
   });
 
-  console.log("user>>", user);
-
   async function getAadhaar(memberId) {
+    const member = user.member.find((m) => m._id === memberId);
+
+    if (member?.aadhaarFront.secure_url && member?.aadhaarBack.secure_url)
+      return;
     setLoading(true);
 
     try {
@@ -230,6 +232,9 @@ function MemberDetailCard({ tenantDetails }) {
                         src={member.profileImage.secure_url}
                         alt={member.name || "Member"}
                         className="w-20 h-20 rounded-full border-4 border-white/80 object-cover mx-auto shadow-md"
+                        onClick={() =>
+                          window.open(member.profileImage.secure_url, "_blank")
+                        }
                       />
                     ) : (
                       <div className="w-20 h-20 rounded-full border-4 border-white/80 bg-blue-800/40 flex items-center justify-center mx-auto shadow-md">
@@ -269,7 +274,7 @@ function MemberDetailCard({ tenantDetails }) {
 
                     <button
                       onClick={() => {
-                        getAadhaar(member._id);
+                        showDocuments !== member._id && getAadhaar(member._id);
                         setShowDocuments(
                           showDocuments === member._id ? null : member._id,
                         );
@@ -354,6 +359,12 @@ function MemberDetailCard({ tenantDetails }) {
                                   src={member.aadhaarFront.secure_url}
                                   alt={`${member.name || "Member"} Aadhaar Front`}
                                   className="w-full h-28 object-cover rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                                  onClick={() =>
+                                    window.open(
+                                      member.aadhaarFront.secure_url,
+                                      "_blank",
+                                    )
+                                  }
                                 />
                               ) : (
                                 <div className="w-full h-28 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">
@@ -371,6 +382,12 @@ function MemberDetailCard({ tenantDetails }) {
                                   src={member.aadhaarBack.secure_url}
                                   alt={`${member.name || "Member"} Aadhaar Back`}
                                   className="w-full h-28 object-cover rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                                  onClick={() =>
+                                    window.open(
+                                      member.aadhaarBack.secure_url,
+                                      "_blank",
+                                    )
+                                  }
                                 />
                               ) : (
                                 <div className="w-full h-28 rounded-lg border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs">

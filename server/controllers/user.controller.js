@@ -895,12 +895,13 @@ export const getAadhaarImage = async (req, res, next) => {
 
 export const getAadhaarImageForMember = async (req, res, next) => {
   try {
-    const { UserId, memberId } = req.body;
+    const { userId, memberId } = req.body;
 
-    console.log("req.body>>>", req.body);
+    const user = await User.findById(userId);
 
-    const user = await User.findById(UserId);
-    const findMember = user.member.find((member) => member._id === memberId);
+    const findMember = user.member.find(
+      (member) => member._id.toString() === memberId,
+    );
 
     if (!findMember) {
       return next(new ErrorHandler("User not found", 404));
@@ -928,6 +929,7 @@ export const getAadhaarImageForMember = async (req, res, next) => {
       aadhaarBackUrl,
     });
   } catch (error) {
+    console.log(error);
     return next(new ErrorHandler(error.message, 500));
   }
 };

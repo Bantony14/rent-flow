@@ -14,12 +14,15 @@ import { useState } from "react";
 import LoadingScreen from "../../components/LoadingScreen";
 import { fetchImage } from "../../api/authApi";
 import MemberDetailCard from "../../components/userInfo/memberDetailsCard";
+import MemberCard from "../../components/tenantPofile/MemberCard";
 
 const TenantProfile = () => {
   const tenant = useContext(AuthContext).user;
   const loading = useContext(AuthContext).loading;
   const [openDocuments, setOpenDocuments] = useState(false);
   const [loadingImage, setLoadingImage] = useState(false);
+
+  console.log("tenant>>", tenant);
 
   async function fetchAaddharImage() {
     if (!tenant.aadhaarFront.secure_url && !tenant.aadhaarBack.secure_url)
@@ -327,7 +330,7 @@ const TenantProfile = () => {
 
         {/* Members */}
         <div className="bg-white rounded-2xl shadow p-6">
-          <MemberDetailCard />
+          <MemberCard />
         </div>
       </div>
     </div>
