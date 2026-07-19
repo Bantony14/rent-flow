@@ -39,34 +39,15 @@ function UserInfoPage() {
   const [room, setRoom] = useState([]);
   const navigate = useNavigate();
   const roomRef = useRef({});
+  const params = {};
+  if (formdata?.building) {
+    params.building = formdata?.building;
+  }
+  if (formdata?.roomNumber) {
+    params.roomNumber = formdata?.roomNumber;
+  }
 
-  const handleRoomUpdate = async (id) => {
-    const { building, roomNumber } = roomRef.current;
-
-    const roomData = {
-      oldBuilding: building,
-      oldRoom: roomNumber,
-      id: id,
-    };
-
-    if (editdata.building && editdata.roomNumber) {
-      roomData.newBuilding = editdata.building;
-      roomData.newRoom = editdata.roomNumber;
-
-      try {
-        const res = await updateRoomAvailability(roomData);
-
-        toast.success(res?.data?.message);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    setBuildingName(user.properties);
-  }, [user]);
-
+  // this api is get data from using use params there is tenant id
   useEffect(() => {
     async function get() {
       try {
@@ -82,6 +63,54 @@ function UserInfoPage() {
     }
     get();
   }, []);
+
+  // this api for updating room availibilty
+  const handleRoomUpdate = async () => {
+    console.log("start");
+    const { building, roomNumber } = roomRef.current;
+
+    const roomData = {
+      oldBuilding: building,
+      oldRoom: roomNumber,
+      id: formdata._id,
+    };
+
+    if (editdata.roomNumber) {
+      roomData.newBuilding = formdata?.building;
+      roomData.newRoom = editdata?.roomNumber;
+
+      try {
+        const res = await updateRoomAvailability(roomData);
+
+        toast.success(res?.data?.message);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  // rent via building and room
+  useEffect(() => {
+    if (!formdata?.roomNumber) return;
+
+    (async () => {
+      try {
+        const res = await getRoomByBuilding(params);
+
+        setFormData((prev) => ({
+          ...prev,
+          rentPrice: res.data.building[0].rent,
+        }));
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to fetch rent");
+      }
+    })();
+  }, [formdata?.roomNumber]);
+
+  // this api is for building Name value
+  useEffect(() => {
+    setBuildingName(user.properties);
+  }, [user]);
 
   useEffect(() => {
     setFormData(structuredClone(tenantDetail));
@@ -127,24 +156,20 @@ function UserInfoPage() {
       setFetchRoomLoading(true);
       setRoom([]);
 
-      if (!building) {
-        const res = await getRoomByBuilding({ building: formdata.building });
+      const selectedBuilding = building || formdata?.building;
 
-        const allRoom = res?.data?.building?.flatMap((item) => item.room) ?? [];
-        setRoom(allRoom);
-      }
-
-      const res = await getRoomByBuilding({ building });
+      const res = await getRoomByBuilding({
+        building: selectedBuilding,
+      });
 
       const allRoom = res?.data?.building?.flatMap((item) => item.room) ?? [];
 
       setRoom(allRoom);
-    } catch (error) {
     } finally {
       setFetchRoomLoading(false);
     }
   };
-
+  // this api for edit mode on
   function handleChange(e) {
     const { name } = e.target;
 
@@ -175,6 +200,7 @@ function UserInfoPage() {
       return {
         ...prev,
         [e.target.name]: e.target.files ? e.target.files[0] : e.target.value,
+        rentPrice: formdata.rentPrice,
       };
     });
   }
@@ -194,6 +220,9 @@ function UserInfoPage() {
       setEditData({});
       setOpenDocuments(false);
       editOn(false);
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       toast.error(error?.response?.data?.message);
     } finally {

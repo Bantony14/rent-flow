@@ -30,9 +30,12 @@ function PropertyDetails({
             >
               {buildingName.map((buildingName) => {
                 return (
-                  <option key={buildingName} value={buildingName}>
-                    {buildingName}
-                  </option>
+                  <>
+                    <option value="">Select Building</option>
+                    <option key={buildingName} value={buildingName}>
+                      {buildingName}
+                    </option>
+                  </>
                 );
               })}
             </select>

@@ -19,6 +19,7 @@ import { Receipt } from "lucide-react";
 import ReceiptHistory from "./assets/pages/TenantPages/Receipt.jsx";
 import AdminProtection from "./assets/routes/AdminProtection.jsx";
 import LoginProtection from "./assets/routes/LoginProtection.jsx";
+import RoomDetails from "./assets/pages/RoomDetail.jsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route element={<LayoutWithNavAndFooter />}>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/room/:id" element={<RoomDetails />} />
         </Route>
 
         {/* this route with navbar only */}

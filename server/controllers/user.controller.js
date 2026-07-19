@@ -202,6 +202,16 @@ export const userUpdate = async (req, res, next) => {
 
   const filterValueForMessage = Object.keys(filter).join(" and ");
 
+  const passwordRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_+\-=[\]{};':"\\|,.<>/?`~])[A-Za-z\d@$!%*?&^#()_+\-=[\]{};':"\\|,.<>/?`~]{8,}$/;
+  if (req.body.password && !passwordRegex.test(req?.body?.password)) {
+    return next(
+      new ErrorHandler(
+        "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        400,
+      ),
+    );
+  }
   try {
     const user = await User.findByIdAndUpdate(id, req.body, {
       returnDocument: "after",
@@ -387,6 +397,7 @@ export const getUserById = async (req, res, next) => {
 
 export const getAllUserByBuilding = async (req, res, next) => {
   const { building, roomNumber } = req.query;
+  console.log(req.params);
   const filter = {};
   if (building) {
     ((filter.buildingName = building), (filter.Avaliablity = true));
@@ -395,14 +406,12 @@ export const getAllUserByBuilding = async (req, res, next) => {
     filter.room = roomNumber;
   }
 
-  if (Object.keys(filter).length < 1) {
-    return next(new ErrorHandler("room not found", 400));
-  }
+  console.log("filter>>>", filter);
   try {
     const building = await Room.find(filter);
 
     if (building.length === 0) {
-      return next(new ErrorHandler("building not found", 400));
+      return next(new ErrorHandler("room not found", 400));
     }
     res.status(200).json({
       success: true,
@@ -814,29 +823,6 @@ export const updateMemberInfo = async (req, res, next) => {
   }
 };
 
-export const getMe = async (req, res, next) => {
-  const { id } = req.user;
-
-  try {
-    const user = await User.findById(id);
-
-    if (!user) {
-      return next(new ErrorHandler("user Not Found", 400));
-    }
-
-    const encryptedValue = decrypt(user.aadhaarNumber);
-    user.aadhaarNumber = encryptedValue;
-
-    res.status(200).json({
-      success: true,
-      message: "Here your information",
-      user,
-    });
-  } catch (error) {
-    return next(new ErrorHandler(error.message, 400));
-  }
-};
-
 export const getReceiptById = async (req, res, next) => {
   try {
     const { id } = req.user;
@@ -931,5 +917,32 @@ export const getAadhaarImageForMember = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return next(new ErrorHandler(error.message, 500));
+  }
+};
+
+export const getMe = async (req, res, next) => {
+  const { id } = req.user;
+
+  try {
+    const user = await User.findById(id);
+
+    if (!user) {
+      return next(new ErrorHandler("user Not Found", 400));
+    }
+
+    const encryptedValue = decrypt(user.aadhaarNumber);
+    user.aadhaarNumber = encryptedValue;
+
+    user.member.forEach(
+      (value) => (value.aadhaarNumber = decrypt(value.aadhaarNumber)),
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Here your information",
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
   }
 };
