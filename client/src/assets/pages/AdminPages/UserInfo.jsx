@@ -99,7 +99,7 @@ function UserInfoPage() {
 
         setFormData((prev) => ({
           ...prev,
-          rentPrice: res.data.building[0].rent,
+          rentPrice: res.data.building[0]?.rent,
         }));
       } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to fetch rent");

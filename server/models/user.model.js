@@ -51,7 +51,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    isActive: Boolean,
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
 
     member: [
       {
@@ -151,6 +154,10 @@ const userSchema = new mongoose.Schema(
     },
 
     joiningDate: {
+      type: Date,
+    },
+
+    leavingDate: {
       type: Date,
     },
 

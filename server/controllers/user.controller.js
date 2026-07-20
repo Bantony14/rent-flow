@@ -303,11 +303,15 @@ export const userDelete = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const user = await User.findByIdAndDelete(id);
+    const user = await User.findById(id);
 
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
+
+    user.leavingDate = Date.now();
+    user.isActive = false;
+    await user.save();
     res.status(200).json({
       success: true,
       message: `User Delete SuccessFully`,
@@ -318,7 +322,7 @@ export const userDelete = async (req, res, next) => {
 };
 
 export const getAllUser = async (req, res, next) => {
-  const filter = {};
+  const filter = { isActive: true };
 
   if (req.query.building) {
     filter.building = req.query.building;
@@ -383,8 +387,15 @@ export const getUserById = async (req, res, next) => {
       return next(new ErrorHandler("user not found", 500));
     }
 
+    // this is for user aadhaarNumber
     const encryptedValue = decrypt(user.aadhaarNumber);
     user.aadhaarNumber = encryptedValue;
+
+    // this is for user member aadhaarNumber
+    user.member.forEach(
+      (value) => (value.aadhaarNumber = decrypt(value.aadhaarNumber)),
+    );
+
     res.status(200).json({
       success: true,
       message: "here is your user data",
@@ -406,13 +417,9 @@ export const getAllUserByBuilding = async (req, res, next) => {
     filter.room = roomNumber;
   }
 
-  console.log("filter>>>", filter);
   try {
     const building = await Room.find(filter);
 
-    if (building.length === 0) {
-      return next(new ErrorHandler("room not found", 400));
-    }
     res.status(200).json({
       success: true,
       message: "here your rooms",
