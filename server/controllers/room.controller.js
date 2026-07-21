@@ -231,9 +231,8 @@ export const addRoomImage = async (req, res, next) => {
 export const updateRoomAvailability = async (req, res) => {
   try {
     const { oldBuilding, oldRoom, newBuilding, newRoom, id } = req.body;
-    console.log("id>>", id);
-
-    console.log("req.body>>>", req.body);
+    console.log(req.body);
+    console.log(id);
 
     // Purana room available kar do
     const oldRoomData = await Room.findOne({

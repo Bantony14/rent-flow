@@ -135,6 +135,21 @@ function ProfileCard({
             >
               {user?.paymentStatus}
             </span>
+            <span
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-300 ${
+                user?.isActive
+                  ? "bg-green-500/50 text-green-300 border-green-500/30"
+                  : "bg-red-500/50 text-red-300 border-red-500/30"
+              }`}
+            >
+              <span
+                className={`w-2.5 h-2.5 rounded-full ${
+                  user?.isActive ? "bg-green-400" : "bg-red-400"
+                }`}
+              ></span>
+
+              {user?.isActive ? "Active" : "In Active"}
+            </span>
           </div>
         </div>
       </div>

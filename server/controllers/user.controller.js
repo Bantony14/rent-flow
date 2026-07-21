@@ -408,7 +408,7 @@ export const getUserById = async (req, res, next) => {
 
 export const getAllUserByBuilding = async (req, res, next) => {
   const { building, roomNumber } = req.query;
-  console.log(req.params);
+
   const filter = {};
   if (building) {
     ((filter.buildingName = building), (filter.Avaliablity = true));
@@ -419,6 +419,10 @@ export const getAllUserByBuilding = async (req, res, next) => {
 
   try {
     const building = await Room.find(filter);
+
+    if (building.length === 0) {
+      return;
+    }
 
     res.status(200).json({
       success: true,
@@ -922,7 +926,6 @@ export const getAadhaarImageForMember = async (req, res, next) => {
       aadhaarBackUrl,
     });
   } catch (error) {
-    console.log(error);
     return next(new ErrorHandler(error.message, 500));
   }
 };

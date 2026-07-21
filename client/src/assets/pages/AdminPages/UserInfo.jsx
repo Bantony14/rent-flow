@@ -66,7 +66,6 @@ function UserInfoPage() {
 
   // this api for updating room availibilty
   const handleRoomUpdate = async () => {
-    console.log("start");
     const { building, roomNumber } = roomRef.current;
 
     const roomData = {
@@ -99,7 +98,12 @@ function UserInfoPage() {
 
         setFormData((prev) => ({
           ...prev,
-          rentPrice: res.data.building[0]?.rent,
+          rentPrice: res?.data?.building[0]?.rent || formdata?.rentPrice,
+        }));
+
+        setEditData((prev) => ({
+          ...prev,
+          rentPrice: res?.data?.building[0]?.rent || formdata?.rentPrice,
         }));
       } catch (error) {
         toast.error(error?.response?.data?.message || "Failed to fetch rent");
@@ -200,7 +204,6 @@ function UserInfoPage() {
       return {
         ...prev,
         [e.target.name]: e.target.files ? e.target.files[0] : e.target.value,
-        rentPrice: formdata.rentPrice,
       };
     });
   }

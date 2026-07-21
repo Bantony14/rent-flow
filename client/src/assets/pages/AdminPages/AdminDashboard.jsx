@@ -10,6 +10,8 @@ const AdminDashboard = () => {
   const [searchField, setSearchField] = useState("");
   let [tenantDetail, setTenantDetail] = useState("");
   const [isError, setIsError] = useState(false);
+
+  // this form data only for sending data with filedName and value
   let formData = {
     [searchField]: search,
   };
