@@ -1,4 +1,4 @@
-import Button from "../components/Button";
+import Button from "../components/MyButton";
 import { Link } from "react-router-dom";
 
 function Home() {

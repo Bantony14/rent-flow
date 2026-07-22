@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 import { ArrowLeft, MapPin, Users, Check, X, Phone } from "lucide-react";
-import Button from "../components/Button";
+import Button from "../components/MyButton";
 
 function RoomDetails() {
   const { id } = useParams();

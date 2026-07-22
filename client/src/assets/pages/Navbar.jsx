@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Button from "../components/Button";
+import Button from "../components/MyButton";
 import { NavLink } from "react-router-dom";
 import { userLogout } from "../api/authApi";
 import { toast } from "react-hot-toast";
