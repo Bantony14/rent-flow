@@ -1,18 +1,18 @@
-import axios from "axios"
+import axios from "axios";
 
 const API = axios.create({
-    baseURL: "http://localhost:5000/api/v1/payment",
-    withCredentials: true
-})
+  baseURL: `${import.meta.env.VITE_API_URL}/api/v1/payment`,
+  withCredentials: true,
+});
 
 export function paymentOrderCreate() {
-    return API.post("/create-order")
+  return API.post("/create-order");
 }
 
 export function paymentCheck() {
-    return API.post("/payment-check")
+  return API.post("/payment-check");
 }
 
 export function paymentHistoryByUser() {
-    return API.get("/payment-history")
+  return API.get("/payment-history");
 }
