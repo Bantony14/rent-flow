@@ -42,7 +42,7 @@ export const verifyPayment = async (req, res, next) => {
 
   const { id } = req.user;
 
-  console.log(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+  // console.log(razorpay_order_id, razorpay_payment_id, razorpay_signature);
 
   let user;
   let pendingMonth;
@@ -80,9 +80,10 @@ export const verifyPayment = async (req, res, next) => {
       return next(new ErrorHandler("payment not verify ", 400));
     }
 
-    console.log("generatedSignature<<", generatedSignature);
+    // console.log("generatedSignature<<", generatedSignature);
 
     const paymentMode = await razorpay.payments.fetch(razorpay_payment_id);
+    // console.log("paymentMode>>", paymentMode);
 
     let payment = await PaymentHistory.create({
       tenant: id,
@@ -93,6 +94,8 @@ export const verifyPayment = async (req, res, next) => {
       status: "success",
     });
 
+    // console.log("payment>>", payment);
+
     let receipt = await ReceiptHistory.create({
       tenantId: id,
       paymentId: payment?._id,
@@ -101,6 +104,8 @@ export const verifyPayment = async (req, res, next) => {
       totalAmount: user.dueAmount,
       paymentMethod: paymentMode.method,
     });
+
+    // console.log("receipt>>>>", receipt);
 
     user.paymentStatus = "Paid";
     user.dueAmount = 0;
@@ -119,18 +124,21 @@ export const verifyPayment = async (req, res, next) => {
     };
 
     const pdfBuffer = await generateReceiptPdf(receiptData);
+    // console.log("pdfBuffer>>>", pdfBuffer);
 
     //upload pdf to cloudinary and updating in receipt
     const result = await uploadPdfToCloudinary(pdfBuffer);
     receipt.pdf.public_id = result.public_id;
     receipt.pdf.secure_url = result.secure_url;
 
+    // console.log("result>>>", result);
+
     // start email
     const email = user.email;
     const subject = "Your This Month Rent reciept ";
     const message = receiptTemplate(receiptData);
 
-    sendEmail({ email, subject, message, pdfBuffer });
+    await sendEmail({ email, subject, message, pdfBuffer });
 
     // end email
 
