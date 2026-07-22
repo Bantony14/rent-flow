@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import SearchBar from "../../components/adminDashboard/searchBar";
+import SearchBar from "../../components/adminDashboard/SearchBar";
 import UserCard from "../../components/adminDashboard/UserCard";
 import TenantActions from "../../components/adminDashboard/TenantAction";
 import { getOneUser } from "../../api/authApi";
