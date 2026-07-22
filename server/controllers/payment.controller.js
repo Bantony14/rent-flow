@@ -41,6 +41,9 @@ export const verifyPayment = async (req, res, next) => {
     req.body;
 
   const { id } = req.user;
+
+  console.log(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+
   let user;
   let pendingMonth;
 
@@ -76,6 +79,8 @@ export const verifyPayment = async (req, res, next) => {
 
       return next(new ErrorHandler("payment not verify ", 400));
     }
+
+    console.log("generatedSignature<<", generatedSignature);
 
     const paymentMode = await razorpay.payments.fetch(razorpay_payment_id);
 

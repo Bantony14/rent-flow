@@ -448,6 +448,7 @@ export const userLogin = async (req, res, next) => {
         new ErrorHandler("user password not match please try again", 400),
       );
     }
+
     const token = user.jwtToken();
     res.cookie("token", token, {
       httpOnly: true,
@@ -456,6 +457,14 @@ export const userLogin = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     user.password = undefined;
+
+    const encryptedValue = decrypt(user.aadhaarNumber);
+    user.aadhaarNumber = encryptedValue;
+
+    user.member.forEach(
+      (value) => (value.aadhaarNumber = decrypt(value.aadhaarNumber)),
+    );
+
     res.status(200).json({
       success: true,
       message: "user login successfully",
