@@ -1,4 +1,3 @@
-import { memo } from "react";
 import cloudinary from "../config/cloudinary.connect.js";
 import User from "../models/user.model.js";
 import decrypt from "../utils/decrypt.js";
