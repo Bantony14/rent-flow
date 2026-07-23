@@ -123,14 +123,20 @@ export const verifyPayment = async (req, res, next) => {
       paymentDate: new Date(receipt.createdAt),
     };
 
-    const pdfBuffer = await generateReceiptPdf(receiptData);
-    // console.log("pdfBuffer>>>", pdfBuffer);
+    let result = null;
 
-    //upload pdf to cloudinary and updating in receipt
-    const result = await uploadPdfToCloudinary(pdfBuffer);
-    receipt.pdf.public_id = result.public_id;
-    receipt.pdf.secure_url = result.secure_url;
+    try {
+      const pdfBuffer = await generateReceiptPdf(receiptData);
+      console.log("PDF generated successfully");
 
+      result = await uploadPdfToCloudinary(pdfBuffer);
+      console.log("Cloudinary upload success:", result);
+
+      receipt.pdf.public_id = result.public_id;
+      receipt.pdf.secure_url = result.secure_url;
+    } catch (error) {
+      console.error("PDF/Cloudinary Error:", error);
+    }
     // console.log("result>>>", result);
 
     // start email
