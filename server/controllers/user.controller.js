@@ -468,6 +468,8 @@ export const userLogin = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       message: "user login successfully",
       user,
     });
