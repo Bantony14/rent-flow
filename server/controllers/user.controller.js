@@ -514,11 +514,11 @@ export const forgotPassword = async (req, res, next) => {
 
     await user.save();
 
-    try {
-      await sendEmail({ email, subject, message });
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   await sendEmail({ email, subject, message });
+    // } catch (error) {
+    //   console.log(error);
+    // }
 
     res.status(200).json({
       success: true,
