@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import otpTemplate from "../utils/optTemplate.js";
 import Room from "../models/room.model.js";
 import ReceiptHistory from "../models/receiptHistory.model.js";
+import { errorMonitor } from "events";
 
 export const userRegistration = async (req, res, next) => {
   const {
@@ -511,7 +512,11 @@ export const forgotPassword = async (req, res, next) => {
 
     await user.save();
 
-    await sendEmail({ email, subject, message });
+    try {
+      await sendEmail({ email, subject, message });
+    } catch (error) {
+      console.log(error);
+    }
 
     res.status(200).json({
       success: true,
