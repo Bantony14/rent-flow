@@ -514,6 +514,7 @@ export const forgotPassword = async (req, res, next) => {
     console.log("afterotpUser>>>", user);
 
     await user.save();
+    console.log("start");
     await sendEmail({ email, subject, message });
     console.log("end");
     res.status(200).json({
