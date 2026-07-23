@@ -17,12 +17,18 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
   try {
     console.log("Before verify");
 
-    await transporter.verify();
+    const result = await Promise.race([
+      transporter.verify(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("VERIFY TIMEOUT")), 10000),
+      ),
+    ]);
 
     console.log("SMTP Connected");
   } catch (err) {
     console.error("VERIFY ERROR:");
     console.error(err);
+    console.error("ERROR:", err);
   }
 
   await transporter.sendMail({
