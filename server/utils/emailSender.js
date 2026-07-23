@@ -14,6 +14,11 @@ const transporter = nodemailer.createTransport({
 });
 
 const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
+  console.log("Before verify");
+
+  await transporter.verify();
+
+  console.log("After verify");
   await transporter.sendMail({
     from: `Rent Management App <${process.env.SMTP_EMAIL}>`,
     to: email,
