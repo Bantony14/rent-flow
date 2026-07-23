@@ -495,12 +495,9 @@ export const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
 
   const otp = otpGenerator();
-  console.log("otp>>>", otp);
 
   try {
     const user = await User.findOne({ email, isActive: true });
-
-    console.log("Finduser>>", user);
 
     if (!user) {
       return next(
@@ -511,12 +508,11 @@ export const forgotPassword = async (req, res, next) => {
     user.otpExpiry = Date.now() + 10 * 60 * 1000;
     const subject = "THIS IS FOR RESET YOUR PASSWORD";
     const message = otpTemplate(otp);
-    console.log("afterotpUser>>>", user);
 
     await user.save();
-    console.log("start");
+
     await sendEmail({ email, subject, message });
-    console.log("end");
+
     res.status(200).json({
       success: true,
       message: "otp send to your registered email address",
