@@ -468,8 +468,6 @@ export const userLogin = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       message: "user login successfully",
       user,
     });
@@ -482,6 +480,8 @@ export const userLogout = async (req, res, next) => {
   try {
     res.clearCookie("token", "", {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       expires: new Date(0),
     });
     res.status(200).json({
