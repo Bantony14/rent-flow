@@ -1,38 +1,53 @@
-import nodemailer from "nodemailer";
+import axios from "axios";
 import { config } from "dotenv";
-import otpTemplate from "./optTemplate.js";
+
 config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
-
 const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
-  console.log("Before verify");
+  try {
+    const payload = {
+      sender: {
+        name: "Rent Management App",
+        email: process.env.SMTP_EMAIL,
+      },
+      to: [
+        {
+          email,
+        },
+      ],
+      subject,
+      htmlContent: message,
+    };
 
-  await transporter.verify();
+    // Attach PDF if available
+    if (pdfBuffer) {
+      payload.attachment = [
+        {
+          name: "receipt.pdf",
+          content: pdfBuffer.toString("base64"),
+        },
+      ];
+    }
 
-  console.log("After verify");
-  await transporter.sendMail({
-    from: `Rent Management App <${process.env.SMTP_EMAIL}>`,
-    to: email,
-    subject,
-    html: message,
-    attachments: pdfBuffer
-      ? [
-          {
-            filename: "receipt.pdf",
-            content: pdfBuffer,
-          },
-        ]
-      : [],
-  });
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      payload,
+      {
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+        },
+      },
+    );
+
+    console.log("✅ Email sent:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Brevo Error:", error.response?.data || error.message);
+
+    throw error;
+  }
 };
 
 export default sendEmail;
