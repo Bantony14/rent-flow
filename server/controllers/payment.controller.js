@@ -143,6 +143,9 @@ export const verifyPayment = async (req, res, next) => {
     const email = user.email;
     const subject = "Your This Month Rent reciept ";
     const message = receiptTemplate(receiptData);
+    console.log(!!message);
+
+    console.log("Email function started");
 
     try {
       await sendEmail({
@@ -156,6 +159,8 @@ export const verifyPayment = async (req, res, next) => {
     } catch (err) {
       console.error("Receipt email failed:", err.message);
     }
+
+    console.log("Email function started");
 
     // end email
 
