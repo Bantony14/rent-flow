@@ -1,30 +1,30 @@
 const receiptTemplate = ({
-    fullName,
-    months = [],
-    totalAmount,
-    paymentId,
-    orderId,
-    roomNumber,
-    building,
-    paymentDate,
+  fullName,
+  months = [],
+  totalAmount,
+  paymentId,
+  orderId,
+  roomNumber,
+  building,
+  paymentDate,
 }) => {
-    const monthRows = months
-        .map(
-            (item) => `
+  const monthRows = months
+    .map(
+      (item) => `
       <tr>
         <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;color:#374151;font-size:13px;">
           ${item.month}
         </td>
         <td style="padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:right;color:#374151;font-size:13px;font-weight:600;">
-          ₹${Number(item.amount).toLocaleString("en-IN")}
+         Rs.${Number(item.amount).toLocaleString("en-IN")}
         </td>
       </tr>
-    `
-        )
-        .join("");
+    `,
+    )
+    .join("");
 
-    // Logo: blue rounded square with "R" — matches the actual RentFlow brand
-    const rfLogo = `
+  // Logo: blue rounded square with "R" — matches the actual RentFlow brand
+  const rfLogo = `
       <svg width="46" height="46" viewBox="0 0 46 46" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -48,7 +48,7 @@ const receiptTemplate = ({
       </svg>
     `;
 
-    return `
+  return `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -241,7 +241,7 @@ const receiptTemplate = ({
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                     line-height: 1;
-                  ">₹${Number(totalAmount).toLocaleString("en-IN")}</div>
+                  ">Rs.${Number(totalAmount).toLocaleString("en-IN")}</div>
                   <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #bfdbfe;">
                     <span style="background:#dbeafe; color:#1d4ed8; font-size:10px; font-weight:700; padding:3px 10px; border-radius:999px; letter-spacing:0.5px;">
                       ${months.length} MONTH${months.length > 1 ? "S" : ""}
@@ -264,7 +264,7 @@ const receiptTemplate = ({
             <tr style="background:#f8fafc;">
               <td style="padding:11px 14px; font-size:13px; font-weight:700; color:#1e293b; border-top:2px solid #e2e8f0;">Total</td>
               <td style="padding:11px 14px; text-align:right; font-size:14px; font-weight:900; color:#2563eb; border-top:2px solid #e2e8f0;">
-                ₹${Number(totalAmount).toLocaleString("en-IN")}
+                Rs.${Number(totalAmount).toLocaleString("en-IN")}
               </td>
             </tr>
           </table>
