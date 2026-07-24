@@ -124,9 +124,10 @@ export const verifyPayment = async (req, res, next) => {
     };
 
     let result = null;
+    let pdfBuffer;
 
     try {
-      const pdfBuffer = await generateReceiptPdf(receiptData);
+      pdfBuffer = await generateReceiptPdf(receiptData);
       console.log("PDF generated successfully");
 
       result = await uploadPdfToCloudinary(pdfBuffer);
