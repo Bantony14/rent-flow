@@ -21,10 +21,11 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
 
     // Attach PDF if available
     if (pdfBuffer) {
+      const base64Pdf = Buffer.from(pdfBuffer).toString("base64");
       payload.attachment = [
         {
           name: "receipt.pdf",
-          content: pdfBuffer.toString("base64"),
+          content: base64Pdf,
         },
       ];
       console.log("Is Buffer:", Buffer.isBuffer(pdfBuffer));
