@@ -21,6 +21,13 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
 
     // Attach PDF if available
     if (pdfBuffer) {
+      console.log("Is Buffer:", Buffer.isBuffer(pdfBuffer));
+      console.log("Type:", typeof pdfBuffer);
+      console.log("Length:", pdfBuffer?.length);
+
+      console.log("Attachment:", payload.attachment);
+
+      console.log("Payload:", JSON.stringify(payload, null, 2));
       payload.attachment = [
         {
           name: "receipt.pdf",
@@ -44,6 +51,8 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
     console.log("✅ Email sent:", response.data);
     return response.data;
   } catch (error) {
+    console.error(error.response?.data);
+    console.error(error.response?.status);
     console.error("❌ Brevo Error:", error.response?.data || error.message);
 
     throw error;
