@@ -21,6 +21,12 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
 
     // Attach PDF if available
     if (pdfBuffer) {
+      payload.attachment = [
+        {
+          name: "receipt.pdf",
+          content: pdfBuffer.toString("base64"),
+        },
+      ];
       console.log("Is Buffer:", Buffer.isBuffer(pdfBuffer));
       console.log("Type:", typeof pdfBuffer);
       console.log("Length:", pdfBuffer?.length);
@@ -28,12 +34,6 @@ const sendEmail = async ({ email, subject, message, pdfBuffer }) => {
       console.log("Attachment:", payload.attachment);
 
       console.log("Payload:", JSON.stringify(payload, null, 2));
-      payload.attachment = [
-        {
-          name: "receipt.pdf",
-          content: pdfBuffer.toString("base64"),
-        },
-      ];
     }
 
     const response = await axios.post(
