@@ -317,7 +317,7 @@ export const userDelete = async (req, res, next) => {
       buildingName: user.building,
       room: user.roomNumber,
     };
-    const room = await Room.findOne({ userRoomDetails });
+    const room = await Room.findOne(userRoomDetails);
     room.Avaliablity = true;
     await room.save();
     await user.save();
