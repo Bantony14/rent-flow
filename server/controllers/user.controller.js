@@ -311,6 +311,14 @@ export const userDelete = async (req, res, next) => {
 
     user.leavingDate = Date.now();
     user.isActive = false;
+
+    // update room availability
+    const userRoomDetails = {
+      buildingName: user.building,
+      room: user.roomNumber,
+    };
+    const room = Room.findOne({ userRoomDetails });
+    room.Avaliablity = true;
     await user.save();
     res.status(200).json({
       success: true,
