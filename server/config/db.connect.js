@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { config } from "dotenv";
 config();
-console.log("bantony");
+
 const databaseConnection = async () => {
   try {
     const db = await mongoose.connect(process.env.MONGO_DB_URL);
