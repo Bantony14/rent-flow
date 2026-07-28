@@ -20,6 +20,7 @@ import ReceiptHistory from "./assets/pages/TenantPages/Receipt.jsx";
 import AdminProtection from "./assets/routes/AdminProtection.jsx";
 import LoginProtection from "./assets/routes/LoginProtection.jsx";
 import RoomDetails from "./assets/pages/RoomDetail.jsx";
+import AllRoom from "./assets/pages/AdminPages/AllRoom.jsx";
 
 function App() {
   return (
@@ -54,6 +55,15 @@ function App() {
             element={
               <AdminProtection>
                 <Registration />
+              </AdminProtection>
+            }
+          />
+
+          <Route
+            path="/allroom"
+            element={
+              <AdminProtection>
+                <AllRoom />
               </AdminProtection>
             }
           />
