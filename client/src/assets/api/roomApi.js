@@ -7,9 +7,9 @@ const API = axios.create({
 });
 
 export function updateRoomAvailability(data) {
-  API.patch("/update-room-availability", data);
+  return API.patch("/update-room-availability", data);
 }
 
 export function addRoom(data) {
-  API.post("/roomadd", data);
+  return API.post("/roomadd", data);
 }

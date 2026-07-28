@@ -7,6 +7,9 @@ import User from "../models/user.model.js";
 export const roomCreate = async (req, res, next) => {
   const { buildingName, id, room } = req.body;
 
+  console.log("req.body>>>", req.body);
+  console.log("req.files>>>", req.files);
+
   try {
     const roomExist = await Room.findOne({
       room,
@@ -24,7 +27,7 @@ export const roomCreate = async (req, res, next) => {
     if (!admin) {
       return next(new ErrorHandler("Admin not found", 404));
     }
-
+    // creating a data here in room db
     const newRoom = await Room.create(req.body);
 
     try {

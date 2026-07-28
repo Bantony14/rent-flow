@@ -24,6 +24,15 @@ function TenantActions() {
         >
           All Tenant
         </button>
+
+        <button
+          className="px-5 py-4 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-500 text-white font-semibold shadow-lg hover:from-violet-700 hover:to-purple-600 hover:scale-105 transition-all duration-300"
+          onClick={() => {
+            navigate("/allroom");
+          }}
+        >
+          All Room
+        </button>
       </div>
     </div>
   );
