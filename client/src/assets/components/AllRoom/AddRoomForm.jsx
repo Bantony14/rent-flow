@@ -7,7 +7,7 @@ import { LoaderCircle, Trash, ImagePlus } from "lucide-react";
 
 function AddRoomForm() {
   const { user } = useContext(AuthContext);
-  const [roomImage, setRoomImage] = useState([{ id: nanoid(), roomImage: "" }]);
+  const [roomImage, setRoomImage] = useState([]);
   const [showInput, setShowInput] = useState(false);
   const [buildingName, setBuildingName] = useState("");
   const [loading, setLoading] = useState(null);
@@ -42,8 +42,8 @@ function AddRoomForm() {
   //   ============== call api to save room in database ==============
   async function addRoomApi(e) {
     e.preventDefault();
-    if (roomImage.every((image) => !image.roomImage)) {
-      toast.error("please select one image Atleast  ");
+    if (roomImage.every((image) => !image?.roomImage)) {
+      toast.error("please select one image Atleast ");
       return;
     }
     if (Object.keys(roomdetails).every((key) => !roomdetails[key])) {

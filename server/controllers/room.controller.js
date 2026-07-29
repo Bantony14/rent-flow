@@ -274,3 +274,22 @@ export const updateRoomAvailability = async (req, res) => {
     });
   }
 };
+
+export const getAllRoom = async (req, res, next) => {
+  try {
+    console.log("heelo");
+    const room = await Room.find({});
+
+    if (room.length === 0) {
+      return next(new ErrorHandler("There are no rooms", 404));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "All rooms fetched successfully",
+      room,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
