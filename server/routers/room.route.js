@@ -15,6 +15,7 @@ import { isAuthorized, isLoggedIn } from "../middlewares/authUser.js";
 const route = express.Router();
 
 route.post("/roomadd", uploadRoomImage, roomCreate);
+
 route.post(
   "/roomimageupdate/:id/:imageid",
   isLoggedIn,
@@ -22,7 +23,7 @@ route.post(
   uploadRoomImage,
   roomImageUpdate,
 );
-route.post(
+route.put(
   "/roomdetailupdate/:id",
   isLoggedIn,
   isAuthorized("ADMIN"),
@@ -48,6 +49,7 @@ route.patch(
   isAuthorized("ADMIN"),
   updateRoomAvailability,
 );
+
 route.get("/get-all-room", getAllRoom);
 
 export default route;

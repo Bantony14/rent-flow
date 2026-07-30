@@ -137,15 +137,19 @@ export const roomImageUpdate = async (req, res, next) => {
 
 export const roomDetailUpdate = async (req, res, next) => {
   const id = req.params.id;
+  console.log("id>>>>", id);
+  console.log("req.body>>>>", req.body);
 
-  if (!id) {
-    return next(new ErrorHandler("room not found", 400));
-  }
   try {
     const room = await Room.findByIdAndUpdate(id, req.body, {
-      new: true,
+      returnDocument: "after",
       runValidation: true,
     });
+    console.log("room>>>>", room);
+
+    if (!room) {
+      return next(new ErrorHandler("room not found", 400));
+    }
 
     res.status(200).json({
       success: true,
@@ -277,7 +281,6 @@ export const updateRoomAvailability = async (req, res) => {
 
 export const getAllRoom = async (req, res, next) => {
   try {
-    console.log("heelo");
     const room = await Room.find({});
 
     if (room.length === 0) {
