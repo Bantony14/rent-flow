@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Plus, X } from "lucide-react";
 import AddRoomForm from "../../components/AllRoom/AddRoomForm.jsx";
 import RoomCard from "../../components/AllRoom/RoomCard.jsx";
 import {
@@ -6,6 +7,8 @@ import {
   getAllRoom,
   roomDetailsUpdate,
   updateRoomImageApi,
+  removeRoomImageApi,
+  addRoomImageApi,
 } from "../../api/roomApi.js";
 import LoadingScreen from "../../components/LoadingScreen.jsx";
 import toast from "react-hot-toast";
@@ -19,11 +22,17 @@ function AllRoom() {
   const [formData, setFormData] = useState([]);
   const [editDataDetails, setEditDataDetails] = useState({});
   const [editImageDetails, setEditImageDetails] = useState([]);
-  const [sendDataLoading, setSendDataLoading] = useState(null);
+  const [sendDataLoading, setSendDataLoading] = useState(false);
   const [showDeleteCard, setShowDeleteCard] = useState(false);
   const [deleteRoomId, setDeleteRoomId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [getDeleteRoom, setGetDeleteRoom] = useState(null);
+  const [sendImageLoading, setSendImageLoading] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  // NEW: loading states for add/delete image
+  const [addImageLoading, setAddImageLoading] = useState(false);
+  const [deleteImageLoading, setDeleteImageLoading] = useState(null); // holds imageId being deleted
 
   const fetchRooms = async () => {
     setRoomLoading(true);
@@ -46,10 +55,8 @@ function AllRoom() {
     setFormData(structuredClone(rooms));
   }, [rooms]);
 
-  //  this function only for details changes not images
   const handleChangeDetails = (e, id) => {
     const { name, value } = e.target;
-
     const finalValue = name === "Avaliablity" ? value === "true" : value;
 
     setFormData((prev) =>
@@ -64,30 +71,22 @@ function AllRoom() {
     }));
   };
 
-  // this function after click on cancle that will remain save data no changes
-
   function handleCancel() {
     setFormData(structuredClone(rooms));
   }
 
-  // this is work for update details call api here
-
   async function updateRoomData(id) {
     try {
       setSendDataLoading(true);
-
       const res = await roomDetailsUpdate(id, editDataDetails);
-      console.log(res?.data?.message);
       toast.success(res?.data?.message);
       setEditingId(null);
     } catch (error) {
-      console.log(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message || "Room details Not changes");
     } finally {
       setSendDataLoading(false);
     }
   }
-
-  //  this function only update RoomImage
 
   function updateRoomImage(e, roomId, imageId) {
     const findRoom = formData.find((rooms) => rooms._id === roomId);
@@ -105,48 +104,80 @@ function AllRoom() {
 
     setEditImageDetails((prev) => {
       const exists = prev.some((img) => img.imageId === imageId);
-
       if (exists) {
         return prev.map((img) =>
           img.imageId === imageId ? { ...img, file: e.target.files[0] } : img,
         );
       }
-
-      return [
-        ...prev,
-        {
-          imageId,
-          file: e.target.files[0],
-        },
-      ];
+      return [...prev, { imageId, file: e.target.files[0] }];
     });
   }
 
-  //  this function has been send api to change image
   async function handleUpdateImage(id) {
     try {
-      const formData = new FormData();
+      setSendImageLoading(true);
+      const data = new FormData();
 
       editImageDetails.forEach((img) => {
-        formData.append("images", img.file);
-        formData.append("imageIds", img.imageId);
+        data.append("roomImage", img.file);
+        data.append("imageIds", img.imageId);
       });
 
-      const res = await updateRoomImageApi(id, formData);
-
+      const res = await updateRoomImageApi(id, data);
       toast.success(res.data.message);
-
+      setEditingId(null);
       setEditImageDetails([]);
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Failed to update room images",
       );
+    } finally {
+      setSendImageLoading(false);
     }
   }
 
-  console.log("editImageDetails>>>", editImageDetails);
+  // Delete a single image from a room
+  async function handleDeleteImage(roomId, imageId) {
+    try {
+      setDeleteImageLoading(imageId);
+      const res = await removeRoomImageApi(roomId, imageId);
+      toast.success(res?.data?.message || "Image removed");
 
-  // this function delete Room API
+      // Update rooms state with the returned room data
+      setRooms((prev) =>
+        prev.map((room) => (room._id === roomId ? res.data.room : room)),
+      );
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to remove image");
+    } finally {
+      setDeleteImageLoading(null);
+    }
+  }
+
+  // Add new images to a room
+  async function handleAddImage(roomId, files) {
+    try {
+      setAddImageLoading(true);
+      const data = new FormData();
+
+      for (let i = 0; i < files.length; i++) {
+        data.append("roomImage", files[i]);
+      }
+
+      const res = await addRoomImageApi(roomId, data);
+      toast.success(res?.data?.message || "Image added");
+
+      // Update rooms state with the returned room data
+      setRooms((prev) =>
+        prev.map((room) => (room._id === roomId ? res.data.room : room)),
+      );
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to add image");
+    } finally {
+      setAddImageLoading(false);
+    }
+  }
+
   async function deleteRoom() {
     try {
       setDeleteLoading(true);
@@ -161,48 +192,95 @@ function AllRoom() {
     }
   }
 
-  //  this function get delete Room details
-
-  function deleteRoomDetails() {
-    setGetDeleteRoom(rooms.find((rooms) => rooms._id === deleteRoomId));
+  function deleteRoomDetails(id) {
+    setGetDeleteRoom(rooms.find((rooms) => rooms._id === id));
   }
 
   if (roomLoading) {
     return <LoadingScreen />;
   }
+
   return (
     <>
-      <AddRoomForm />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-6">
-        {rooms.length === 0 ? (
-          <h2>No Rooms Found</h2>
-        ) : (
-          formData.map((room) => (
-            <RoomCard
-              key={room._id}
-              room={room}
-              editingId={editingId}
-              setEditingId={setEditingId}
-              handleChange={handleChangeDetails}
-              handleUpdate={updateRoomData}
-              sendDataLoading={sendDataLoading}
-              setShowDeleteCard={setShowDeleteCard}
-              setDeleteRoomId={setDeleteRoomId}
-              handleCancel={handleCancel}
-              deleteRoomDetails={deleteRoomDetails}
-              updateRoomImage={updateRoomImage}
-              handleUpdateImage={handleUpdateImage}
-            />
-          ))
-        )}
-        <DeletePopup
-          open={showDeleteCard}
-          setShowDeleteCard={setShowDeleteCard}
-          onDelete={deleteRoom}
-          loading={deleteLoading}
-          room={getDeleteRoom}
-        />
+      <div className="flex items-center justify-between px-6 pt-6">
+        <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+          {showAddForm ? "Add New Room" : "All Rooms"}
+        </h1>
+
+        <button
+          type="button"
+          onClick={() => setShowAddForm((prev) => !prev)}
+          className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium
+            transition-all duration-200 shadow-sm active:scale-95
+            ${
+              showAddForm
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-blue-600 text-white hover:bg-blue-700"
+            }`}
+        >
+          {showAddForm ? (
+            <>
+              <X size={16} />
+              Close
+            </>
+          ) : (
+            <>
+              <Plus size={16} />
+              Add Room
+            </>
+          )}
+        </button>
       </div>
+
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+          showAddForm ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="p-6 pt-4">
+            <AddRoomForm />
+          </div>
+        </div>
+      </div>
+
+      {!showAddForm && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-6">
+          {rooms.length === 0 ? (
+            <h2>No Rooms Found</h2>
+          ) : (
+            formData.map((room) => (
+              <RoomCard
+                key={room._id}
+                room={room}
+                editingId={editingId}
+                setEditingId={setEditingId}
+                handleChange={handleChangeDetails}
+                handleUpdate={updateRoomData}
+                sendDataLoading={sendDataLoading}
+                setShowDeleteCard={setShowDeleteCard}
+                setDeleteRoomId={setDeleteRoomId}
+                handleCancel={handleCancel}
+                deleteRoomDetails={deleteRoomDetails}
+                updateRoomImage={updateRoomImage}
+                handleUpdateImage={handleUpdateImage}
+                sendImageLoading={sendImageLoading}
+                handleDeleteImage={handleDeleteImage}
+                handleAddImage={handleAddImage}
+                deleteImageLoading={deleteImageLoading}
+                addImageLoading={addImageLoading}
+              />
+            ))
+          )}
+          <DeletePopup
+            open={showDeleteCard}
+            setShowDeleteCard={setShowDeleteCard}
+            onDelete={deleteRoom}
+            loading={deleteLoading}
+            room={getDeleteRoom}
+          />
+        </div>
+      )}
     </>
   );
 }

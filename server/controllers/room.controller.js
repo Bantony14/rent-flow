@@ -86,6 +86,9 @@ export const roomDelete = async (req, res, next) => {
 
 export const roomImageUpdate = async (req, res, next) => {
   const roomId = req.params.id;
+  if (!req.files) {
+    return next(new ErrorHandler("no changes in Image only in details"));
+  }
 
   if (!roomId) {
     return next(new ErrorHandler("Please enter room id", 400));
@@ -93,6 +96,7 @@ export const roomImageUpdate = async (req, res, next) => {
 
   try {
     const room = await Room.findById(roomId);
+    console.log("room>>>", room);
 
     if (!room) {
       return next(new ErrorHandler("Room not found", 404));
@@ -140,7 +144,11 @@ export const roomImageUpdate = async (req, res, next) => {
 
 export const roomDetailUpdate = async (req, res, next) => {
   const id = req.params.id;
-  if (Object.keys(req.body).length === 0) return;
+  if (Object.keys(req.body).length === 0) {
+    return next(
+      new ErrorHandler("no changes in details Wait.... for image update"),
+    );
+  }
 
   try {
     const room = await Room.findByIdAndUpdate(id, req.body, {
