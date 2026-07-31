@@ -85,49 +85,52 @@ export const roomDelete = async (req, res, next) => {
 };
 
 export const roomImageUpdate = async (req, res, next) => {
-  const id = req.params.id;
-  const imageId = req.params.imageid;
+  const roomId = req.params.id;
 
-  if (!id) {
-    return next(new ErrorHandler("please enter id  ", 400));
-  }
-  if (!imageId) {
-    return next(new ErrorHandler("imageId does not exist ", 400));
+  if (!roomId) {
+    return next(new ErrorHandler("Please enter room id", 400));
   }
 
   try {
-    const room = await Room.findById(id);
+    const room = await Room.findById(roomId);
 
     if (!room) {
-      return next(new ErrorHandler("room not have ", 400));
+      return next(new ErrorHandler("Room not found", 404));
     }
 
-    try {
-      if (req.files && imageId) {
-        const updateImage = room.roomImage.find(
-          (room) => room._id.toString() === imageId,
-        );
+    const imageIds = Array.isArray(req.body.imageIds)
+      ? req.body.imageIds
+      : [req.body.imageIds];
 
-        // delete Cloudinary image
-        await cloudinary.uploader.destroy(updateImage.public_id);
-        // upload new image on cloudinary
-        const result = await cloudinary.uploader.upload(req.files[0].path, {
-          folder: "roomImage",
-        });
+    if (imageIds.length !== req.files.length) {
+      return next(new ErrorHandler("Images and imageIds count mismatch", 400));
+    }
 
-        // update new image
-        updateImage.public_id = result.public_id;
-        updateImage.secure_url = result.secure_url;
-      }
-    } catch (error) {
-      return next(new ErrorHandler(error.message, 500));
+    for (let i = 0; i < imageIds.length; i++) {
+      const imageId = imageIds[i];
+      const file = req.files[i];
+
+      const image = room.roomImage.find(
+        (img) => img._id.toString() === imageId,
+      );
+
+      if (!image) continue;
+
+      await cloudinary.uploader.destroy(image.public_id);
+
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "roomImage",
+      });
+
+      image.public_id = result.public_id;
+      image.secure_url = result.secure_url;
     }
 
     await room.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "room image update successful",
+      message: "Room images updated successfully",
       room,
     });
   } catch (error) {
@@ -137,15 +140,13 @@ export const roomImageUpdate = async (req, res, next) => {
 
 export const roomDetailUpdate = async (req, res, next) => {
   const id = req.params.id;
-  console.log("id>>>>", id);
-  console.log("req.body>>>>", req.body);
+  if (Object.keys(req.body).length === 0) return;
 
   try {
     const room = await Room.findByIdAndUpdate(id, req.body, {
       returnDocument: "after",
       runValidation: true,
     });
-    console.log("room>>>>", room);
 
     if (!room) {
       return next(new ErrorHandler("room not found", 400));

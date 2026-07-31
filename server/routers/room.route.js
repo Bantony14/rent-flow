@@ -17,7 +17,7 @@ const route = express.Router();
 route.post("/roomadd", uploadRoomImage, roomCreate);
 
 route.post(
-  "/roomimageupdate/:id/:imageid",
+  "/roomimageupdate/:id",
   isLoggedIn,
   isAuthorized("ADMIN"),
   uploadRoomImage,

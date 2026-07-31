@@ -17,3 +17,15 @@ export function addRoom(data) {
 export function getAllRoom() {
   return API.get("/get-all-room");
 }
+
+export function roomDetailsUpdate(id, data) {
+  return API.put(`/roomdetailupdate/${id}`, data);
+}
+
+export function deleteRoomApi(id) {
+  return API.delete(`/roomdelete/${id}`);
+}
+
+export function updateRoomImageApi(id, data) {
+  return API.post(`/roomimageupdate/${id}`, data);
+}

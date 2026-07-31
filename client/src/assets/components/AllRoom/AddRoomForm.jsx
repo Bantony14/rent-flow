@@ -46,7 +46,7 @@ function AddRoomForm() {
       toast.error("please select one image Atleast ");
       return;
     }
-    if (Object.keys(roomdetails).every((key) => !roomdetails[key])) {
+    if (Object.keys(roomdetails).some((key) => !roomdetails[key])) {
       toast.error("please fill all field");
       return;
     }
