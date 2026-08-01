@@ -69,16 +69,16 @@ function Navbar() {
               </NavLink>
             </li>
 
-            {/* <li className="relative cursor-pointer text-zinc-300 hover:text-cyan-400 transition duration-300 after:absolute after:left-0 after:-bottom-2 after:h-[2px] after:w-0 after:bg-cyan-400 hover:after:w-full after:transition-all after:duration-300">
-            <NavLink
-              to="/rooms"
-              className={({ isActive }) =>
-                isActive ? "text-cyan-400 font-bold" : "text-white"
-              }
-            >
-              Rooms
-            </NavLink>
-          </li> */}
+            <li className="relative cursor-pointer text-zinc-300 hover:text-cyan-400 transition duration-300 after:absolute after:left-0 after:-bottom-2 after:h-[2px] after:w-0 after:bg-cyan-400 hover:after:w-full after:transition-all after:duration-300">
+              <NavLink
+                to="/rooms"
+                className={({ isActive }) =>
+                  isActive ? "text-cyan-400 font-bold" : "text-white"
+                }
+              >
+                Rooms
+              </NavLink>
+            </li>
           </ul>
 
           {/* Desktop Buttons */}
@@ -153,16 +153,16 @@ function Navbar() {
                   </NavLink>
                 </li>
 
-                {/* <li className="text-zinc-300 hover:text-cyan-400 transition duration-300 cursor-pointer">
-                <NavLink
-                  to="/rooms"
-                  className={({ isActive }) =>
-                    isActive ? "text-cyan-400 font-bold" : "text-white"
-                  }
-                >
-                  Rooms
-                </NavLink>
-              </li> */}
+                <li className="text-zinc-300 hover:text-cyan-400 transition duration-300 cursor-pointer">
+                  <NavLink
+                    to="/rooms"
+                    className={({ isActive }) =>
+                      isActive ? "text-cyan-400 font-bold" : "text-white"
+                    }
+                  >
+                    Rooms
+                  </NavLink>
+                </li>
               </ul>
 
               {/* Mobile Buttons */}

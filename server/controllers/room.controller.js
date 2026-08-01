@@ -3,6 +3,9 @@ import Room from "../models/room.model.js";
 import fs from "fs/promises";
 import ErrorHandler from "../utils/error.js";
 import User from "../models/user.model.js";
+import sendEmail from "../utils/emailSender.js";
+import bookingClientTemplate from "../utils/bookingClientTemplate.js";
+import bookingOwnerTemplate from "../utils/bookingOwnerTemplate.js";
 
 export const roomCreate = async (req, res, next) => {
   const { buildingName, id, room } = req.body;
@@ -300,6 +303,59 @@ export const getAllRoom = async (req, res, next) => {
       success: true,
       message: "All rooms fetched successfully",
       room,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+};
+
+export const bookRoom = async (req, res, next) => {
+  try {
+    const {
+      roomId,
+      roomName,
+      buildingName,
+      rent,
+      userName,
+      userEmail,
+      userMobile,
+    } = req.body;
+    // Validate required fields
+    if (!roomId || !userName || !userEmail || !userMobile) {
+      return next(new ErrorHandler("All fields are required", 400));
+    }
+    // Find the room to get address
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return next(new ErrorHandler("Room not found", 404));
+    }
+    const bookingDate = new Date();
+    // Common data for both templates
+    const templateData = {
+      userName,
+      userEmail,
+      userMobile,
+      roomName: roomName || room.room,
+      buildingName: buildingName || room.buildingName,
+      rent: rent || room.rent,
+      address: room.address,
+      bookingDate,
+    };
+    // 1. Send email to CLIENT
+    await sendEmail({
+      email: userEmail,
+      subject: `Booking Request Received - Room ${templateData.roomName} | RentFlow`,
+      message: bookingClientTemplate(templateData),
+    });
+    // 2. Send email to OWNER
+    await sendEmail({
+      email: process.env.OWNER_EMAIL, // Add OWNER_EMAIL to your .env file
+      subject: `🔔 New Booking Request - Room ${templateData.roomName} by ${userName}`,
+      message: bookingOwnerTemplate(templateData),
+    });
+    res.status(200).json({
+      success: true,
+      message: "Booking request sent successfully! Check your email.",
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 500));

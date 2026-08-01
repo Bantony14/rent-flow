@@ -21,6 +21,7 @@ import AdminProtection from "./assets/routes/AdminProtection.jsx";
 import LoginProtection from "./assets/routes/LoginProtection.jsx";
 import RoomDetails from "./assets/pages/RoomDetail.jsx";
 import AllRoom from "./assets/pages/AdminPages/AllRoom.jsx";
+import Properties from "./assets/pages/Properties.jsx";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/room/:id" element={<RoomDetails />} />
+          <Route path="/rooms" element={<Properties />} />
         </Route>
 
         {/* this route with navbar only */}

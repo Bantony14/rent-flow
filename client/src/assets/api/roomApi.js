@@ -1,8 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_API_URL}/api/v1/room`,
-  // baseURL: "http://localhost:5000/api/v1/room",
+  // baseURL: `${import.meta.env.VITE_API_URL}/api/v1/room`,
+  baseURL: "http://localhost:5000/api/v1/room",
   withCredentials: true,
 });
 
@@ -38,4 +38,8 @@ export function removeRoomImageApi(roomId, imageId) {
 // Add new images to a room
 export function addRoomImageApi(id, data) {
   return API.put(`/addroomimage/${id}`, data);
+}
+
+export function bookRoom(data) {
+  return API.post("/book-room", data);
 }

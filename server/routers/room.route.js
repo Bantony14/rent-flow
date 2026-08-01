@@ -2,6 +2,7 @@ import express from "express";
 import { uploadRoomImage } from "../middlewares/upload.middleware.js";
 import {
   addRoomImage,
+  bookRoom,
   getAllRoom,
   roomCreate,
   roomDelete,
@@ -49,6 +50,8 @@ route.patch(
   isAuthorized("ADMIN"),
   updateRoomAvailability,
 );
+
+route.post("/book-room", bookRoom);
 
 route.get("/get-all-room", getAllRoom);
 
