@@ -12,9 +12,9 @@ function Home() {
 
   // Owner contact info (replace with API data later)
   const ownerInfo = {
-    name: "Rajesh Patel",
-    phone: "+91 98765 43210",
-    email: "rajesh.patel@example.com",
+    name: "Bantony Singh",
+    phone: "+91 91041 53677",
+    email: "bantonysin95@gmail.com",
   };
 
   useEffect(() => {

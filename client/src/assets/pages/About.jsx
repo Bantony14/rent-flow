@@ -1,6 +1,17 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Phone } from "lucide-react";
 import Button from "../components/MyButton";
 
 function About() {
+  const [showContact, setShowContact] = useState(false);
+
+  const ownerInfo = {
+    name: "Bantony Singh",
+    phone: "+91 91041 53677",
+    email: "bantonysin95@gmail.com",
+  };
+
   return (
     <section className="w-full bg-zinc-950 text-white py-20 md:py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
@@ -137,13 +148,58 @@ function About() {
 
               {/* Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:scale-105 transition duration-300 shadow-xl shadow-cyan-500/20">
-                  Contact Owner
+                <Button
+                  onClick={() => setShowContact((prev) => !prev)}
+                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold hover:scale-105 active:scale-95 transition duration-300 shadow-xl shadow-cyan-500/20 inline-flex items-center justify-center gap-2"
+                >
+                  <Phone size={18} />
+                  {showContact ? "Hide Contact" : "Contact Owner"}
                 </Button>
 
-                <Button className="w-full sm:w-auto px-6 py-3 rounded-2xl border border-zinc-700 bg-zinc-900 hover:border-cyan-500 transition duration-300 font-medium">
-                  View Rooms
-                </Button>
+                <Link to="/rooms">
+                  <Button className="w-full sm:w-auto px-6 py-3 rounded-2xl border border-zinc-700 bg-zinc-900/70 hover:border-cyan-500 hover:bg-zinc-900 transition duration-300 font-medium text-center">
+                    View Rooms
+                  </Button>
+                </Link>
+              </div>
+
+              {/* ===== CONTACT INFO (slide down) ===== */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  showContact
+                    ? "max-h-60 opacity-100 mt-5"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 sm:p-6 space-y-3">
+                  <h3 className="text-base font-bold text-cyan-400 mb-2">
+                    Owner Contact Details
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-zinc-400 text-sm">Name</p>
+                    <p className="font-semibold text-sm sm:text-base">
+                      {ownerInfo.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-zinc-400 text-sm">Phone</p>
+                    <a
+                      href={`tel:${ownerInfo.phone}`}
+                      className="font-semibold text-sm sm:text-base text-cyan-400 hover:underline"
+                    >
+                      {ownerInfo.phone}
+                    </a>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <p className="text-zinc-400 text-sm">Email</p>
+                    <a
+                      href={`mailto:${ownerInfo.email}`}
+                      className="font-semibold text-sm sm:text-base text-cyan-400 hover:underline truncate max-w-[60%]"
+                    >
+                      {ownerInfo.email}
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
